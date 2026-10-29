@@ -5,7 +5,7 @@ import { SegmentedControl } from '../common/SegmentedControl';
 import { Slider } from '../common/Slider';
 import { ToggleSwitch } from '../common/ToggleSwitch';
 import { ChargeStopsPreference } from '../../types/settings';
-import { availableNetworks } from '../../data/demoSettings';
+import { availableNetworks, initialPlanOptions } from '../../data/demoSettings';
 import { Check, Plus, Edit3 } from 'lucide-react';
 
 export const PlanOptionsModal: React.FC = () => {
@@ -14,6 +14,7 @@ export const PlanOptionsModal: React.FC = () => {
     setIsOptionsModalOpen,
     planOptions,
     setPlanOptions,
+    setChargingSettings,
     setRoutingSettings,
     openSettingsTab,
     replanRoute,
@@ -23,6 +24,11 @@ export const PlanOptionsModal: React.FC = () => {
   const handleChargeStopsChange = (val: ChargeStopsPreference) => {
     setPlanOptions((prev) => ({ ...prev, chargeStops: val }));
     setRoutingSettings((prev) => ({ ...prev, chargeStops: val }));
+  };
+
+  const handleDestinationSocChange = (val: number) => {
+    setPlanOptions((prev) => ({ ...prev, destinationArrivalSoc: val }));
+    setChargingSettings((prev) => ({ ...prev, preferredMinArrivalBatteryDestination: val }));
   };
 
   const toggleAvoid = (key: 'avoidTolls' | 'avoidHighways' | 'avoidFerriesAndTrains' | 'avoidBorders') => {
@@ -40,11 +46,14 @@ export const PlanOptionsModal: React.FC = () => {
   const togglePreferredNetwork = (network: string) => {
     setPlanOptions((prev) => {
       const exists = prev.preferredNetworks.includes(network);
+      const updated = exists
+        ? prev.preferredNetworks.filter((n) => n !== network)
+        : [...prev.preferredNetworks, network];
+      // Keep chargingSettings in sync
+      setChargingSettings((c) => ({ ...c, preferredNetworks: updated }));
       return {
         ...prev,
-        preferredNetworks: exists
-          ? prev.preferredNetworks.filter((n) => n !== network)
-          : [...prev.preferredNetworks, network]
+        preferredNetworks: updated
       };
     });
   };
@@ -66,15 +75,8 @@ export const PlanOptionsModal: React.FC = () => {
           <button
             type="button"
             onClick={() => {
-              setPlanOptions({
-                chargeStops: 'Optimal',
-                destinationArrivalSoc: 10,
-                avoidTolls: false,
-                avoidHighways: false,
-                avoidFerriesAndTrains: true,
-                avoidBorders: false,
-                preferredNetworks: ['Adani Total Energies', 'Charge_IN by Mahindra']
-              });
+              setPlanOptions(initialPlanOptions);
+              setChargingSettings((c) => ({ ...c, preferredNetworks: initialPlanOptions.preferredNetworks }));
               showToast('Reset plan options to reference defaults.');
             }}
             className="text-xs text-slate-400 hover:text-slate-200 underline"
@@ -118,9 +120,7 @@ export const PlanOptionsModal: React.FC = () => {
             max={50}
             step={1}
             value={planOptions.destinationArrivalSoc}
-            onChange={(val) =>
-              setPlanOptions((prev) => ({ ...prev, destinationArrivalSoc: val }))
-            }
+            onChange={handleDestinationSocChange}
           />
         </div>
 

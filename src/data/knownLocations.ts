@@ -39,3 +39,4 @@ export function findLocationByName(query: string): LocationPoint | undefined {
       loc.state.toLowerCase().includes(q)
   );
 }
+

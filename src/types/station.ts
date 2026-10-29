@@ -34,3 +34,4 @@ export interface ChargingStation {
   isExcluded?: boolean;
   isPreferred?: boolean;
 }
+

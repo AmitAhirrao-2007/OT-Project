@@ -215,3 +215,4 @@ export const chargingStations: ChargingStation[] = [
     notes: 'Ultra-fast dual 240 kW guns on Agra-Lucknow / Yamuna expressway interchange.'
   }
 ];
+

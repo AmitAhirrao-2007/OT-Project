@@ -35,3 +35,4 @@ export function formatTemperature(fahrenheit: number, unit: TempUnit): string {
   }
   return `${Math.round(fahrenheit)}°F`;
 }
+

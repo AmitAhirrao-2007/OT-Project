@@ -3,6 +3,8 @@ import { usePlanner } from '../../context/PlannerContext';
 import { ChargingStopCard } from './ChargingStopCard';
 import { RouteInputs } from './RouteInputs';
 import { formatDistance } from '../../utils/units';
+import { formatHoursMinutes, addMinutesToTimeString } from '../../services/routingService';
+import { calculateLegEnergy } from '../../services/energyModel';
 import {
   ChevronLeft,
   ChevronRight,
@@ -10,7 +12,8 @@ import {
   RotateCw,
   Zap,
   Compass,
-  MapPin
+  MapPin,
+  AlertTriangle
 } from 'lucide-react';
 
 export const RoutePanel: React.FC = () => {
@@ -23,6 +26,8 @@ export const RoutePanel: React.FC = () => {
     replanRoute,
     vehicle,
     displaySettings,
+    planOptions,
+    chargingSettings,
     openSettingsTab,
     isPanelCollapsed,
     togglePanelCollapse,
@@ -34,6 +39,30 @@ export const RoutePanel: React.FC = () => {
   // Remaining leg distance to final destination
   const stopsDistanceSum = activeRoute.stops.reduce((sum, s) => sum + s.legDistanceMi, 0);
   const finalLegDistanceMi = Math.max(15, activeRoute.totalDistanceMi - stopsDistanceSum);
+  const finalLegDriveMinutes = Math.round(finalLegDistanceMi * 1.33);
+
+  let destinationEta = trip.destination.arrivalTime || '3:12 PM';
+  let destArrivalSoc = trip.destination.batterySoc;
+
+  if (activeRoute.stops.length > 0) {
+    const lastStop = activeRoute.stops[activeRoute.stops.length - 1];
+    destinationEta = addMinutesToTimeString(lastStop.departureTime, finalLegDriveMinutes);
+    const finalLegEnergy = calculateLegEnergy({ distanceMi: finalLegDistanceMi, vehicle });
+    destArrivalSoc = Math.round(lastStop.departureSoc - finalLegEnergy.socPercent);
+  } else {
+    destinationEta = addMinutesToTimeString(
+      trip.origin.departureTime || '12:31 AM',
+      activeRoute.drivingDurationMinutes
+    );
+    const directEnergy = calculateLegEnergy({ distanceMi: activeRoute.totalDistanceMi, vehicle });
+    destArrivalSoc = Math.round(trip.origin.batterySoc - directEnergy.socPercent);
+  }
+
+  const minDestReserve =
+    planOptions.destinationArrivalSoc ||
+    chargingSettings.preferredMinArrivalBatteryDestination ||
+    10;
+  const isDestReserveSatisfied = destArrivalSoc >= minDestReserve;
 
   return (
     <>
@@ -174,11 +203,14 @@ export const RoutePanel: React.FC = () => {
             </div>
             <span>•</span>
             <div
-              className="flex items-center gap-1"
-              title={`Charging time (${activeRoute.chargingDuration}) + ${activeRoute.stopBufferDuration} buffer overhead`}
+              className="flex items-center gap-1 cursor-help"
+              title={`Charging: ${activeRoute.chargingDuration} | Stop buffer allowance: ${activeRoute.stopBufferDuration} (5 min per stop)`}
             >
               <Zap className="w-3.5 h-3.5 text-amber-400" />
               <span>{activeRoute.chargingDuration}</span>
+              <span className="text-[9px] text-slate-400 font-normal">
+                (+{activeRoute.stopBufferMinutes}m)
+              </span>
             </div>
             <span>•</span>
             <div title="Total highway distance">
@@ -207,6 +239,19 @@ export const RoutePanel: React.FC = () => {
               </>
             )}
           </div>
+
+          {/* Feasibility Alert Banner */}
+          {!activeRoute.isFeasible && (
+            <div className="mt-2.5 p-2.5 bg-rose-950/80 border border-rose-800 rounded-xl text-rose-200 text-xs flex items-start gap-2">
+              <AlertTriangle className="w-4 h-4 text-rose-400 shrink-0 mt-0.5" />
+              <div>
+                <strong className="font-semibold block">Route Infeasible Under Current Constraints</strong>
+                <p className="text-[11px] text-rose-300 mt-0.5">
+                  One or more legs exceed battery range or drop below required minimum reserve ({minDestReserve}%). Try relaxing minimum battery reserve or unblocking networks.
+                </p>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* 4. Scrollable Stops & Route Details */}
@@ -248,22 +293,30 @@ export const RoutePanel: React.FC = () => {
           {/* Final Leg to Destination */}
           <div className="flex items-center gap-2 pl-7 py-2 text-xs text-slate-400">
             <div className="w-px h-6 bg-[#2a3746] absolute left-3.5"></div>
-            <span className="font-medium text-slate-300">1 h 13 min</span>
+            <span className="font-medium text-slate-300">{formatHoursMinutes(finalLegDriveMinutes)}</span>
             <span>·</span>
             <span>{formatDistance(finalLegDistanceMi, displaySettings.units)}</span>
           </div>
 
-          {/* Destination Card (Delhi) */}
-          <div className="relative rounded-xl border border-cyan-900/60 bg-[#13222d] p-3 shadow-sm">
+          {/* Destination Card */}
+          <div className={`relative rounded-xl border p-3 shadow-sm transition-colors ${
+            isDestReserveSatisfied
+              ? 'border-cyan-900/60 bg-[#13222d]'
+              : 'border-rose-900/60 bg-[#25151b]'
+          }`}>
             <div className="flex items-start justify-between">
               <div className="flex items-center gap-2.5">
-                <div className="w-6 h-6 rounded-full bg-[#00b0ff]/20 text-[#00b0ff] border border-[#00b0ff]/40 flex items-center justify-center text-xs font-bold shrink-0">
+                <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold shrink-0 ${
+                  isDestReserveSatisfied
+                    ? 'bg-[#00b0ff]/20 text-[#00b0ff] border border-[#00b0ff]/40'
+                    : 'bg-rose-500/20 text-rose-300 border border-rose-500/40'
+                }`}>
                   B
                 </div>
                 <div>
                   <div className="flex items-center gap-2">
                     <span className="text-xs font-semibold text-[#00b0ff] font-mono">
-                      {trip.destination.arrivalTime}
+                      {destinationEta}
                     </span>
                     <span className="text-sm font-semibold text-white">
                       {trip.destination.name}
@@ -276,10 +329,14 @@ export const RoutePanel: React.FC = () => {
               </div>
 
               <div className="flex flex-col items-end">
-                <span className="text-xs font-bold text-cyan-300 font-mono">
-                  {trip.destination.batterySoc}%
+                <span className={`text-xs font-bold font-mono ${
+                  isDestReserveSatisfied ? 'text-cyan-300' : 'text-rose-400 animate-pulse'
+                }`}>
+                  {destArrivalSoc}%
                 </span>
-                <span className="text-[10px] text-slate-400">Arrival SoC</span>
+                <span className="text-[10px] text-slate-400">
+                  {isDestReserveSatisfied ? 'Arrival SoC' : 'Low Reserve!'}
+                </span>
               </div>
             </div>
           </div>

@@ -14,7 +14,7 @@ export const initialPlanOptions: PlanOptions = {
   avoidHighways: false,
   avoidFerriesAndTrains: true,
   avoidBorders: false,
-  preferredNetworks: ['Adani Total Energies', 'Charge_IN by Mahindra']
+  preferredNetworks: [] // Observed reference: No preferred charging networks configured by default
 };
 
 export const initialChargingSettings: ChargingSettings = {

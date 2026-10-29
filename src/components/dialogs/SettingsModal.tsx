@@ -38,6 +38,7 @@ export const SettingsModal: React.FC = () => {
     setChargingSettings,
     routingSettings,
     setRoutingSettings,
+    setPlanOptions,
     displaySettings,
     setDisplaySettings,
     privacySettings,
@@ -57,6 +58,43 @@ export const SettingsModal: React.FC = () => {
   // Sync plan options avoidances when routing settings change
   const handleRoutingAvoidChange = (key: 'avoidTolls' | 'avoidBorders' | 'avoidHighways' | 'avoidFerries', val: boolean) => {
     setRoutingSettings((prev) => ({ ...prev, [key]: val }));
+    if (key === 'avoidTolls') setPlanOptions((p) => ({ ...p, avoidTolls: val }));
+    if (key === 'avoidHighways') setPlanOptions((p) => ({ ...p, avoidHighways: val }));
+    if (key === 'avoidFerries') setPlanOptions((p) => ({ ...p, avoidFerriesAndTrains: val }));
+    if (key === 'avoidBorders') setPlanOptions((p) => ({ ...p, avoidBorders: val }));
+  };
+
+  const handleChargeStopsChange = (val: ChargeStopsPreference) => {
+    setRoutingSettings((prev) => ({ ...prev, chargeStops: val }));
+    setPlanOptions((prev) => ({ ...prev, chargeStops: val }));
+  };
+
+  const handleAddPreferredNetwork = (net: string) => {
+    setChargingSettings((prev) => {
+      const updated = [...prev.preferredNetworks, net];
+      setPlanOptions((p) => ({ ...p, preferredNetworks: updated }));
+      return {
+        ...prev,
+        preferredNetworks: updated,
+        avoidedNetworks: prev.avoidedNetworks.filter((a) => a !== net)
+      };
+    });
+  };
+
+  const handleRemovePreferredNetwork = (net: string) => {
+    setChargingSettings((prev) => {
+      const updated = prev.preferredNetworks.filter((n) => n !== net);
+      setPlanOptions((p) => ({ ...p, preferredNetworks: updated }));
+      return {
+        ...prev,
+        preferredNetworks: updated
+      };
+    });
+  };
+
+  const handleDestinationSocChange = (val: number) => {
+    setChargingSettings((prev) => ({ ...prev, preferredMinArrivalBatteryDestination: val }));
+    setPlanOptions((prev) => ({ ...prev, destinationArrivalSoc: val }));
   };
 
   const handleSaveAndApply = () => {
@@ -449,12 +487,7 @@ export const SettingsModal: React.FC = () => {
                             <span>{net}</span>
                             <button
                               type="button"
-                              onClick={() =>
-                                setChargingSettings((prev) => ({
-                                  ...prev,
-                                  preferredNetworks: prev.preferredNetworks.filter((n) => n !== net)
-                                }))
-                              }
+                              onClick={() => handleRemovePreferredNetwork(net)}
                               className="hover:text-white"
                             >
                               <X className="w-3 h-3" />
@@ -471,13 +504,7 @@ export const SettingsModal: React.FC = () => {
                           <button
                             key={net}
                             type="button"
-                            onClick={() =>
-                              setChargingSettings((prev) => ({
-                                ...prev,
-                                preferredNetworks: [...prev.preferredNetworks, net],
-                                avoidedNetworks: prev.avoidedNetworks.filter((a) => a !== net)
-                              }))
-                            }
+                            onClick={() => handleAddPreferredNetwork(net)}
                             className="px-2.5 py-1 rounded-md bg-[#192330] hover:bg-[#223042] border border-[#2b3a4a] text-slate-300 text-[11px] flex items-center gap-1 transition-colors"
                           >
                             <Plus className="w-3 h-3 text-[#00b0ff]" />
@@ -638,12 +665,7 @@ export const SettingsModal: React.FC = () => {
                       min={5}
                       max={50}
                       value={chargingSettings.preferredMinArrivalBatteryDestination}
-                      onChange={(val) =>
-                        setChargingSettings((prev) => ({
-                          ...prev,
-                          preferredMinArrivalBatteryDestination: val
-                        }))
-                      }
+                      onChange={handleDestinationSocChange}
                     />
                   </div>
                 </div>
@@ -701,9 +723,7 @@ export const SettingsModal: React.FC = () => {
                   <SegmentedControl<ChargeStopsPreference>
                     className="w-full"
                     value={routingSettings.chargeStops}
-                    onChange={(val) =>
-                      setRoutingSettings((prev) => ({ ...prev, chargeStops: val }))
-                    }
+                    onChange={handleChargeStopsChange}
                     options={[
                       { value: 'Optimal', label: 'Optimal', subLabel: 'Fastest overall trip' },
                       { value: 'Fewer', label: 'Fewer', subLabel: 'Fewer longer stops' },

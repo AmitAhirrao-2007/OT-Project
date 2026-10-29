@@ -309,7 +309,11 @@ export const PlannerProvider: React.FC<{ children: ReactNode }> = ({ children })
     setRoutingSettings(initialRoutingSettings);
     setDisplaySettings(initialDisplaySettings);
     setPrivacySettings(initialPrivacySettings);
-    localStorage.clear();
+    Object.values(STORAGE_KEYS).forEach((k) => {
+      try {
+        localStorage.removeItem(k);
+      } catch {}
+    });
     showToast('All settings reset to demonstration defaults.');
   };
 

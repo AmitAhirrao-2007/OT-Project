@@ -164,7 +164,7 @@ export const ChargerFinderModal: React.FC<ChargerFinderModalProps> = ({
       coordinates: station.coordinates,
       powerKw: station.ratedPowerKw,
       stallsTotal: station.totalStalls,
-      stallsAvailable: station.availableStalls || station.totalStalls,
+      stallsAvailable: station.availableStalls !== undefined ? station.availableStalls : undefined,
       arrivalTime: '12:00 PM',
       departureTime: '12:35 PM',
       arrivalSoc: 12,
@@ -379,7 +379,7 @@ export const ChargerFinderModal: React.FC<ChargerFinderModalProps> = ({
                         </div>
                         <span className="text-slate-600">·</span>
                         <div className="text-slate-300">
-                          {station.totalStalls} stalls ({station.availableStalls || station.totalStalls} available)
+                          {station.totalStalls} stalls {station.availableStalls !== undefined ? `(${station.availableStalls} available)` : ''}
                         </div>
                         <span className="text-slate-600">·</span>
                         <div className="text-emerald-400 font-mono font-medium">
@@ -468,3 +468,4 @@ export const ChargerFinderModal: React.FC<ChargerFinderModalProps> = ({
     </Modal>
   );
 };
+

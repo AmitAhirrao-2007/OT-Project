@@ -72,7 +72,9 @@ export const ChargingStopCard: React.FC<ChargingStopCardProps> = ({ stop, index 
       <div
         onClick={handleCardClick}
         className={`group relative rounded-xl border p-3.5 transition-all duration-150 cursor-pointer ${
-          isSelected
+          !stop.isFeasible
+            ? 'bg-[#22161c] border-rose-600/70 shadow-md ring-1 ring-rose-500/30'
+            : isSelected
             ? 'bg-[#1e2a38] border-amber-400 shadow-md ring-1 ring-amber-400/40'
             : isHovered
             ? 'bg-[#1b2533] border-[#3d4f64]'
@@ -83,7 +85,11 @@ export const ChargingStopCard: React.FC<ChargingStopCardProps> = ({ stop, index 
         <div className="flex items-start justify-between gap-3">
           <div className="flex items-start gap-2.5">
             {/* Stop sequence badge */}
-            <div className="w-6 h-6 rounded-full bg-[#243344] border border-[#3b4e64] text-slate-200 text-xs font-semibold flex items-center justify-center shrink-0 mt-0.5">
+            <div className={`w-6 h-6 rounded-full border text-xs font-semibold flex items-center justify-center shrink-0 mt-0.5 ${
+              !stop.isFeasible
+                ? 'bg-rose-900/40 border-rose-700 text-rose-200'
+                : 'bg-[#243344] border-[#3b4e64] text-slate-200'
+            }`}>
               {index + 1}
             </div>
 
@@ -109,10 +115,22 @@ export const ChargingStopCard: React.FC<ChargingStopCardProps> = ({ stop, index 
               {stop.powerKw} kW
             </span>
             <span className="text-[11px] text-slate-400">
-              {stop.stallsTotal} chargers
+              {stop.stallsAvailable !== undefined
+                ? `${stop.stallsAvailable}/${stop.stallsTotal} stalls`
+                : `${stop.stallsTotal} stalls`}
             </span>
           </div>
         </div>
+
+        {/* If Infeasible Leg Alert */}
+        {!stop.isFeasible && (
+          <div className="mt-2.5 py-1 px-2 rounded-md bg-rose-950/70 border border-rose-800 text-[10px] text-rose-300 font-semibold flex items-center gap-1.5">
+            <span>⚠️ Infeasible Stop:</span>
+            <span>
+              Arrival {stop.arrivalSoc}% is below reserve or charger is blocked
+            </span>
+          </div>
+        )}
 
         {/* Middle Row: Battery Delta & Charging Duration */}
         <div className="mt-3 pt-2.5 border-t border-[#233140] flex items-center justify-between">

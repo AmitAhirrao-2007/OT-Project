@@ -256,24 +256,28 @@ export const MapView: React.FC = () => {
             isSelected ? 'scale-125 z-50' : isHovered ? 'scale-115 z-40' : 'hover:scale-110'
           }">
             <div class="px-2.5 py-0.5 rounded-full ${
-              isSelected
+              !stop.isFeasible
+                ? 'bg-rose-600 text-white font-bold ring-2 ring-rose-400 shadow-xl'
+                : isSelected
                 ? 'bg-amber-400 text-slate-950 ring-2 ring-white font-bold shadow-xl shadow-amber-500/40'
                 : isHovered
                 ? 'bg-[#2b3a4a] text-white border-2 border-[#00b0ff] shadow-lg'
                 : 'bg-[#182330] text-slate-200 border border-[#3b4d63] shadow-md'
             } text-[11px] flex items-center gap-1.5 backdrop-blur-md">
               <span class="w-3.5 h-3.5 rounded-full ${
-                isSelected
+                !stop.isFeasible
+                  ? 'bg-white text-rose-700'
+                  : isSelected
                   ? 'bg-slate-950 text-amber-400'
                   : 'bg-cyan-500/20 text-[#00b0ff]'
               } flex items-center justify-center text-[9px] font-black">
-                ⚡
+                ${!stop.isFeasible ? '!' : '⚡'}
               </span>
               <span class="font-bold">${stop.arrivalSoc}%</span>
               <span class="text-[10px] ${isSelected ? 'text-slate-800' : 'text-slate-400'}">#${index + 1}</span>
             </div>
             <div class="w-2 h-2 ${
-              isSelected ? 'bg-amber-400' : isHovered ? 'bg-[#00b0ff]' : 'bg-[#182330]'
+              !stop.isFeasible ? 'bg-rose-600' : isSelected ? 'bg-amber-400' : isHovered ? 'bg-[#00b0ff]' : 'bg-[#182330]'
             } rotate-45 -mt-1"></div>
           </div>
         `,
@@ -300,6 +304,7 @@ export const MapView: React.FC = () => {
         `<div class="font-sans text-xs">
           <div class="font-bold text-white mb-0.5">${stop.name} (#${index + 1})</div>
           <div class="text-slate-300">${stop.powerKw} kW · ${stop.stallsTotal} stalls</div>
+          ${!stop.isFeasible ? '<div class="text-rose-400 font-bold mt-0.5">⚠️ Infeasible: Arrival SoC below minimum reserve!</div>' : ''}
           <div class="text-amber-400 mt-0.5 font-medium">Session: ${stop.arrivalSoc}% → ${stop.departureSoc}% (${stop.chargeDurationMinutes} min)</div>
           <div class="text-slate-400 text-[10px] mt-0.5">Click for station details & controls</div>
         </div>`,

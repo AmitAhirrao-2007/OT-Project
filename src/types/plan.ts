@@ -17,3 +17,4 @@ export interface SavedPlan {
   totalEnergyKwh: number;
   routeOption: RouteOption;
 }
+
