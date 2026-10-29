@@ -1,6 +1,7 @@
 import {
   ChargingSettings,
   DisplaySettings,
+  DriveHistoryItem,
   PlanOptions,
   PrivacySettings,
   RoutingSettings
@@ -13,15 +14,15 @@ export const initialPlanOptions: PlanOptions = {
   avoidHighways: false,
   avoidFerriesAndTrains: true,
   avoidBorders: false,
-  preferredNetworks: ['Adani Total Energies', 'Charge_IN by Mahindra', 'Renovatio', 'Tata Power EZ Charge']
+  preferredNetworks: ['Adani Total Energies', 'Charge_IN by Mahindra']
 };
 
 export const initialChargingSettings: ChargingSettings = {
-  chargeCards: ['PlugShare Key', 'RFID Card - Adani', 'Tata Power RFID'],
-  preferredNetworks: ['Adani Total Energies', 'Charge_IN by Mahindra', 'Renovatio', 'Tata Power EZ Charge'],
-  avoidedNetworks: ['Generic Unverified'],
-  excludedChargers: [],
-  minimumChargerStalls: 1, // Observed reference: 1
+  chargeCards: [], // Observed reference: No charge cards configured
+  preferredNetworks: [], // Observed reference: No preferred charging networks configured
+  avoidedNetworks: [],
+  excludedChargers: [], // Observed reference: No excluded chargers
+  minimumChargerStalls: 1, // Observed reference: 1 stall
   maximumChargeLimit: 100, // Observed reference: 100%
   restroomAvailable: true,
   trailerFriendly: false,
@@ -54,6 +55,29 @@ export const initialPrivacySettings: PrivacySettings = {
   shareVehicle: false,
   telemetryEnabled: true
 };
+
+export const initialDriveHistory: DriveHistoryItem[] = [
+  {
+    id: 'hist-1',
+    date: 'Oct 29, 2026',
+    routeTitle: 'Patna → Delhi Corridor (Reference Simulation)',
+    distanceMi: 649,
+    duration: '14 h 41 min',
+    stopsCount: 6,
+    energyKwh: 154,
+    isDemo: true
+  },
+  {
+    id: 'hist-2',
+    date: 'Oct 22, 2026',
+    routeTitle: 'Bengaluru → Chennai Expressway (Calibration Run)',
+    distanceMi: 218,
+    duration: '4 h 15 min',
+    stopsCount: 1,
+    energyKwh: 52,
+    isDemo: true
+  }
+];
 
 export const availableNetworks = [
   'Adani Total Energies',

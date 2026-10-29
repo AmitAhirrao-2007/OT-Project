@@ -22,7 +22,7 @@ export const TopNav: React.FC = () => {
 
   return (
     <>
-      <div className="absolute top-4 right-4 z-30 flex items-center gap-2.5 pointer-events-auto">
+      <div className="absolute top-4 right-4 z-30 flex items-center gap-2 pointer-events-auto">
         {/* Quick Options Button */}
         <button
           type="button"
@@ -57,7 +57,7 @@ export const TopNav: React.FC = () => {
 
           {/* Dropdown Menu */}
           {isMenuOpen && (
-            <div className="absolute right-0 mt-2 w-64 bg-[#18212b] border border-[#2b3a4a] rounded-xl shadow-2xl overflow-hidden py-2 z-50 animate-in fade-in-50 zoom-in-95">
+            <div className="absolute right-0 mt-2 w-64 bg-[#18212b] border border-[#2b3a4a] rounded-xl shadow-2xl overflow-hidden py-2 z-50 animate-in fade-in zoom-in-95 duration-150">
               <div className="px-3.5 py-2 border-b border-[#243343] mb-1">
                 <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">
                   Settings & Profiles
@@ -74,7 +74,7 @@ export const TopNav: React.FC = () => {
                       setIsMenuOpen(false);
                       openSettingsTab(item.tab);
                     }}
-                    className="w-full px-3.5 py-2.5 text-left text-xs font-medium text-slate-200 hover:text-white hover:bg-[#233140] flex items-center gap-2.5 transition-colors"
+                    className="w-full px-3.5 py-2 text-left text-xs font-medium text-slate-200 hover:text-white hover:bg-[#233140] flex items-center gap-2.5 transition-colors"
                   >
                     <Icon className="w-4 h-4 text-[#00b0ff]" />
                     <span>{item.label}</span>
@@ -89,7 +89,7 @@ export const TopNav: React.FC = () => {
                     setIsMenuOpen(false);
                     setIsLoginModalOpen(true);
                   }}
-                  className="w-full px-3.5 py-2.5 text-left text-xs font-medium text-slate-300 hover:text-white hover:bg-[#233140] flex items-center gap-2.5 transition-colors"
+                  className="w-full px-3.5 py-2 text-left text-xs font-medium text-slate-300 hover:text-white hover:bg-[#233140] flex items-center gap-2.5 transition-colors"
                 >
                   <User className="w-4 h-4 text-emerald-400" />
                   <span>Account & Cloud Sync</span>

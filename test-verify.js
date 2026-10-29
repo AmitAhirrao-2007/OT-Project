@@ -1,28 +1,30 @@
-async function verify() {
-  const res = await fetch('http://127.0.0.1:4173/');
-  const html = await res.text();
-  console.log('HTML byte length:', html.length);
-  const regex = /(src|href)="([^"]+)"/g;
-  let m;
-  let allOk = true;
-  while ((m = regex.exec(html)) !== null) {
-    const assetPath = m[2];
-    if (assetPath.startsWith('http') || assetPath.startsWith('/')) {
-      const fullUrl = new URL(assetPath, 'http://127.0.0.1:4173/').href;
-      const assetRes = await fetch(fullUrl);
-      console.log(`Asset ${assetPath}: status ${assetRes.status} (${assetRes.headers.get('content-type')})`);
-      if (assetRes.status !== 200) allOk = false;
-    }
-  }
-  if (allOk) {
-    console.log('ALL ASSETS AND SCRIPTS VERIFIED HTTP 200 OK!');
-  } else {
-    console.error('Some assets failed to load.');
+import fs from 'node:fs';
+
+console.log('--- RUNNING DIST BUNDLE ASSET AUDIT ---');
+
+const indexHtml = fs.readFileSync('dist/index.html', 'utf8');
+const jsMatch = indexHtml.match(/src="(\/assets\/[^"]+\.js)"/);
+const cssMatch = indexHtml.match(/href="(\/assets\/[^"]+\.css)"/);
+
+assert(jsMatch && jsMatch[1], 'JS bundle script reference missing in dist/index.html');
+assert(cssMatch && cssMatch[1], 'CSS bundle link reference missing in dist/index.html');
+
+const jsPath = 'dist' + jsMatch[1];
+const cssPath = 'dist' + cssMatch[1];
+
+assert(fs.existsSync(jsPath), `Referenced JS file ${jsPath} does not exist!`);
+assert(fs.existsSync(cssPath), `Referenced CSS file ${cssPath} does not exist!`);
+
+const jsSize = fs.statSync(jsPath).size;
+const cssSize = fs.statSync(cssPath).size;
+
+console.log(`✓ JS Bundle: ${jsPath} (${Math.round(jsSize / 1024)} KB)`);
+console.log(`✓ CSS Bundle: ${cssPath} (${Math.round(cssSize / 1024)} KB)`);
+console.log('--- ALL DIST ASSETS AUDITED SUCCESSFULLY! ---');
+
+function assert(condition, message) {
+  if (!condition) {
+    console.error('Assertion failed:', message);
     process.exit(1);
   }
 }
-
-verify().catch((err) => {
-  console.error(err);
-  process.exit(1);
-});

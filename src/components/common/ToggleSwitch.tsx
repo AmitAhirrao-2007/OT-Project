@@ -56,3 +56,4 @@ export const ToggleSwitch: React.FC<ToggleSwitchProps> = ({
     </label>
   );
 };
+

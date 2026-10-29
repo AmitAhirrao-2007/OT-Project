@@ -15,22 +15,33 @@ export const StationDetailsModal: React.FC = () => {
     setIsStationDetailsOpen,
     selectedStop,
     showToast,
-    setChargingSettings
+    setChargingSettings,
+    chargingSettings
   } = usePlanner();
 
   if (!selectedStop) return null;
 
-  const handleExcludeStation = () => {
-    setChargingSettings((prev) => ({
-      ...prev,
-      excludedChargers: [...prev.excludedChargers, selectedStop.id]
-    }));
-    showToast(`Added ${selectedStop.name} to excluded chargers.`);
+  const isExcluded = chargingSettings.excludedChargers.includes(selectedStop.id);
+
+  const handleToggleExclude = () => {
+    if (isExcluded) {
+      setChargingSettings((prev) => ({
+        ...prev,
+        excludedChargers: prev.excludedChargers.filter((id) => id !== selectedStop.id)
+      }));
+      showToast(`Removed ${selectedStop.name} from excluded list.`);
+    } else {
+      setChargingSettings((prev) => ({
+        ...prev,
+        excludedChargers: [...prev.excludedChargers, selectedStop.id]
+      }));
+      showToast(`Added ${selectedStop.name} to excluded chargers.`);
+    }
     setIsStationDetailsOpen(false);
   };
 
   const handlePreferStation = () => {
-    showToast(`Station ${selectedStop.name} prioritized for future replans.`);
+    showToast(`Prioritizing ${selectedStop.name} (${selectedStop.network}) for future routes.`);
     setIsStationDetailsOpen(false);
   };
 
@@ -45,11 +56,15 @@ export const StationDetailsModal: React.FC = () => {
         <div className="flex items-center justify-between w-full">
           <button
             type="button"
-            onClick={handleExcludeStation}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-rose-500/15 hover:bg-rose-500/25 text-rose-300 border border-rose-500/30 text-xs font-semibold transition-colors"
+            onClick={handleToggleExclude}
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs font-semibold transition-colors ${
+              isExcluded
+                ? 'bg-slate-700/60 text-slate-200 border-slate-600 hover:bg-slate-700'
+                : 'bg-rose-500/15 hover:bg-rose-500/25 text-rose-300 border-rose-500/30'
+            }`}
           >
             <Slash className="w-3.5 h-3.5" />
-            <span>Avoid Station</span>
+            <span>{isExcluded ? 'Unblock Charger' : 'Exclude Charger'}</span>
           </button>
 
           <div className="flex items-center gap-2">
@@ -79,8 +94,8 @@ export const StationDetailsModal: React.FC = () => {
           <div className="text-xs">
             <p className="text-slate-200 font-medium">{selectedStop.address}</p>
             <p className="text-slate-500 mt-0.5">
-              Coordinates: {selectedStop.coordinates[0].toFixed(4)},{' '}
-              {selectedStop.coordinates[1].toFixed(4)}
+              Coordinates: {selectedStop.coordinates[0].toFixed(4)}° N,{' '}
+              {selectedStop.coordinates[1].toFixed(4)}° E
             </p>
           </div>
         </div>
@@ -113,12 +128,12 @@ export const StationDetailsModal: React.FC = () => {
 
           <div className="p-2.5 bg-[#16202c] rounded-xl border border-[#243343] text-center">
             <span className="text-[10px] text-slate-400 uppercase tracking-wider block">
-              Arrival Time
+              Timing
             </span>
-            <span className="text-base font-bold text-slate-100 mt-0.5 block">
+            <span className="text-sm font-bold text-slate-100 mt-0.5 block font-mono">
               {selectedStop.arrivalTime}
             </span>
-            <span className="text-[10px] text-slate-400">
+            <span className="text-[10px] text-slate-400 font-mono">
               Depart {selectedStop.departureTime}
             </span>
           </div>
@@ -146,7 +161,7 @@ export const StationDetailsModal: React.FC = () => {
           </div>
 
           {/* Bar Visual */}
-          <div className="w-full bg-[#10161f] h-3 rounded-full overflow-hidden flex border border-[#253241]">
+          <div className="w-full bg-[#10161f] h-3.5 rounded-full overflow-hidden flex border border-[#253241]">
             <div
               className="bg-rose-500 h-full flex items-center justify-center text-[9px] font-bold text-white"
               style={{ width: `${selectedStop.arrivalSoc}%` }}
@@ -161,8 +176,7 @@ export const StationDetailsModal: React.FC = () => {
               }}
               title={`Added charge: +${selectedStop.departureSoc - selectedStop.arrivalSoc}%`}
             >
-              +
-              {selectedStop.departureSoc - selectedStop.arrivalSoc}%
+              +{selectedStop.departureSoc - selectedStop.arrivalSoc}%
             </div>
             <div
               className="bg-slate-800 h-full"
@@ -173,11 +187,11 @@ export const StationDetailsModal: React.FC = () => {
           <div className="flex justify-between text-[11px] text-slate-400 mt-2">
             <span>
               Arrival SoC:{' '}
-              <strong className="text-rose-400">{selectedStop.arrivalSoc}%</strong>
+              <strong className="text-rose-400 font-mono">{selectedStop.arrivalSoc}%</strong>
             </span>
             <span>
               Target SoC:{' '}
-              <strong className="text-emerald-400">
+              <strong className="text-emerald-400 font-mono">
                 {selectedStop.departureSoc}%
               </strong>
             </span>

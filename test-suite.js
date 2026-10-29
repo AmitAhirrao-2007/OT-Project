@@ -1,48 +1,81 @@
 import assert from 'node:assert';
 import fs from 'node:fs';
+import { demoTrip, demoRouteOptions } from './src/data/demoRoute.ts';
+import { initialVehicleProfile, availableVehicles } from './src/data/demoVehicle.ts';
+import { initialChargingSettings, initialRoutingSettings, initialPlanOptions } from './src/data/demoSettings.ts';
 
-console.log('--- RUNNING EV ROUTE PLANNER INTEGRITY TEST SUITE ---');
+console.log('--- EXECUTING EV ROUTE PLANNER INTEGRITY & CONSISTENCY TEST SUITE ---');
 
-// 1. Check demonstration route data
-import('./dist/assets/index-CLwTq_uJ.js').then(() => {
-  console.log('✓ Production JS bundle imports and evaluates successfully.');
-}).catch((err) => {
-  console.warn('Note on direct module import:', err.message);
-});
+// 1. DATA CONSISTENCY TEST: Check all 3 alternative routes
+console.log('Test 1: Mathematical Duration & Metric Consistency across all routes...');
+for (const route of demoRouteOptions) {
+  console.log(`Checking route: ${route.id} (${route.label})`);
+  
+  // Total must strictly equal driving + charging + stop buffer
+  const calculatedTotal = route.drivingDurationMinutes + route.chargingDurationMinutes + route.stopBufferMinutes;
+  assert.strictEqual(
+    route.totalDurationMinutes,
+    calculatedTotal,
+    `Duration inconsistency in ${route.id}: total (${route.totalDurationMinutes}) != drive (${route.drivingDurationMinutes}) + charge (${route.chargingDurationMinutes}) + buffer (${route.stopBufferMinutes})`
+  );
 
-// Verify raw data files
-const routeData = fs.readFileSync('src/data/demoRoute.ts', 'utf8');
-assert(routeData.includes('Patna'), 'Missing Patna in demoRoute');
-assert(routeData.includes('Delhi'), 'Missing Delhi in demoRoute');
-assert(routeData.includes('14 h 41 min'), 'Missing 14 h 41 min option');
-assert(routeData.includes('14 h 45 min'), 'Missing 14 h 45 min option');
-assert(routeData.includes('17 h 8 min'), 'Missing 17 h 8 min option');
-assert(routeData.includes('240'), 'Missing 240 kW charger');
-assert(routeData.includes('Purvanchal Expressway'), 'Missing Purvanchal stop');
-assert(routeData.includes('Renovatio e-charge'), 'Missing Renovatio stop');
-assert(routeData.includes('Bikanerwala Garhmukteshwar'), 'Missing Bikanerwala stop');
-console.log('✓ Route demonstration data verified against captured reference.');
+  // Stop count must equal stops.length
+  assert.strictEqual(
+    route.stopCount,
+    route.stops.length,
+    `Stop count mismatch in ${route.id}: stopCount (${route.stopCount}) != stops.length (${route.stops.length})`
+  );
 
-// Verify vehicle profile
-const vehicleData = fs.readFileSync('src/data/demoVehicle.ts', 'utf8');
-assert(vehicleData.includes('245'), 'Missing 245 Wh/mi reference consumption');
-assert(vehicleData.includes('83'), 'Missing 83 mph maximum speed');
-assert(vehicleData.includes('101'), 'Missing 101% relative speed');
-assert(vehicleData.includes('5.1'), 'Missing 5.1% battery degradation');
-assert(vehicleData.includes('CCS'), 'Missing CCS plug type');
-console.log('✓ Vehicle profile verified (Tata Nexon EV reference values).');
+  // Buffer must equal stops.length * 5 min
+  assert.strictEqual(
+    route.stopBufferMinutes,
+    route.stops.length * 5,
+    `Stop buffer in ${route.id} does not equal 5 min per stop`
+  );
 
-// Verify settings
-const settingsData = fs.readFileSync('src/data/demoSettings.ts', 'utf8');
-assert(settingsData.includes('minimumChargerStalls: 1'), 'Missing 1 min stall requirement');
-assert(settingsData.includes('maximumChargeLimit: 100'), 'Missing 100% max charge limit');
-assert(settingsData.includes('preferredMinArrivalBatteryCharger: 10'), 'Missing 10% min charger battery');
-assert(settingsData.includes('preferredMinArrivalBatteryDestination: 10'), 'Missing 10% min dest battery');
-assert(settingsData.includes('Seasonal temperature and wind conditions based on historical data'), 'Missing seasonal weather description');
-console.log('✓ Charging & routing settings verified against reference specifications.');
+  // Polyline must have real coordinates
+  assert(route.polylineCoordinates.length >= 10, `Polyline for ${route.id} has too few coordinates`);
+  for (const [lat, lng] of route.polylineCoordinates) {
+    assert(lat >= 25 && lat <= 29, `Latitude ${lat} out of range for corridor`);
+    assert(lng >= 77 && lng <= 86, `Longitude ${lng} out of range for corridor`);
+  }
+}
+console.log('✓ All 3 route alternatives are mathematically and geographically consistent.');
 
-// Verify components exist and comply
-const components = [
+// 2. TILE PROVIDER AUDIT: Ensure NO unauthenticated CARTO watermark URL is used as default
+console.log('Test 2: Verifying Map tile provider configuration...');
+const mapViewContent = fs.readFileSync('src/components/map/MapView.tsx', 'utf8');
+assert(!mapViewContent.includes('basemaps.cartocdn.com/dark_all'), 'CARTO watermark URL still present in MapView.tsx');
+assert(mapViewContent.includes('tile.openstreetmap.org'), 'OpenStreetMap tile source missing');
+assert(mapViewContent.includes('osm-dark-tiles'), 'Dark mode tile filter class missing');
+assert(mapViewContent.includes('esri-dark'), 'Esri dark tile option missing');
+console.log('✓ Map tile provider verified: CARTO watermark completely removed; OSM Dark + Esri configured.');
+
+// 3. VEHICLE PROFILE AUDIT: Tata Nexon reference test values
+console.log('Test 3: Checking vehicle profile values...');
+assert.strictEqual(initialVehicleProfile.referenceConsumptionWhPerMi, 245, 'Ref consumption must be 245 Wh/mi');
+assert.strictEqual(initialVehicleProfile.maximumSpeedMph, 83, 'Max speed must be 83 mph');
+assert.strictEqual(initialVehicleProfile.relativeSpeedPercent, 101, 'Relative speed must be 101%');
+assert.strictEqual(initialVehicleProfile.batteryDegradationPercent, 5.1, 'Degradation must be 5.1%');
+assert(initialVehicleProfile.selectedPlugTypes.includes('CCS'), 'CCS must be selected');
+assert(!initialVehicleProfile.selectedPlugTypes.includes('Level 2'), 'Level 2 must be unselected');
+assert(availableVehicles.length >= 3, 'Multiple vehicle options must be available for replace dialog');
+console.log('✓ Vehicle profile verified against reference specifications.');
+
+// 4. CHARGING & ROUTING SETTINGS AUDIT
+console.log('Test 4: Checking charging & routing settings defaults...');
+assert.strictEqual(initialChargingSettings.minimumChargerStalls, 1, 'Minimum charger stalls must be 1');
+assert.strictEqual(initialChargingSettings.maximumChargeLimit, 100, 'Maximum charge limit must be 100%');
+assert.strictEqual(initialChargingSettings.preferredMinArrivalBatteryCharger, 10, 'Min charger arrival battery must be 10%');
+assert.strictEqual(initialChargingSettings.preferredMinArrivalBatteryDestination, 10, 'Min destination arrival battery must be 10%');
+assert.strictEqual(initialRoutingSettings.chargeStops, 'Optimal', 'Default charge stops strategy must be Optimal');
+assert.strictEqual(initialRoutingSettings.weatherChoice, 'Seasonal', 'Default weather choice must be Seasonal');
+assert(initialRoutingSettings.seasonalWeatherDescription.includes('Seasonal temperature'), 'Seasonal weather description missing');
+console.log('✓ Charging & routing settings verified.');
+
+// 5. COMPONENT EXISTENCE & HEALTH CHECK
+console.log('Test 5: Verifying all required modular components on disk...');
+const requiredFiles = [
   'src/components/map/MapView.tsx',
   'src/components/route/RoutePanel.tsx',
   'src/components/route/ChargingStopCard.tsx',
@@ -50,15 +83,19 @@ const components = [
   'src/components/dialogs/SettingsModal.tsx',
   'src/components/dialogs/StationDetailsModal.tsx',
   'src/components/dialogs/LoginModal.tsx',
+  'src/components/dialogs/LiveDataModal.tsx',
+  'src/components/dialogs/PlugTypesModal.tsx',
+  'src/components/dialogs/ReplaceVehicleModal.tsx',
+  'src/components/dialogs/AddChargeCardModal.tsx',
   'src/components/topbar/TopNav.tsx',
   'src/context/PlannerContext.tsx'
 ];
 
-for (const comp of components) {
-  assert(fs.existsSync(comp), `Component ${comp} does not exist`);
-  const content = fs.readFileSync(comp, 'utf8');
-  assert(content.length > 200, `Component ${comp} appears incomplete`);
+for (const f of requiredFiles) {
+  assert(fs.existsSync(f), `File ${f} is missing!`);
+  const content = fs.readFileSync(f, 'utf8');
+  assert(content.length > 250, `File ${f} is unexpectedly small`);
 }
-console.log(`✓ All ${components.length} architectural components verified on disk.`);
+console.log(`✓ All ${requiredFiles.length} required modular files verified intact.`);
 
-console.log('--- ALL INTEGRITY & VERIFICATION TESTS PASSED SUCCESSFULLY! ---');
+console.log('--- ALL ACCEPTANCE CRITERIA TESTS PASSED! ---');

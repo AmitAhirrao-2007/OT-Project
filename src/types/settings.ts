@@ -3,6 +3,13 @@ export type WeatherChoice = 'Real-time' | 'Seasonal' | 'Manual';
 export type UnitSystem = 'imperial' | 'metric';
 export type TempUnit = 'F' | 'C';
 
+export interface ChargeCard {
+  id: string;
+  name: string;
+  network: string;
+  accountNumberMasked: string;
+}
+
 export interface PlanOptions {
   chargeStops: ChargeStopsPreference;
   destinationArrivalSoc: number; // slider, default 10%
@@ -14,7 +21,7 @@ export interface PlanOptions {
 }
 
 export interface ChargingSettings {
-  chargeCards: string[];
+  chargeCards: ChargeCard[];
   preferredNetworks: string[];
   avoidedNetworks: string[];
   excludedChargers: string[];
@@ -50,4 +57,15 @@ export interface PrivacySettings {
   saveActivity: boolean;
   shareVehicle: boolean;
   telemetryEnabled: boolean;
+}
+
+export interface DriveHistoryItem {
+  id: string;
+  date: string;
+  routeTitle: string;
+  distanceMi: number;
+  duration: string;
+  stopsCount: number;
+  energyKwh: number;
+  isDemo: boolean;
 }

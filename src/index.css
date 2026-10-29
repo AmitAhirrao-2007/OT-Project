@@ -31,12 +31,21 @@ dialog::backdrop {
   background: #34485c;
 }
 
-/* Leaflet Container & Markers */
+/* Leaflet Container & Dark Tiles */
 .leaflet-container {
   width: 100%;
   height: 100%;
   background-color: #12161a !important;
   font-family: inherit;
+}
+
+/* High-contrast dark mode filter for OpenStreetMap tiles: Zero API key, zero watermark */
+.leaflet-tile-pane .osm-dark-tiles {
+  filter: invert(100%) hue-rotate(180deg) brightness(82%) contrast(96%) saturate(60%);
+}
+
+.leaflet-tile-pane .esri-dark-tiles {
+  filter: brightness(90%) contrast(105%);
 }
 
 .custom-map-marker {
@@ -60,7 +69,7 @@ dialog::backdrop {
 
 /* Attribution styling */
 .leaflet-control-attribution {
-  background: rgba(18, 22, 26, 0.85) !important;
+  background: rgba(18, 22, 26, 0.88) !important;
   color: #718096 !important;
   font-size: 10px !important;
   backdrop-filter: blur(4px);

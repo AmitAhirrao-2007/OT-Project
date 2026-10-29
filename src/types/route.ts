@@ -19,6 +19,8 @@ export interface ChargingStop {
   amenities: Amenity[];
   priceEstimate?: string;
   notes?: string;
+  isExcluded?: boolean;
+  isPreferred?: boolean;
 }
 
 export interface RouteOption {
@@ -26,8 +28,13 @@ export interface RouteOption {
   label: string; // e.g. "14 h 41 min"
   badge?: string; // e.g. "Faster" or "+2 h 27 min"
   totalDuration: string;
+  totalDurationMinutes: number;
   drivingDuration: string;
+  drivingDurationMinutes: number;
   chargingDuration: string;
+  chargingDurationMinutes: number;
+  stopBufferDuration: string;
+  stopBufferMinutes: number;
   totalDistanceMi: number;
   stopCount: number;
   totalEnergyKwh: number;

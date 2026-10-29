@@ -16,3 +16,4 @@ export interface VehicleProfile {
   liveDataConnected: boolean;
   saveActivity: boolean;
 }
+
