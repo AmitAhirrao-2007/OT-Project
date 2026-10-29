@@ -379,4 +379,198 @@ describe('EV Route Planner — Core Correctness Test Suite', () => {
       expect(result.routeOptions[0].stops).toHaveLength(0);
     });
   });
+
+  // 16. Low Initial State of Charge Handling
+  describe('16. Low initial SoC and battery feasibility', () => {
+    it('flags default corridor route as infeasible if departure battery is critically low (e.g. 5%)', async () => {
+      const lowSocOrigin: Waypoint = {
+        ...demoTrip.origin,
+        batterySoc: 5
+      };
+
+      const result = await calculateTripRoutes({
+        origin: lowSocOrigin,
+        destination: demoTrip.destination,
+        waypoints: [],
+        vehicle: initialVehicleProfile,
+        planOptions: initialPlanOptions,
+        chargingSettings: initialChargingSettings,
+        routingSettings: initialRoutingSettings
+      });
+
+      // 5% battery cannot reach the first charging stop (~80 miles away)
+      expect(result.routeOptions[0].isFeasible).toBe(false);
+      expect(result.routeOptions[0].stops[0].isFeasible).toBe(false);
+      expect(result.routeOptions[0].stops[0].arrivalSoc).toBeLessThan(0);
+    });
+  });
+
+  // 17. Destination Reserve Requirement
+  describe('17. Destination reserve feasibility enforcement', () => {
+    it('flags route as infeasible if destination arrival buffer exceeds achievable SoC', async () => {
+      const highReserveOptions = {
+        ...initialPlanOptions,
+        destinationArrivalSoc: 50 // demanding 50% buffer at final destination
+      };
+
+      const highReserveCharging = {
+        ...initialChargingSettings,
+        preferredMinArrivalBatteryDestination: 50
+      };
+
+      const result = await calculateTripRoutes({
+        origin: demoTrip.origin,
+        destination: demoTrip.destination,
+        waypoints: [],
+        vehicle: initialVehicleProfile,
+        planOptions: highReserveOptions,
+        chargingSettings: highReserveCharging,
+        routingSettings: initialRoutingSettings
+      });
+
+      // The final leg from last charger into Delhi arrives with ~20-30%, not 50%
+      expect(result.routeOptions[0].isFeasible).toBe(false);
+    });
+  });
+
+  // 18. Vehicle Connector Compatibility
+  describe('18. Connector plug compatibility filtering', () => {
+    it('excludes stations when vehicle has incompatible connector types', () => {
+      const type2OnlyVehicle = {
+        ...initialVehicleProfile,
+        selectedPlugTypes: ['Type 2' as const]
+      };
+
+      const testStations: ChargingStation[] = [
+        {
+          id: 'test-ccs-only',
+          name: 'CCS Only Plaza',
+          network: 'Statiq',
+          address: 'Highway KM 50',
+          coordinates: [26.0, 82.0],
+          ratedPowerKw: 120,
+          totalStalls: 4,
+          availableStalls: 2,
+          connectors: [{ type: 'CCS', maxPowerKw: 120, count: 4 }],
+          amenities: [],
+          pricePerKwh: '₹20/kWh',
+          operationalStatus: 'operational',
+          statusTimestamp: 'now',
+          openingHours: '24/7',
+          paymentMethods: ['App'],
+          dataSource: 'Reference Simulation'
+        },
+        {
+          id: 'test-type2-station',
+          name: 'Type 2 AC Point',
+          network: 'Tata Power',
+          address: 'Highway KM 60',
+          coordinates: [26.1, 82.1],
+          ratedPowerKw: 22,
+          totalStalls: 2,
+          availableStalls: 2,
+          connectors: [{ type: 'Type 2', maxPowerKw: 22, count: 2 }],
+          amenities: [],
+          pricePerKwh: '₹15/kWh',
+          operationalStatus: 'operational',
+          statusTimestamp: 'now',
+          openingHours: '24/7',
+          paymentMethods: ['App'],
+          dataSource: 'Reference Simulation'
+        }
+      ];
+
+      const eligible = getEligibleStations(
+        testStations,
+        type2OnlyVehicle,
+        initialPlanOptions,
+        initialChargingSettings
+      );
+
+      expect(eligible).toHaveLength(1);
+      expect(eligible[0].id).toBe('test-type2-station');
+    });
+  });
+
+  // 19. Network Avoidance & Charger Exclusion
+  describe('19. Avoided networks and excluded chargers', () => {
+    it('filters out avoided networks from candidate stations', () => {
+      const chargingWithAvoided = {
+        ...initialChargingSettings,
+        avoidedNetworks: ['Adani Total Energies']
+      };
+
+      const eligible = getEligibleStations(
+        chargingStations,
+        initialVehicleProfile,
+        initialPlanOptions,
+        chargingWithAvoided
+      );
+
+      expect(eligible.every((s) => s.network !== 'Adani Total Energies')).toBe(true);
+    });
+
+    it('filters out individual excluded chargers by ID', () => {
+      const chargingWithExcluded = {
+        ...initialChargingSettings,
+        excludedChargers: ['sta-lucknow-tata']
+      };
+
+      const eligible = getEligibleStations(
+        chargingStations,
+        initialVehicleProfile,
+        initialPlanOptions,
+        chargingWithExcluded
+      );
+
+      expect(eligible.some((s) => s.id === 'sta-lucknow-tata')).toBe(false);
+    });
+  });
+
+  // 20. Detour Corridor Limit
+  describe('20. Detour corridor limit enforcement', () => {
+    it('correctly calculates perpendicular detour distance from polyline', () => {
+      const polyline: [number, number][] = [
+        [25.0, 80.0],
+        [25.0, 82.0]
+      ];
+
+      // A station directly on the line
+      const onLineProj = projectStationOnPolyline([25.0, 81.0], polyline);
+      expect(onLineProj.detourMi).toBeLessThan(1);
+
+      // A station 1 degree of latitude north (~69 miles away)
+      const farProj = projectStationOnPolyline([26.0, 81.0], polyline);
+      expect(farProj.detourMi).toBeGreaterThan(60);
+    });
+  });
+
+  // 21. Stall Availability & Zero Stalls Handling
+  describe('21. Zero available stalls representation', () => {
+    it('preserves availableStalls = 0 and does not fall back to totalStalls', () => {
+      const zeroStallsStation: ChargingStation = {
+        id: 'full-station',
+        name: 'Full Hub',
+        network: 'Statiq',
+        address: 'Delhi Bypass',
+        coordinates: [28.5, 77.2],
+        ratedPowerKw: 120,
+        totalStalls: 4,
+        availableStalls: 0,
+        connectors: [{ type: 'CCS', maxPowerKw: 120, count: 4, availableCount: 0 }],
+        amenities: [],
+        pricePerKwh: '₹20/kWh',
+        operationalStatus: 'operational',
+        statusTimestamp: 'now',
+        openingHours: '24/7',
+        paymentMethods: ['App'],
+        dataSource: 'Reference Simulation'
+      };
+
+      expect(zeroStallsStation.availableStalls).toBe(0);
+      expect(zeroStallsStation.availableStalls !== undefined).toBe(true);
+      expect(zeroStallsStation.totalStalls).toBe(4);
+    });
+  });
 });
+

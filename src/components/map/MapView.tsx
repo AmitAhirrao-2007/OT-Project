@@ -59,6 +59,7 @@ export const MapView: React.FC = () => {
   const {
     activeRoute,
     trip,
+    vehicle,
     selectedStop,
     setSelectedStop,
     setIsStationDetailsOpen,
@@ -371,11 +372,13 @@ export const MapView: React.FC = () => {
         </div>
       )}
 
-      {/* Bottom Center Demonstration Status Badge */}
+      {/* Bottom Center Demonstration / Dynamic Route Status Badge */}
       <div className="absolute bottom-3 left-1/2 -translate-x-1/2 z-10 bg-[#161f28]/95 backdrop-blur-md border border-[#2b3a4a] text-slate-300 text-[11px] px-3.5 py-1.5 rounded-full shadow-lg flex items-center gap-2 pointer-events-auto">
-        <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+        <span className={`w-2 h-2 rounded-full ${activeRoute.isFeasible ? 'bg-emerald-400 animate-pulse' : 'bg-rose-500'}`}></span>
         <span>
-          Simulated Demonstration Data · Patna → Delhi Corridor · Tata Nexon EV
+          {activeRoute.id.startsWith('default-')
+            ? `Reference Demonstration · ${trip.origin.name} → ${trip.destination.name} · ${vehicle.name}`
+            : `Dynamic Route · ${trip.origin.name} → ${trip.destination.name} · ${vehicle.name}`}
         </span>
       </div>
 

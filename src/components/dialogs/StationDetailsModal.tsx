@@ -16,7 +16,8 @@ export const StationDetailsModal: React.FC = () => {
     selectedStop,
     showToast,
     setChargingSettings,
-    chargingSettings
+    chargingSettings,
+    replanRoute
   } = usePlanner();
 
   if (!selectedStop) return null;
@@ -38,11 +39,19 @@ export const StationDetailsModal: React.FC = () => {
       showToast(`Added ${selectedStop.name} to excluded chargers.`);
     }
     setIsStationDetailsOpen(false);
+    setTimeout(() => replanRoute(), 100);
   };
 
   const handlePreferStation = () => {
+    setChargingSettings((prev) => {
+      const alreadyPreferred = prev.preferredNetworks.includes(selectedStop.network);
+      return alreadyPreferred
+        ? prev
+        : { ...prev, preferredNetworks: [...prev.preferredNetworks, selectedStop.network] };
+    });
     showToast(`Prioritizing ${selectedStop.name} (${selectedStop.network}) for future routes.`);
     setIsStationDetailsOpen(false);
+    setTimeout(() => replanRoute(), 100);
   };
 
   return (

@@ -146,6 +146,7 @@ export const RouteInputs: React.FC<RouteInputsProps> = () => {
       ...prev,
       origin: { ...prev.origin, batterySoc: soc }
     }));
+    setTimeout(() => replanRoute(), 100);
   };
 
   const filteredLocations = POPULAR_LOCATIONS.filter(
@@ -160,7 +161,7 @@ export const RouteInputs: React.FC<RouteInputsProps> = () => {
       {/* Route Endpoints Box */}
       <div className="relative space-y-2">
         {/* Origin field */}
-        <div className="relative">
+        <div className="relative pr-9">
           <div className="flex items-center gap-2">
             <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 shrink-0 ring-2 ring-emerald-500/20" />
             <button
@@ -218,7 +219,7 @@ export const RouteInputs: React.FC<RouteInputsProps> = () => {
 
         {/* Intermediate Waypoints */}
         {trip.waypoints.map((wp, index) => (
-          <div key={wp.id} className="relative flex items-center gap-2 pl-4">
+          <div key={wp.id} className="relative flex items-center gap-2 pl-4 pr-9">
             <span className="w-2 h-2 rounded-full bg-amber-400 shrink-0" />
             <div className="flex-1 px-3 py-1.5 rounded-lg bg-[#182330] border border-[#2b3d52] text-xs text-slate-200 flex items-center justify-between">
               <span className="font-medium truncate">{wp.name}</span>
@@ -268,7 +269,7 @@ export const RouteInputs: React.FC<RouteInputsProps> = () => {
         </button>
 
         {/* Destination field */}
-        <div className="relative">
+        <div className="relative pr-9">
           <div className="flex items-center gap-2">
             <span className="w-2.5 h-2.5 rounded-full bg-[#00b0ff] shrink-0 ring-2 ring-cyan-500/20" />
             <button
@@ -380,7 +381,7 @@ export const RouteInputs: React.FC<RouteInputsProps> = () => {
         <div className="flex items-center gap-2">
           <input
             type="range"
-            min="20"
+            min="5"
             max="100"
             step="5"
             value={trip.origin.batterySoc}

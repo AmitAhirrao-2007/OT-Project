@@ -213,6 +213,175 @@ export const chargingStations: ChargingStation[] = [
     paymentMethods: ['Zeon App', 'RFID Tag', 'UPI'],
     dataSource: 'Reference Simulation',
     notes: 'Ultra-fast dual 240 kW guns on Agra-Lucknow / Yamuna expressway interchange.'
+  },
+  {
+    id: 'sta-khalapur-jiobp',
+    name: 'Jio-bp pulse - Khalapur Expressway Plaza',
+    network: 'Jio-bp pulse',
+    address: 'Mumbai-Pune Expressway KM 32, Khalapur',
+    coordinates: [18.8285, 73.2847],
+    ratedPowerKw: 120,
+    totalStalls: 6,
+    availableStalls: 4,
+    connectors: [
+      { type: 'CCS', maxPowerKw: 120, count: 6, availableCount: 4 },
+      { type: 'Type 2', maxPowerKw: 22, count: 2, availableCount: 2 }
+    ],
+    amenities: ['restaurant', 'restroom', 'coffee', 'shopping'],
+    pricePerKwh: '₹21.00 / kWh',
+    operationalStatus: 'operational',
+    statusTimestamp: 'Verified 10m ago',
+    openingHours: '24/7 Always Open',
+    paymentMethods: ['Jio-bp pulse App', 'UPI', 'Credit Card'],
+    dataSource: 'Reference Simulation',
+    notes: 'Expressway food court charging hub with Wild Bean Cafe and ample canopy.'
+  },
+  {
+    id: 'sta-lonavala-tata',
+    name: 'Tata Power EZ Charge - Lonavala Plaza',
+    network: 'Tata Power EZ Charge',
+    address: 'Old Mumbai-Pune Highway, Lonavala',
+    coordinates: [18.7557, 73.4091],
+    ratedPowerKw: 60,
+    totalStalls: 2,
+    availableStalls: 2,
+    connectors: [
+      { type: 'CCS', maxPowerKw: 60, count: 2, availableCount: 2 }
+    ],
+    amenities: ['restaurant', 'restroom', 'coffee'],
+    pricePerKwh: '₹20.50 / kWh',
+    operationalStatus: 'operational',
+    statusTimestamp: 'Verified 22m ago',
+    openingHours: '24/7 Always Open',
+    paymentMethods: ['Tata Power EZ App', 'RFID Tag', 'UPI'],
+    dataSource: 'Reference Simulation',
+    notes: 'Hill station wayside charger with dining amenities.'
+  },
+  {
+    id: 'sta-neemrana-statiq',
+    name: 'Statiq Fast Hub - Neemrana Highway Zone',
+    network: 'Statiq',
+    address: 'NH-48 Delhi-Jaipur Highway, Neemrana',
+    coordinates: [27.9892, 76.3860],
+    ratedPowerKw: 120,
+    totalStalls: 4,
+    availableStalls: 3,
+    connectors: [
+      { type: 'CCS', maxPowerKw: 120, count: 4, availableCount: 3 }
+    ],
+    amenities: ['restaurant', 'restroom', 'lodging'],
+    pricePerKwh: '₹21.50 / kWh',
+    operationalStatus: 'operational',
+    statusTimestamp: 'Verified 14m ago',
+    openingHours: '24/7 Always Open',
+    paymentMethods: ['Statiq App', 'UPI'],
+    dataSource: 'Reference Simulation',
+    notes: 'Industrial highway transit corridor with clean motel and diner.'
+  },
+  {
+    id: 'sta-behror-tata',
+    name: 'Tata Power EZ Charge - Highway King Behror',
+    network: 'Tata Power EZ Charge',
+    address: 'NH-48 KM 132, Behror Bypass',
+    coordinates: [27.8872, 76.2818],
+    ratedPowerKw: 60,
+    totalStalls: 2,
+    availableStalls: 1,
+    connectors: [
+      { type: 'CCS', maxPowerKw: 60, count: 2, availableCount: 1 }
+    ],
+    amenities: ['restaurant', 'restroom', 'shopping'],
+    pricePerKwh: '₹20.00 / kWh',
+    operationalStatus: 'operational',
+    statusTimestamp: 'Verified 30m ago',
+    openingHours: '24/7 Always Open',
+    paymentMethods: ['Tata Power EZ App', 'UPI'],
+    dataSource: 'Reference Simulation',
+    notes: 'Popular highway rest stop with expansive food court.'
+  },
+  {
+    id: 'sta-krishnagiri-zeon',
+    name: 'Zeon Charging - Saravana Bhavan Krishnagiri',
+    network: 'Zeon Charging',
+    address: 'NH-44 / NH-48 Bengaluru-Chennai Highway, Krishnagiri',
+    coordinates: [12.5284, 78.2140],
+    ratedPowerKw: 120,
+    totalStalls: 4,
+    availableStalls: 4,
+    connectors: [
+      { type: 'CCS', maxPowerKw: 120, count: 4, availableCount: 4 }
+    ],
+    amenities: ['restaurant', 'restroom', 'coffee'],
+    pricePerKwh: '₹22.00 / kWh',
+    operationalStatus: 'operational',
+    statusTimestamp: 'Verified 18m ago',
+    openingHours: '24/7 Always Open',
+    paymentMethods: ['Zeon App', 'UPI', 'Credit Card'],
+    dataSource: 'Reference Simulation',
+    notes: 'High-speed dual guns at Saravana Bhavan complex with fast vegetarian dining.'
+  },
+  {
+    id: 'sta-vellore-tata',
+    name: 'Tata Power EZ Charge - Vellore Bypass',
+    network: 'Tata Power EZ Charge',
+    address: 'NH-48 Chennai Outer Corridor, Vellore',
+    coordinates: [12.9165, 79.1325],
+    ratedPowerKw: 60,
+    totalStalls: 2,
+    availableStalls: 2,
+    connectors: [
+      { type: 'CCS', maxPowerKw: 60, count: 2, availableCount: 2 }
+    ],
+    amenities: ['restaurant', 'restroom'],
+    pricePerKwh: '₹21.00 / kWh',
+    operationalStatus: 'operational',
+    statusTimestamp: 'Verified 25m ago',
+    openingHours: '24/7 Always Open',
+    paymentMethods: ['Tata Power EZ App', 'UPI'],
+    dataSource: 'Reference Simulation',
+    notes: 'Convenient wayside charger on Chennai-Bengaluru highway.'
+  },
+  {
+    id: 'sta-prayagraj-jiobp',
+    name: 'Jio-bp pulse - Prayagraj Bypass',
+    network: 'Jio-bp pulse',
+    address: 'NH-19 GT Road, Prayagraj Bypass',
+    coordinates: [25.4520, 81.8340],
+    ratedPowerKw: 120,
+    totalStalls: 4,
+    availableStalls: 3,
+    connectors: [
+      { type: 'CCS', maxPowerKw: 120, count: 4, availableCount: 3 }
+    ],
+    amenities: ['restroom', 'coffee'],
+    pricePerKwh: '₹21.00 / kWh',
+    operationalStatus: 'operational',
+    statusTimestamp: 'Verified 11m ago',
+    openingHours: '24/7 Always Open',
+    paymentMethods: ['Jio-bp pulse App', 'UPI'],
+    dataSource: 'Reference Simulation',
+    notes: 'Strategic highway stop between Varanasi and Kanpur.'
+  },
+  {
+    id: 'sta-varanasi-tata',
+    name: 'Tata Power EZ Charge - Varanasi Ring Road',
+    network: 'Tata Power EZ Charge',
+    address: 'Varanasi Ring Road Phase 1, Harhua',
+    coordinates: [25.3524, 82.9850],
+    ratedPowerKw: 60,
+    totalStalls: 2,
+    availableStalls: 2,
+    connectors: [
+      { type: 'CCS', maxPowerKw: 60, count: 2, availableCount: 2 }
+    ],
+    amenities: ['restaurant', 'restroom', 'wifi'],
+    pricePerKwh: '₹21.00 / kWh',
+    operationalStatus: 'operational',
+    statusTimestamp: 'Verified 8m ago',
+    openingHours: '24/7 Always Open',
+    paymentMethods: ['Tata Power EZ App', 'UPI'],
+    dataSource: 'Reference Simulation',
+    notes: 'Ring road plaza connecting NH-19 and Purvanchal link.'
   }
 ];
 

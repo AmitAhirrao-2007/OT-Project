@@ -72,7 +72,7 @@ export const RoutePanel: React.FC = () => {
         onClick={togglePanelCollapse}
         aria-label={isPanelCollapsed ? 'Expand Route Panel' : 'Collapse Route Panel'}
         className={`fixed top-4 left-4 z-40 p-2 rounded-xl bg-[#1a232f]/95 hover:bg-[#253242] border border-[#2c3a4a] text-slate-200 shadow-2xl backdrop-blur-md transition-all ${
-          isPanelCollapsed ? 'opacity-100 scale-100' : 'hidden md:flex opacity-0 pointer-events-none'
+          isPanelCollapsed ? 'flex opacity-100 scale-100 pointer-events-auto' : 'hidden md:flex opacity-0 pointer-events-none'
         }`}
       >
         <ChevronRight className="w-4 h-4 text-[#00b0ff]" />
