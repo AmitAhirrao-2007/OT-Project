@@ -10,10 +10,18 @@ import { LoginModal } from './components/dialogs/LoginModal';
 import { LiveDataModal } from './components/dialogs/LiveDataModal';
 import { PlugTypesModal } from './components/dialogs/PlugTypesModal';
 import { ReplaceVehicleModal } from './components/dialogs/ReplaceVehicleModal';
+import { ChargerFinderModal } from './components/charger/ChargerFinderModal';
+import { SavedPlansModal } from './components/dialogs/SavedPlansModal';
 import { CheckCircle2 } from 'lucide-react';
 
 const PlannerApp: React.FC = () => {
-  const { toastMessage } = usePlanner();
+  const {
+    toastMessage,
+    isChargerFinderOpen,
+    setIsChargerFinderOpen,
+    isSavedPlansOpen,
+    setIsSavedPlansOpen
+  } = usePlanner();
 
   return (
     <div className="relative w-screen h-screen overflow-hidden flex flex-row bg-[#12161a] text-slate-100 font-sans">
@@ -34,6 +42,14 @@ const PlannerApp: React.FC = () => {
       <LiveDataModal />
       <PlugTypesModal />
       <ReplaceVehicleModal />
+      <ChargerFinderModal
+        isOpen={isChargerFinderOpen}
+        onClose={() => setIsChargerFinderOpen(false)}
+      />
+      <SavedPlansModal
+        isOpen={isSavedPlansOpen}
+        onClose={() => setIsSavedPlansOpen(false)}
+      />
 
       {/* Toast Feedback Notification */}
       {toastMessage && (

@@ -1,13 +1,16 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { usePlanner } from '../../context/PlannerContext';
 import { ChargingStopCard } from './ChargingStopCard';
+import { RouteInputs } from './RouteInputs';
+import { formatDistance } from '../../utils/units';
 import {
   ChevronLeft,
   ChevronRight,
   SlidersHorizontal,
   RotateCw,
   Zap,
-  Compass
+  Compass,
+  MapPin
 } from 'lucide-react';
 
 export const RoutePanel: React.FC = () => {
@@ -19,11 +22,18 @@ export const RoutePanel: React.FC = () => {
     setIsOptionsModalOpen,
     replanRoute,
     vehicle,
+    displaySettings,
     openSettingsTab,
     isPanelCollapsed,
     togglePanelCollapse,
     showToast
   } = usePlanner();
+
+  const [isEndpointsExpanded, setIsEndpointsExpanded] = useState(false);
+
+  // Remaining leg distance to final destination
+  const stopsDistanceSum = activeRoute.stops.reduce((sum, s) => sum + s.legDistanceMi, 0);
+  const finalLegDistanceMi = Math.max(15, activeRoute.totalDistanceMi - stopsDistanceSum);
 
   return (
     <>
@@ -88,6 +98,20 @@ export const RoutePanel: React.FC = () => {
             <div className="flex items-center gap-1.5">
               <button
                 type="button"
+                onClick={() => setIsEndpointsExpanded(!isEndpointsExpanded)}
+                title="Edit origin, destination & stops"
+                aria-label="Edit route endpoints"
+                className={`p-2 rounded-lg border transition-colors ${
+                  isEndpointsExpanded
+                    ? 'bg-[#00b0ff]/20 text-[#00b0ff] border-[#00b0ff]/50'
+                    : 'text-slate-400 hover:text-white hover:bg-[#253344] border-[#2b3a4a]'
+                }`}
+              >
+                <MapPin className="w-4 h-4" />
+              </button>
+
+              <button
+                type="button"
                 onClick={() => setIsOptionsModalOpen(true)}
                 title="Route Planning Options"
                 aria-label="Open route options"
@@ -97,6 +121,13 @@ export const RoutePanel: React.FC = () => {
               </button>
             </div>
           </div>
+
+          {/* Collapsible Route Endpoints & Waypoints Editor */}
+          {isEndpointsExpanded && (
+            <div className="mt-3 animate-in fade-in slide-in-from-top-2 duration-150">
+              <RouteInputs />
+            </div>
+          )}
 
           {/* 2. Route Duration Segmented Buttons */}
           <div className="mt-3.5 grid grid-cols-3 gap-1.5 p-1 bg-[#10161f] border border-[#232f3e] rounded-xl">
@@ -151,7 +182,7 @@ export const RoutePanel: React.FC = () => {
             </div>
             <span>•</span>
             <div title="Total highway distance">
-              <span>{activeRoute.totalDistanceMi} mi</span>
+              <span>{formatDistance(activeRoute.totalDistanceMi, displaySettings.units)}</span>
             </div>
             <span>•</span>
             <div title="Number of charging stops">
@@ -219,7 +250,7 @@ export const RoutePanel: React.FC = () => {
             <div className="w-px h-6 bg-[#2a3746] absolute left-3.5"></div>
             <span className="font-medium text-slate-300">1 h 13 min</span>
             <span>·</span>
-            <span>55 mi</span>
+            <span>{formatDistance(finalLegDistanceMi, displaySettings.units)}</span>
           </div>
 
           {/* Destination Card (Delhi) */}

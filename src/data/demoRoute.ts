@@ -67,6 +67,7 @@ const route3Coordinates: [number, number][] = [
 export const demoStopsRoute1: ChargingStop[] = [
   {
     id: 'stop-1',
+    stationId: 'sta-azamgarh-adani',
     name: 'Adani TGas',
     network: 'Adani Total Energies',
     address: 'Purvanchal Expressway, Azamgarh sub-district',
@@ -79,14 +80,17 @@ export const demoStopsRoute1: ChargingStop[] = [
     arrivalSoc: 13,
     departureSoc: 79,
     chargeDurationMinutes: 38,
+    energyAddedKwh: 24.5,
     legDriveDuration: '3 h 38 min',
     legDistanceMi: 170,
     amenities: ['restaurant', 'restroom', 'coffee', 'shopping'],
     priceEstimate: '₹22.50 / kWh',
-    notes: 'High-speed DC fast charger located inside expressway wayside amenities center.'
+    notes: 'High-speed DC fast charger located inside expressway wayside amenities center.',
+    isFeasible: true
   },
   {
     id: 'stop-2',
+    stationId: 'sta-haidergarh-renovatio',
     name: 'Renovatio e-charge',
     network: 'Renovatio',
     address: 'NH-731, Haidergarh',
@@ -99,14 +103,17 @@ export const demoStopsRoute1: ChargingStop[] = [
     arrivalSoc: 17,
     departureSoc: 62,
     chargeDurationMinutes: 27,
+    energyAddedKwh: 16.8,
     legDriveDuration: '2 h 03 min',
     legDistanceMi: 118,
     amenities: ['restaurant', 'restroom', 'coffee'],
     priceEstimate: '₹21.00 / kWh',
-    notes: '24/7 highway diner and EV charging station with shaded parking canopy.'
+    notes: '24/7 highway diner and EV charging station with shaded parking canopy.',
+    isFeasible: true
   },
   {
     id: 'stop-3',
+    stationId: 'sta-sitapur-adani',
     name: 'Adani TGas',
     network: 'Adani Total Energies',
     address: 'Navabad Grant- GGE',
@@ -119,14 +126,17 @@ export const demoStopsRoute1: ChargingStop[] = [
     arrivalSoc: 10,
     departureSoc: 61,
     chargeDurationMinutes: 26,
+    energyAddedKwh: 19.2,
     legDriveDuration: '1 h 46 min',
     legDistanceMi: 95,
     amenities: ['restaurant', 'restroom', 'coffee', 'wifi'],
     priceEstimate: '₹22.50 / kWh',
-    notes: 'Fast charge hub with 6 CCS2 bays and clean lounge.'
+    notes: 'Fast charge hub with 6 CCS2 bays and clean lounge.',
+    isFeasible: true
   },
   {
     id: 'stop-4',
+    stationId: 'sta-bareilly-adani',
     name: 'Adani TGas',
     network: 'Adani Total Energies',
     address: 'Gularia-GGE',
@@ -139,14 +149,17 @@ export const demoStopsRoute1: ChargingStop[] = [
     arrivalSoc: 10,
     departureSoc: 58,
     chargeDurationMinutes: 24,
+    energyAddedKwh: 18.0,
     legDriveDuration: '1 h 02 min',
     legDistanceMi: 77,
     amenities: ['restroom', 'coffee'],
     priceEstimate: '₹22.50 / kWh',
-    notes: 'Convenient wayside location with quick coffee and snacks.'
+    notes: 'Convenient wayside location with quick coffee and snacks.',
+    isFeasible: true
   },
   {
     id: 'stop-5',
+    stationId: 'sta-chandausi-adani',
     name: 'Adani TGas',
     network: 'Adani Total Energies',
     address: 'Kalliya Kazampur- GGE',
@@ -159,14 +172,17 @@ export const demoStopsRoute1: ChargingStop[] = [
     arrivalSoc: 25,
     departureSoc: 65,
     chargeDurationMinutes: 24,
+    energyAddedKwh: 15.0,
     legDriveDuration: '41 min',
     legDistanceMi: 49,
     amenities: ['restroom', 'shopping'],
     priceEstimate: '₹19.50 / kWh',
-    notes: '60 kW dual-gun charger adjacent to supermarket.'
+    notes: '60 kW dual-gun charger adjacent to supermarket.',
+    isFeasible: true
   },
   {
     id: 'stop-6',
+    stationId: 'sta-garhmukteshwar-chargein',
     name: 'ChargeIn',
     network: 'Charge_IN by Mahindra',
     address: 'Bikanerwala Garhmukteshwar (Charge_IN by Mahindra)',
@@ -179,11 +195,13 @@ export const demoStopsRoute1: ChargingStop[] = [
     arrivalSoc: 11,
     departureSoc: 38,
     chargeDurationMinutes: 13,
+    energyAddedKwh: 10.2,
     legDriveDuration: '1 h 17 min',
     legDistanceMi: 85,
     amenities: ['restaurant', 'restroom', 'coffee', 'shopping'],
     priceEstimate: '₹23.00 / kWh',
-    notes: 'Popular food court stop at Bikanerwala. Quick top-up for final Delhi approach.'
+    notes: 'Popular food court stop at Bikanerwala. Quick top-up for final Delhi approach.',
+    isFeasible: true
   }
 ];
 
@@ -195,7 +213,8 @@ export const demoStopsRoute2: ChargingStop[] = [
     ...demoStopsRoute1[3],
     departureSoc: 72,
     chargeDurationMinutes: 32,
-    departureTime: '11:23 AM'
+    departureTime: '11:23 AM',
+    energyAddedKwh: 23.2
   },
   demoStopsRoute1[5]
 ];
@@ -205,6 +224,7 @@ export const demoStopsRoute3: ChargingStop[] = [
   { ...demoStopsRoute1[1], arrivalTime: '7:35 AM', departureTime: '8:09 AM' },
   {
     id: 'stop-3-alt',
+    stationId: 'sta-lucknow-tata',
     name: 'Tata Power EZ Charge',
     network: 'Tata Power EZ Charge',
     address: 'Kisan Path Bypass, Lucknow',
@@ -217,11 +237,13 @@ export const demoStopsRoute3: ChargingStop[] = [
     arrivalSoc: 18,
     departureSoc: 64,
     chargeDurationMinutes: 26,
+    energyAddedKwh: 17.5,
     legDriveDuration: '1 h 33 min',
     legDistanceMi: 68,
     amenities: ['restaurant', 'restroom', 'wifi'],
     priceEstimate: '₹21.50 / kWh',
-    notes: 'Dedicated Tata Power EV plaza with AC lounge.'
+    notes: 'Dedicated Tata Power EV plaza with AC lounge.',
+    isFeasible: true
   },
   { ...demoStopsRoute1[2], arrivalTime: '11:45 AM', departureTime: '12:17 PM' },
   { ...demoStopsRoute1[3], arrivalTime: '1:18 PM', departureTime: '1:48 PM' },
@@ -245,9 +267,12 @@ export const demoRouteOptions: RouteOption[] = [
     totalDistanceMi: 649,
     stopCount: 6,
     totalEnergyKwh: 154,
+    estimatedExpenseInr: 2280,
     tollNote: 'Toll',
     stops: demoStopsRoute1,
-    polylineCoordinates: route1Coordinates
+    polylineCoordinates: route1Coordinates,
+    isFeasible: true,
+    calculationMethod: 'Energy-Constrained Path Simulation'
   },
   {
     id: 'route-fewer',
@@ -263,9 +288,12 @@ export const demoRouteOptions: RouteOption[] = [
     totalDistanceMi: 654,
     stopCount: 5,
     totalEnergyKwh: 158,
+    estimatedExpenseInr: 2310,
     tollNote: 'Toll',
     stops: demoStopsRoute2,
-    polylineCoordinates: route2Coordinates
+    polylineCoordinates: route2Coordinates,
+    isFeasible: true,
+    calculationMethod: 'Energy-Constrained Path Simulation'
   },
   {
     id: 'route-fewest',
@@ -282,26 +310,32 @@ export const demoRouteOptions: RouteOption[] = [
     totalDistanceMi: 682,
     stopCount: 7,
     totalEnergyKwh: 166,
+    estimatedExpenseInr: 2490,
     tollNote: 'No Toll',
     stops: demoStopsRoute3,
-    polylineCoordinates: route3Coordinates
+    polylineCoordinates: route3Coordinates,
+    isFeasible: true,
+    calculationMethod: 'Energy-Constrained Path Simulation'
   }
 ];
 
 export const demoTrip: DemonstrationTrip = {
   origin: {
+    id: 'origin-patna',
     name: 'Patna',
     coordinates: [25.5941, 85.1376],
     batterySoc: 95,
     departureTime: '12:31 AM'
   },
   destination: {
+    id: 'destination-delhi',
     name: 'Delhi',
     subTitle: 'South West',
     coordinates: [28.6139, 77.2090],
     batterySoc: 11,
     arrivalTime: '3:12 PM'
   },
+  waypoints: [],
   routeOptions: demoRouteOptions,
   activeRouteId: 'route-optimal'
 };

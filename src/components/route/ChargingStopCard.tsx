@@ -9,6 +9,7 @@ import {
   Info
 } from 'lucide-react';
 import { usePlanner } from '../../context/PlannerContext';
+import { formatDistance } from '../../utils/units';
 
 interface ChargingStopCardProps {
   stop: ChargingStop;
@@ -41,7 +42,8 @@ export const ChargingStopCard: React.FC<ChargingStopCardProps> = ({ stop, index 
     setSelectedStop,
     setIsStationDetailsOpen,
     hoveredStopId,
-    setHoveredStopId
+    setHoveredStopId,
+    displaySettings
   } = usePlanner();
 
   const isSelected = selectedStop?.id === stop.id;
@@ -63,7 +65,7 @@ export const ChargingStopCard: React.FC<ChargingStopCardProps> = ({ stop, index 
         <div className="w-px h-6 bg-[#2a3746] absolute left-3.5 -top-2"></div>
         <span className="font-medium text-slate-300">{stop.legDriveDuration}</span>
         <span>·</span>
-        <span>{stop.legDistanceMi} mi</span>
+        <span>{formatDistance(stop.legDistanceMi, displaySettings.units)}</span>
       </div>
 
       {/* Main Stop Card */}

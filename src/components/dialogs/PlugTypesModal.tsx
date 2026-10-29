@@ -125,3 +125,4 @@ export const PlugTypesModal: React.FC = () => {
     </Modal>
   );
 };
+

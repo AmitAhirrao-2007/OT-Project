@@ -218,6 +218,32 @@ export const MapView: React.FC = () => {
       )
       .addTo(markersLayerRef.current);
 
+    // Intermediate Waypoints Markers
+    trip.waypoints.forEach((wp, wIdx) => {
+      const wpIcon = L.divIcon({
+        className: 'custom-map-marker',
+        html: `
+          <div class="relative flex flex-col items-center cursor-pointer group">
+            <div class="px-2 py-0.5 rounded-full bg-amber-400 text-slate-950 text-xs font-bold shadow-lg shadow-amber-500/40 flex items-center gap-1 border border-amber-200">
+              <span class="w-1.5 h-1.5 rounded-full bg-slate-950"></span>
+              <span>${wp.name}</span>
+              <span class="bg-amber-950 text-amber-200 px-1 rounded text-[9px] font-mono">W${wIdx + 1}</span>
+            </div>
+            <div class="w-2 h-2 bg-amber-400 rotate-45 -mt-1 shadow-md"></div>
+          </div>
+        `,
+        iconSize: [110, 34],
+        iconAnchor: [55, 28]
+      });
+
+      L.marker(wp.coordinates, { icon: wpIcon })
+        .bindTooltip(
+          `<div class="font-sans text-xs"><strong>Waypoint #${wIdx + 1}: ${wp.name}</strong><br/><span class="text-slate-300">${wp.subTitle || 'Intermediate stop'}</span></div>`,
+          { direction: 'top', offset: [0, -18] }
+        )
+        .addTo(markersLayerRef.current!);
+    });
+
     // Charging Stop Markers
     activeRoute.stops.forEach((stop, index) => {
       const isSelected = selectedStop?.id === stop.id;

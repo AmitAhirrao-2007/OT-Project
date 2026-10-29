@@ -19,6 +19,7 @@ import {
   initialPrivacySettings,
   initialRoutingSettings
 } from '../data/demoSettings';
+import { calculateTripRoutes } from '../services/routingService';
 
 export type SettingsTab =
   | 'vehicle'
@@ -63,6 +64,10 @@ interface PlannerContextType {
   setIsPlugTypesModalOpen: (open: boolean) => void;
   isReplaceVehicleModalOpen: boolean;
   setIsReplaceVehicleModalOpen: (open: boolean) => void;
+  isChargerFinderOpen: boolean;
+  setIsChargerFinderOpen: (open: boolean) => void;
+  isSavedPlansOpen: boolean;
+  setIsSavedPlansOpen: (open: boolean) => void;
 
   // Configurations
   planOptions: PlanOptions;
@@ -117,6 +122,8 @@ export const PlannerProvider: React.FC<{ children: ReactNode }> = ({ children })
   const [isLiveDataModalOpen, setIsLiveDataModalOpen] = useState<boolean>(false);
   const [isPlugTypesModalOpen, setIsPlugTypesModalOpen] = useState<boolean>(false);
   const [isReplaceVehicleModalOpen, setIsReplaceVehicleModalOpen] = useState<boolean>(false);
+  const [isChargerFinderOpen, setIsChargerFinderOpen] = useState<boolean>(false);
+  const [isSavedPlansOpen, setIsSavedPlansOpen] = useState<boolean>(false);
 
   // Hydrate configurations with LocalStorage persistence
   const [planOptions, setPlanOptions] = useState<PlanOptions>(() => {
@@ -250,30 +257,37 @@ export const PlannerProvider: React.FC<{ children: ReactNode }> = ({ children })
     setIsPanelCollapsed((prev) => !prev);
   };
 
-  const replanRoute = () => {
+  const replanRoute = async () => {
     showToast('Calculating optimized demonstration route...');
-    setTimeout(() => {
-      // Deterministic calculation based on preferences
-      if (planOptions.avoidTolls || routingSettings.avoidTolls) {
-        setSelectedRouteId('route-fewest'); // Route 3 is the No Toll route
-        showToast('Toll avoidance active: routed via non-toll trunk highway (17 h 08 min).');
-      } else if (
-        planOptions.chargeStops === 'Fewest' ||
-        routingSettings.chargeStops === 'Fewest'
-      ) {
-        setSelectedRouteId('route-fewest');
-        showToast('Fewest stops strategy applied.');
-      } else if (
-        planOptions.chargeStops === 'Fewer' ||
-        routingSettings.chargeStops === 'Fewer'
-      ) {
-        setSelectedRouteId('route-fewer');
-        showToast('Fewer stops strategy applied (5 stops, 14 h 45 min).');
-      } else {
-        setSelectedRouteId('route-optimal');
-        showToast('Optimal strategy applied (Fastest overall trip, 14 h 41 min).');
-      }
-    }, 500);
+    try {
+      const result = await calculateTripRoutes({
+        origin: trip.origin,
+        destination: trip.destination,
+        waypoints: trip.waypoints,
+        vehicle,
+        planOptions,
+        chargingSettings,
+        routingSettings
+      });
+
+      setTrip((prev) => ({
+        ...prev,
+        routeOptions: result.routeOptions,
+        activeRouteId: result.activeRouteId
+      }));
+      setSelectedRouteId(result.activeRouteId);
+
+      const activeOpt =
+        result.routeOptions.find((r) => r.id === result.activeRouteId) ||
+        result.routeOptions[0];
+      showToast(
+        `Route optimized: ${activeOpt?.totalDuration || '14 h 41 min'} (${
+          activeOpt?.stops.length || 0
+        } stops).`
+      );
+    } catch {
+      showToast('Standard highway corridor applied.');
+    }
   };
 
   const replaceVehicleWith = (profile: VehicleProfile) => {
@@ -331,6 +345,10 @@ export const PlannerProvider: React.FC<{ children: ReactNode }> = ({ children })
         setIsPlugTypesModalOpen,
         isReplaceVehicleModalOpen,
         setIsReplaceVehicleModalOpen,
+        isChargerFinderOpen,
+        setIsChargerFinderOpen,
+        isSavedPlansOpen,
+        setIsSavedPlansOpen,
         planOptions,
         setPlanOptions,
         vehicle,
