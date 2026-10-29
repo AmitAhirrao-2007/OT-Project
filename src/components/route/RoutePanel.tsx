@@ -1,0 +1,245 @@
+import React from 'react';
+import { usePlanner } from '../../context/PlannerContext';
+import { ChargingStopCard } from './ChargingStopCard';
+import {
+  ChevronLeft,
+  SlidersHorizontal,
+  RotateCw,
+  Zap,
+  Compass
+} from 'lucide-react';
+
+export const RoutePanel: React.FC = () => {
+  const {
+    trip,
+    activeRoute,
+    selectedRouteId,
+    setSelectedRouteId,
+    setIsOptionsModalOpen,
+    replanRoute,
+    vehicle,
+    openSettingsTab
+  } = usePlanner();
+
+  return (
+    <aside
+      aria-label="Route planning details"
+      className="w-full md:w-[420px] lg:w-[440px] h-full bg-[#141b24] border-r border-[#222e3d] flex flex-col z-20 shadow-2xl shrink-0"
+    >
+      {/* 1. Header & Destination area */}
+      <div className="p-4 border-b border-[#202b38] bg-[#18212c]">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <button
+              type="button"
+              onClick={() => alert('Return to trip input form')}
+              title="Back to planner"
+              aria-label="Go back"
+              className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-[#253344] transition-colors"
+            >
+              <ChevronLeft className="w-5 h-5" />
+            </button>
+            <div>
+              <div className="flex items-center gap-2">
+                <h1 className="text-xl font-bold text-white tracking-tight">
+                  {trip.destination.name}
+                </h1>
+                {trip.destination.subTitle && (
+                  <span className="text-xs px-2 py-0.5 rounded-full bg-[#243344] text-slate-300 font-medium border border-[#374c63]">
+                    {trip.destination.subTitle}
+                  </span>
+                )}
+              </div>
+              <p className="text-xs text-slate-400 flex items-center gap-1.5 mt-0.5">
+                <span>From</span>
+                <span className="text-slate-200 font-medium">{trip.origin.name}</span>
+                <span>•</span>
+                <button
+                  type="button"
+                  onClick={() => openSettingsTab('vehicle')}
+                  className="text-[#00b0ff] hover:underline"
+                >
+                  {vehicle.name}
+                </button>
+              </p>
+            </div>
+          </div>
+
+          <button
+            type="button"
+            onClick={() => setIsOptionsModalOpen(true)}
+            title="Plan Options"
+            aria-label="Open route options"
+            className="p-2 rounded-lg text-slate-400 hover:text-white hover:bg-[#253344] border border-[#2b3a4a] transition-colors"
+          >
+            <SlidersHorizontal className="w-4 h-4" />
+          </button>
+        </div>
+
+        {/* 2. Route Duration Segmented Buttons */}
+        <div className="mt-3.5 grid grid-cols-3 gap-1.5 p-1 bg-[#10161f] border border-[#232f3e] rounded-xl">
+          {trip.routeOptions.map((opt) => {
+            const isSelected = opt.id === selectedRouteId;
+            return (
+              <button
+                key={opt.id}
+                type="button"
+                onClick={() => setSelectedRouteId(opt.id)}
+                className={`flex flex-col items-center justify-center py-2 px-1 rounded-lg text-xs transition-all ${
+                  isSelected
+                    ? 'bg-[#253446] text-white font-bold shadow border border-[#3b506b]'
+                    : 'text-slate-400 hover:text-slate-200 hover:bg-[#18212b]'
+                }`}
+              >
+                <span className="text-[13px]">{opt.label}</span>
+                {opt.badge ? (
+                  <span
+                    className={`text-[9px] px-1.5 py-0.5 rounded-full mt-0.5 uppercase tracking-wider ${
+                      isSelected
+                        ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/40'
+                        : 'text-slate-500'
+                    }`}
+                  >
+                    {opt.badge}
+                  </span>
+                ) : (
+                  <span className="text-[9px] text-slate-500 mt-0.5">Alternative</span>
+                )}
+              </button>
+            );
+          })}
+        </div>
+
+        {/* 3. Trip Summary Statistics Pills */}
+        <div className="mt-3 flex items-center justify-between text-[11px] text-slate-300 bg-[#121922] p-2 rounded-lg border border-[#202b38]">
+          <div className="flex items-center gap-1" title="Driving time">
+            <Compass className="w-3.5 h-3.5 text-slate-400" />
+            <span>{activeRoute.drivingDuration}</span>
+          </div>
+          <span>•</span>
+          <div className="flex items-center gap-1" title="Charging time">
+            <Zap className="w-3.5 h-3.5 text-amber-400" />
+            <span>{activeRoute.chargingDuration}</span>
+          </div>
+          <span>•</span>
+          <div title="Total distance">
+            <span>{activeRoute.totalDistanceMi} mi</span>
+          </div>
+          <span>•</span>
+          <div title="Number of charging stops">
+            <span>{activeRoute.stopCount} stops</span>
+          </div>
+          <span>•</span>
+          <div title="Estimated energy consumed">
+            <span>{activeRoute.totalEnergyKwh} kWh</span>
+          </div>
+          {activeRoute.tollNote && (
+            <>
+              <span>•</span>
+              <span className="px-1.5 py-0.5 rounded bg-slate-800 text-slate-300 text-[10px] border border-slate-700">
+                {activeRoute.tollNote}
+              </span>
+            </>
+          )}
+        </div>
+      </div>
+
+      {/* 4. Scrollable Stops & Route Details */}
+      <div className="flex-1 overflow-y-auto p-4 space-y-2 custom-scrollbar">
+        {/* Origin Card (Patna) */}
+        <div className="relative rounded-xl border border-emerald-900/50 bg-[#14231f] p-3 shadow-sm">
+          <div className="flex items-start justify-between">
+            <div className="flex items-center gap-2.5">
+              <div className="w-6 h-6 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 flex items-center justify-center text-xs font-bold shrink-0">
+                A
+              </div>
+              <div>
+                <div className="flex items-center gap-2">
+                  <span className="text-xs font-semibold text-emerald-400">
+                    {trip.origin.departureTime}
+                  </span>
+                  <span className="text-sm font-semibold text-white">
+                    {trip.origin.name}
+                  </span>
+                </div>
+                <p className="text-xs text-slate-400">Origin Departure Point</p>
+              </div>
+            </div>
+
+            <div className="flex flex-col items-end">
+              <span className="text-xs font-bold text-emerald-400">
+                {trip.origin.batterySoc}%
+              </span>
+              <span className="text-[10px] text-slate-400">Departure SoC</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Charging Stops */}
+        {activeRoute.stops.map((stop, index) => (
+          <ChargingStopCard key={stop.id} stop={stop} index={index} />
+        ))}
+
+        {/* Final Leg to Destination */}
+        <div className="flex items-center gap-2 pl-7 py-2 text-xs text-slate-400">
+          <div className="w-px h-6 bg-[#2a3746] absolute left-3.5"></div>
+          <span className="font-medium text-slate-300">1 h 13 min</span>
+          <span>·</span>
+          <span>55 mi</span>
+        </div>
+
+        {/* Destination Card (Delhi) */}
+        <div className="relative rounded-xl border border-cyan-900/60 bg-[#13222d] p-3 shadow-sm">
+          <div className="flex items-start justify-between">
+            <div className="flex items-center gap-2.5">
+              <div className="w-6 h-6 rounded-full bg-[#00b0ff]/20 text-[#00b0ff] border border-[#00b0ff]/40 flex items-center justify-center text-xs font-bold shrink-0">
+                B
+              </div>
+              <div>
+                <div className="flex items-center gap-2">
+                  <span className="text-xs font-semibold text-[#00b0ff]">
+                    {trip.destination.arrivalTime}
+                  </span>
+                  <span className="text-sm font-semibold text-white">
+                    {trip.destination.name}
+                  </span>
+                </div>
+                <p className="text-xs text-slate-400">
+                  {trip.destination.subTitle || 'Final Destination'}
+                </p>
+              </div>
+            </div>
+
+            <div className="flex flex-col items-end">
+              <span className="text-xs font-bold text-cyan-300">
+                {trip.destination.batterySoc}%
+              </span>
+              <span className="text-[10px] text-slate-400">Arrival SoC</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* 5. Bottom Action Bar: Options & Replan */}
+      <div className="p-3.5 border-t border-[#202b38] bg-[#17202c] grid grid-cols-2 gap-3">
+        <button
+          type="button"
+          onClick={() => setIsOptionsModalOpen(true)}
+          className="w-full py-2.5 px-4 rounded-xl bg-[#222f3e] hover:bg-[#2c3c4e] text-slate-200 text-sm font-semibold border border-[#33465b] flex items-center justify-center gap-2 transition-colors"
+        >
+          <SlidersHorizontal className="w-4 h-4 text-[#00b0ff]" />
+          <span>Options</span>
+        </button>
+
+        <button
+          type="button"
+          onClick={replanRoute}
+          className="w-full py-2.5 px-4 rounded-xl bg-[#00b0ff] hover:bg-[#009be0] text-slate-950 text-sm font-bold shadow-lg shadow-cyan-500/20 flex items-center justify-center gap-2 transition-all active:scale-[0.98]"
+        >
+          <RotateCw className="w-4 h-4 stroke-[2.5]" />
+          <span>Replan</span>
+        </button>
+      </div>
+    </aside>
+  );
+};
