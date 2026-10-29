@@ -138,7 +138,7 @@ export const SettingsModal: React.FC = () => {
               <button
                 type="button"
                 onClick={() => setIsSettingsModalOpen(false)}
-                className="px-4 py-2 rounded-lg bg-[#222f3e] hover:bg-[#2c3c4e] text-slate-200 text-xs font-semibold"
+                className="px-4 py-2 rounded-lg bg-[#242424] hover:bg-[#2c2c2c] text-[#EEEEEE] border border-[#383838] text-xs font-semibold"
               >
                 Cancel
               </button>
@@ -153,9 +153,37 @@ export const SettingsModal: React.FC = () => {
           </div>
         }
       >
+        {/* Top Account / Profile Overview Card with Segmented Progress Bar */}
+        <div className="p-3.5 bg-[#202020] rounded-xl border border-[#2e2e2e] flex flex-col sm:flex-row items-center justify-between gap-3">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-full bg-[#2a2a2a] border border-[#383838] flex items-center justify-center text-[#00b0ff] shrink-0">
+              <User className="w-5 h-5" />
+            </div>
+            <div>
+              <div className="flex items-center gap-2">
+                <span className="font-bold text-sm text-[#EEEEEE]">Demonstration Account</span>
+                <span className="text-[10px] px-1.5 py-0.5 rounded bg-[#00b0ff]/20 text-[#00b0ff] font-semibold border border-[#00b0ff]/30">
+                  Standard Plan
+                </span>
+              </div>
+              <p className="text-xs text-[#A8A8A8]">Sync preferences, vehicle profiles & saved trips</p>
+            </div>
+          </div>
+          <div className="flex flex-col sm:items-end gap-1.5 w-full sm:w-auto">
+            {/* 4-segment decoration bar matching ABRP tier progress */}
+            <div className="flex items-center gap-1.5 w-full sm:w-36">
+              <div className="h-1.5 flex-1 rounded-full bg-[#00b0ff]" title="Standard Mode" />
+              <div className="h-1.5 flex-1 rounded-full bg-[#333333]" title="Telemetry Sync" />
+              <div className="h-1.5 flex-1 rounded-full bg-[#333333]" title="Weather Modeling" />
+              <div className="h-1.5 flex-1 rounded-full bg-[#333333]" title="Fleet Management" />
+            </div>
+            <span className="text-[10px] text-[#707070] font-mono">1/4 Features Active</span>
+          </div>
+        </div>
+
         <div className="flex flex-col md:flex-row gap-6 min-h-[480px]">
           {/* Vertical Navigation Bar */}
-          <div className="w-full md:w-56 flex flex-row md:flex-col gap-1 overflow-x-auto md:overflow-visible pb-2 md:pb-0 border-b md:border-b-0 md:border-r border-[#263444] pr-0 md:pr-4 shrink-0">
+          <div className="w-full md:w-56 flex flex-row md:flex-col gap-1 overflow-x-auto md:overflow-visible pb-2 md:pb-0 border-b md:border-b-0 md:border-r border-[#282828] pr-0 md:pr-4 shrink-0">
             {tabs.map((tab) => {
               const Icon = tab.icon;
               const isActive = settingsTab === tab.id;
@@ -164,14 +192,17 @@ export const SettingsModal: React.FC = () => {
                   key={tab.id}
                   type="button"
                   onClick={() => setSettingsTab(tab.id)}
-                  className={`flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-xs font-medium text-left transition-colors whitespace-nowrap ${
+                  className={`flex items-center justify-between px-3 py-2.5 rounded-lg text-xs font-medium text-left transition-colors whitespace-nowrap ${
                     isActive
-                      ? 'bg-[#253446] text-white font-semibold border border-[#3b506b]'
-                      : 'text-slate-400 hover:text-slate-200 hover:bg-[#1b2533]'
+                      ? 'bg-[#242424] text-[#EEEEEE] font-bold border border-[#383838]'
+                      : 'text-[#A8A8A8] hover:text-[#EEEEEE] hover:bg-[#1a1a1a]'
                   }`}
                 >
-                  <Icon className={`w-4 h-4 ${isActive ? 'text-[#00b0ff]' : 'text-slate-400'}`} />
-                  <span>{tab.label}</span>
+                  <div className="flex items-center gap-2.5">
+                    <Icon className={`w-4 h-4 ${isActive ? 'text-[#00b0ff]' : 'text-[#707070]'}`} />
+                    <span>{tab.label}</span>
+                  </div>
+                  <ChevronRight className={`w-3.5 h-3.5 hidden md:block ${isActive ? 'text-[#00b0ff]' : 'text-[#505050]'}`} />
                 </button>
               );
             })}
@@ -181,12 +212,12 @@ export const SettingsModal: React.FC = () => {
           <div className="flex-1 overflow-y-auto pr-1 text-xs">
             {/* 1. VEHICLE SETTINGS */}
             {settingsTab === 'vehicle' && (
-              <div className="space-y-5">
+              <div className="space-y-4">
                 {/* Vehicle Header & Neutral Illustration */}
-                <div className="p-4 bg-[#141d27] rounded-xl border border-[#253445] flex flex-col sm:flex-row items-center justify-between gap-4">
+                <div className="p-4 bg-[#202020] rounded-xl border border-[#303030] flex flex-col sm:flex-row items-center justify-between gap-4">
                   <div className="flex items-center gap-4">
                     {/* Permitted Vector Vehicle Silhouette (Neutral Electric SUV) */}
-                    <div className="w-20 h-14 bg-[#1b2736] border border-[#2e4056] rounded-xl flex items-center justify-center p-2 text-[#00b0ff] shrink-0">
+                    <div className="w-20 h-14 bg-[#282828] border border-[#383838] rounded-xl flex items-center justify-center p-2 text-[#00b0ff] shrink-0">
                       <svg viewBox="0 0 64 36" className="w-full h-full fill-current">
                         <path d="M12 24 L10 20 L16 12 L44 12 L52 18 L58 20 L60 25 L58 28 L54 28 C53 25 50 23 46 23 C42 23 39 25 38 28 L24 28 C23 25 20 23 16 23 C12 23 9 25 8 28 L4 28 L4 25 Z" opacity="0.9" />
                         <circle cx="16" cy="28" r="4" fill="#0f172a" stroke="currentColor" strokeWidth="1.5" />
@@ -197,10 +228,10 @@ export const SettingsModal: React.FC = () => {
                     </div>
 
                     <div>
-                      <h3 className="text-base font-bold text-white">{vehicle.name}</h3>
-                      <p className="text-xs text-slate-400">{vehicle.model}</p>
-                      <div className="flex items-center gap-2 mt-1 text-[11px] text-slate-300">
-                        <span className="px-1.5 py-0.2 rounded bg-emerald-950 text-emerald-400 font-mono">
+                      <h3 className="text-base font-bold text-[#EEEEEE]">{vehicle.name}</h3>
+                      <p className="text-xs text-[#A8A8A8]">{vehicle.model}</p>
+                      <div className="flex items-center gap-2 mt-1 text-[11px] text-[#A8A8A8]">
+                        <span className="px-1.5 py-0.2 rounded bg-emerald-950/80 text-emerald-400 font-mono border border-emerald-800/40">
                           {vehicle.usableBatteryKwh} kWh
                         </span>
                         <span>•</span>
@@ -213,7 +244,7 @@ export const SettingsModal: React.FC = () => {
                     <button
                       type="button"
                       onClick={() => setIsReplaceVehicleModalOpen(true)}
-                      className="px-3 py-1.5 rounded-lg bg-[#202c3c] hover:bg-[#2b3a4f] text-slate-200 border border-[#304358] text-xs font-semibold transition-colors"
+                      className="px-3 py-1.5 rounded-lg bg-[#282828] hover:bg-[#323232] text-[#EEEEEE] border border-[#383838] text-xs font-semibold transition-colors"
                     >
                       Replace vehicle
                     </button>
@@ -221,7 +252,7 @@ export const SettingsModal: React.FC = () => {
                       type="button"
                       onClick={() => showToast('Vehicle link copied to clipboard!')}
                       title="Share vehicle configuration"
-                      className="p-1.5 rounded-lg bg-[#202c3c] hover:bg-[#2b3a4f] text-slate-200 border border-[#304358] transition-colors"
+                      className="p-1.5 rounded-lg bg-[#282828] hover:bg-[#323232] text-[#EEEEEE] border border-[#383838] transition-colors"
                     >
                       <Share2 className="w-4 h-4" />
                     </button>
@@ -230,12 +261,12 @@ export const SettingsModal: React.FC = () => {
 
                 {/* Drive Profile Editable Specifications */}
                 <div>
-                  <h4 className="text-xs font-semibold text-slate-300 uppercase tracking-wider mb-2">
+                  <h4 className="text-xs font-semibold text-[#EEEEEE] uppercase tracking-wider mb-2">
                     Drive Profile (Captured Reference Baseline)
                   </h4>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
-                    <div className="p-3 bg-[#141b24] rounded-xl border border-[#243343]">
-                      <label className="block text-slate-300 font-semibold mb-1">
+                    <div className="p-3 bg-[#202020] rounded-xl border border-[#303030]">
+                      <label className="block text-[#EEEEEE] font-semibold mb-1">
                         Reference Consumption
                       </label>
                       <div className="flex items-center gap-2">
@@ -248,17 +279,17 @@ export const SettingsModal: React.FC = () => {
                               referenceConsumptionWhPerMi: Number(e.target.value)
                             }))
                           }
-                          className="w-full bg-[#1c2734] border border-[#2d3d50] rounded-lg px-3 py-1.5 text-white font-mono"
+                          className="w-full bg-[#161616] border border-[#333333] rounded-lg px-3 py-1.5 text-[#EEEEEE] font-mono focus:border-[#00b0ff] outline-none"
                         />
-                        <span className="text-slate-400 whitespace-nowrap">Wh/mi</span>
+                        <span className="text-[#A8A8A8] whitespace-nowrap">Wh/mi</span>
                       </div>
-                      <span className="text-[10px] text-slate-500 mt-1 block">
+                      <span className="text-[10px] text-[#707070] mt-1 block">
                         Observed reference: 245 Wh/mi
                       </span>
                     </div>
 
-                    <div className="p-3 bg-[#141b24] rounded-xl border border-[#243343]">
-                      <label className="block text-slate-300 font-semibold mb-1">
+                    <div className="p-3 bg-[#202020] rounded-xl border border-[#303030]">
+                      <label className="block text-[#EEEEEE] font-semibold mb-1">
                         Maximum Speed
                       </label>
                       <div className="flex items-center gap-2">
@@ -271,17 +302,17 @@ export const SettingsModal: React.FC = () => {
                               maximumSpeedMph: Number(e.target.value)
                             }))
                           }
-                          className="w-full bg-[#1c2734] border border-[#2d3d50] rounded-lg px-3 py-1.5 text-white font-mono"
+                          className="w-full bg-[#161616] border border-[#333333] rounded-lg px-3 py-1.5 text-[#EEEEEE] font-mono focus:border-[#00b0ff] outline-none"
                         />
-                        <span className="text-slate-400 whitespace-nowrap">mph</span>
+                        <span className="text-[#A8A8A8] whitespace-nowrap">mph</span>
                       </div>
-                      <span className="text-[10px] text-slate-500 mt-1 block">
+                      <span className="text-[10px] text-[#707070] mt-1 block">
                         Observed reference: 83 mph
                       </span>
                     </div>
 
-                    <div className="p-3 bg-[#141b24] rounded-xl border border-[#243343]">
-                      <label className="block text-slate-300 font-semibold mb-1">
+                    <div className="p-3 bg-[#202020] rounded-xl border border-[#303030]">
+                      <label className="block text-[#EEEEEE] font-semibold mb-1">
                         Relative Speed
                       </label>
                       <div className="flex items-center gap-2">
@@ -294,17 +325,17 @@ export const SettingsModal: React.FC = () => {
                               relativeSpeedPercent: Number(e.target.value)
                             }))
                           }
-                          className="w-full bg-[#1c2734] border border-[#2d3d50] rounded-lg px-3 py-1.5 text-white font-mono"
+                          className="w-full bg-[#161616] border border-[#333333] rounded-lg px-3 py-1.5 text-[#EEEEEE] font-mono focus:border-[#00b0ff] outline-none"
                         />
-                        <span className="text-slate-400 whitespace-nowrap">%</span>
+                        <span className="text-[#A8A8A8] whitespace-nowrap">%</span>
                       </div>
-                      <span className="text-[10px] text-slate-500 mt-1 block">
+                      <span className="text-[10px] text-[#707070] mt-1 block">
                         Observed reference: 101%
                       </span>
                     </div>
 
-                    <div className="p-3 bg-[#141b24] rounded-xl border border-[#243343]">
-                      <label className="block text-slate-300 font-semibold mb-1">
+                    <div className="p-3 bg-[#202020] rounded-xl border border-[#303030]">
+                      <label className="block text-[#EEEEEE] font-semibold mb-1">
                         Battery Degradation
                       </label>
                       <div className="flex items-center gap-2">
@@ -318,11 +349,11 @@ export const SettingsModal: React.FC = () => {
                               batteryDegradationPercent: Number(e.target.value)
                             }))
                           }
-                          className="w-full bg-[#1c2734] border border-[#2d3d50] rounded-lg px-3 py-1.5 text-white font-mono"
+                          className="w-full bg-[#161616] border border-[#333333] rounded-lg px-3 py-1.5 text-[#EEEEEE] font-mono focus:border-[#00b0ff] outline-none"
                         />
-                        <span className="text-slate-400 whitespace-nowrap">%</span>
+                        <span className="text-[#A8A8A8] whitespace-nowrap">%</span>
                       </div>
-                      <span className="text-[10px] text-slate-500 mt-1 block">
+                      <span className="text-[10px] text-[#707070] mt-1 block">
                         Observed reference: 5.1%
                       </span>
                     </div>
@@ -333,37 +364,37 @@ export const SettingsModal: React.FC = () => {
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
                   <div
                     onClick={() => setIsLiveDataModalOpen(true)}
-                    className="p-3.5 bg-[#141b24] hover:bg-[#1a232f] border border-[#243343] hover:border-[#33465b] rounded-xl cursor-pointer flex items-center justify-between transition-colors"
+                    className="p-3.5 bg-[#202020] hover:bg-[#262626] border border-[#303030] hover:border-[#404040] rounded-xl cursor-pointer flex items-center justify-between transition-colors"
                   >
                     <div className="flex items-center gap-2.5">
                       <Radio className="w-4 h-4 text-emerald-400" />
                       <div>
-                        <span className="font-semibold text-slate-200 block">Connect Live Data</span>
-                        <span className="text-[11px] text-slate-400">OBD-II BLE / Telemetry</span>
+                        <span className="font-semibold text-[#EEEEEE] block">Connect Live Data</span>
+                        <span className="text-[11px] text-[#A8A8A8]">OBD-II BLE / Telemetry</span>
                       </div>
                     </div>
-                    <ChevronRight className="w-4 h-4 text-slate-500" />
+                    <ChevronRight className="w-4 h-4 text-[#707070]" />
                   </div>
 
                   <div
                     onClick={() => setIsPlugTypesModalOpen(true)}
-                    className="p-3.5 bg-[#141b24] hover:bg-[#1a232f] border border-[#243343] hover:border-[#33465b] rounded-xl cursor-pointer flex items-center justify-between transition-colors"
+                    className="p-3.5 bg-[#202020] hover:bg-[#262626] border border-[#303030] hover:border-[#404040] rounded-xl cursor-pointer flex items-center justify-between transition-colors"
                   >
                     <div className="flex items-center gap-2.5">
                       <Plug className="w-4 h-4 text-[#00b0ff]" />
                       <div>
-                        <span className="font-semibold text-slate-200 block">Plug Types</span>
-                        <span className="text-[11px] text-slate-400">
+                        <span className="font-semibold text-[#EEEEEE] block">Plug Types</span>
+                        <span className="text-[11px] text-[#A8A8A8]">
                           {vehicle.selectedPlugTypes.join(', ') || 'None selected'}
                         </span>
                       </div>
                     </div>
-                    <ChevronRight className="w-4 h-4 text-slate-500" />
+                    <ChevronRight className="w-4 h-4 text-[#707070]" />
                   </div>
                 </div>
 
                 {/* Activity & History Actions */}
-                <div className="p-3.5 bg-[#141b24] rounded-xl border border-[#243343] divide-y divide-[#222e3d]">
+                <div className="p-3.5 bg-[#202020] rounded-xl border border-[#303030] divide-y divide-[#2a2a2a]">
                   <ToggleSwitch
                     label="Save My Activity"
                     description="Record driven routes and calibration points locally in browser storage"
@@ -372,11 +403,11 @@ export const SettingsModal: React.FC = () => {
                   />
                 </div>
 
-                <div className="flex items-center justify-between pt-1 text-slate-400">
+                <div className="flex items-center justify-between pt-1 text-[#A8A8A8]">
                   <button
                     type="button"
                     onClick={() => setSettingsTab('history')}
-                    className="hover:text-slate-200 underline"
+                    className="hover:text-[#EEEEEE] underline"
                   >
                     View Vehicle History
                   </button>
@@ -397,20 +428,20 @@ export const SettingsModal: React.FC = () => {
 
             {/* 2. CHARGING SETTINGS */}
             {settingsTab === 'charging' && (
-              <div className="space-y-5">
+              <div className="space-y-4">
                 {/* 2a. Charge Cards Section */}
-                <div className="p-4 bg-[#141b24] rounded-xl border border-[#243343]">
+                <div className="p-4 bg-[#202020] rounded-xl border border-[#303030]">
                   <div className="flex items-center justify-between mb-2.5">
                     <div>
-                      <h4 className="font-bold text-slate-200">Charge Cards</h4>
-                      <p className="text-slate-400 text-[11px]">
+                      <h4 className="font-bold text-[#EEEEEE]">Charge Cards</h4>
+                      <p className="text-[#A8A8A8] text-[11px]">
                         RFID cards or operator passes used for charger authentication
                       </p>
                     </div>
                     <button
                       type="button"
                       onClick={() => setIsAddCardOpen(true)}
-                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#202b38] hover:bg-[#2b3a4f] text-slate-200 border border-[#304256] font-semibold text-xs transition-colors"
+                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#282828] hover:bg-[#323232] text-[#EEEEEE] border border-[#383838] font-semibold text-xs transition-colors"
                     >
                       <Plus className="w-3.5 h-3.5 text-[#00b0ff]" />
                       <span>Add new card</span>
@@ -418,7 +449,7 @@ export const SettingsModal: React.FC = () => {
                   </div>
 
                   {chargingSettings.chargeCards.length === 0 ? (
-                    <div className="py-4 text-center text-slate-500 border border-dashed border-[#243343] rounded-lg">
+                    <div className="py-4 text-center text-[#707070] border border-dashed border-[#303030] rounded-lg">
                       No charge cards configured
                     </div>
                   ) : (
@@ -426,13 +457,13 @@ export const SettingsModal: React.FC = () => {
                       {chargingSettings.chargeCards.map((card) => (
                         <div
                           key={card.id}
-                          className="flex items-center justify-between p-2.5 bg-[#182330] rounded-lg border border-[#273749]"
+                          className="flex items-center justify-between p-2.5 bg-[#262626] rounded-lg border border-[#383838]"
                         >
                           <div className="flex items-center gap-2.5">
                             <CreditCard className="w-4 h-4 text-[#00b0ff]" />
                             <div>
-                              <span className="font-semibold text-white">{card.name}</span>
-                              <span className="text-[11px] text-slate-400 ml-2">
+                              <span className="font-semibold text-[#EEEEEE]">{card.name}</span>
+                              <span className="text-[11px] text-[#A8A8A8] ml-2">
                                 {card.network} ({card.accountNumberMasked})
                               </span>
                             </div>
@@ -445,7 +476,7 @@ export const SettingsModal: React.FC = () => {
                                 chargeCards: prev.chargeCards.filter((c) => c.id !== card.id)
                               }))
                             }
-                            className="text-slate-500 hover:text-rose-400 p-1"
+                            className="text-[#707070] hover:text-rose-400 p-1"
                           >
                             <Trash2 className="w-3.5 h-3.5" />
                           </button>
@@ -456,10 +487,10 @@ export const SettingsModal: React.FC = () => {
                 </div>
 
                 {/* 2b. Preferred & Avoided Charging Networks */}
-                <div className="p-4 bg-[#141b24] rounded-xl border border-[#243343] space-y-4">
+                <div className="p-4 bg-[#202020] rounded-xl border border-[#303030] space-y-4">
                   <div>
-                    <h4 className="font-bold text-slate-200 mb-0.5">Charging Networks</h4>
-                    <p className="text-slate-400 text-[11px] mb-2.5">
+                    <h4 className="font-bold text-[#EEEEEE] mb-0.5">Charging Networks</h4>
+                    <p className="text-[#A8A8A8] text-[11px] mb-2.5">
                       Configure networks you prefer or wish to avoid during route optimization
                     </p>
                   </div>
@@ -468,13 +499,13 @@ export const SettingsModal: React.FC = () => {
                   <div>
                     <div className="text-[11px] font-semibold text-emerald-400 uppercase tracking-wider mb-1.5 flex items-center justify-between">
                       <span>Preferred Networks</span>
-                      <span className="text-slate-500 font-normal">
+                      <span className="text-[#707070] font-normal">
                         {chargingSettings.preferredNetworks.length} selected
                       </span>
                     </div>
 
                     {chargingSettings.preferredNetworks.length === 0 ? (
-                      <div className="p-3 text-center text-slate-500 border border-dashed border-[#243343] rounded-lg text-xs">
+                      <div className="p-3 text-center text-[#707070] border border-dashed border-[#303030] rounded-lg text-xs">
                         No preferred charging networks configured
                       </div>
                     ) : (
@@ -505,7 +536,7 @@ export const SettingsModal: React.FC = () => {
                             key={net}
                             type="button"
                             onClick={() => handleAddPreferredNetwork(net)}
-                            className="px-2.5 py-1 rounded-md bg-[#192330] hover:bg-[#223042] border border-[#2b3a4a] text-slate-300 text-[11px] flex items-center gap-1 transition-colors"
+                            className="px-2.5 py-1 rounded-md bg-[#262626] hover:bg-[#303030] border border-[#383838] text-[#EEEEEE] text-[11px] flex items-center gap-1 transition-colors"
                           >
                             <Plus className="w-3 h-3 text-[#00b0ff]" />
                             <span>{net}</span>
@@ -515,16 +546,16 @@ export const SettingsModal: React.FC = () => {
                   </div>
 
                   {/* Avoided list */}
-                  <div className="pt-2 border-t border-[#222e3d]">
+                  <div className="pt-2 border-t border-[#2a2a2a]">
                     <div className="text-[11px] font-semibold text-rose-400 uppercase tracking-wider mb-1.5 flex items-center justify-between">
                       <span>Avoided Networks</span>
-                      <span className="text-slate-500 font-normal">
+                      <span className="text-[#707070] font-normal">
                         {chargingSettings.avoidedNetworks.length} selected
                       </span>
                     </div>
 
                     {chargingSettings.avoidedNetworks.length === 0 ? (
-                      <div className="p-3 text-center text-slate-500 border border-dashed border-[#243343] rounded-lg text-xs">
+                      <div className="p-3 text-center text-[#707070] border border-dashed border-[#303030] rounded-lg text-xs">
                         No avoided charging networks configured
                       </div>
                     ) : (
@@ -566,7 +597,7 @@ export const SettingsModal: React.FC = () => {
                                 preferredNetworks: prev.preferredNetworks.filter((p) => p !== net)
                               }))
                             }
-                            className="px-2.5 py-1 rounded-md bg-[#192330] hover:bg-[#223042] border border-[#2b3a4a] text-slate-300 text-[11px] flex items-center gap-1 transition-colors"
+                            className="px-2.5 py-1 rounded-md bg-[#262626] hover:bg-[#303030] border border-[#383838] text-[#EEEEEE] text-[11px] flex items-center gap-1 transition-colors"
                           >
                             <Ban className="w-3 h-3 text-rose-400" />
                             <span>{net}</span>
@@ -577,13 +608,13 @@ export const SettingsModal: React.FC = () => {
                 </div>
 
                 {/* 2c. Excluded Chargers */}
-                <div className="p-4 bg-[#141b24] rounded-xl border border-[#243343]">
-                  <h4 className="font-bold text-slate-200 mb-0.5">Excluded Chargers</h4>
-                  <p className="text-slate-400 text-[11px] mb-2.5">
+                <div className="p-4 bg-[#202020] rounded-xl border border-[#303030]">
+                  <h4 className="font-bold text-[#EEEEEE] mb-0.5">Excluded Chargers</h4>
+                  <p className="text-[#A8A8A8] text-[11px] mb-2.5">
                     Individual stations blacklisted from future route calculations
                   </p>
                   {chargingSettings.excludedChargers.length === 0 ? (
-                    <div className="py-3 text-center text-slate-500 border border-dashed border-[#243343] rounded-lg">
+                    <div className="py-3 text-center text-[#707070] border border-dashed border-[#303030] rounded-lg">
                       No excluded chargers. You can exclude specific chargers from their station
                       details dialog.
                     </div>
@@ -592,9 +623,9 @@ export const SettingsModal: React.FC = () => {
                       {chargingSettings.excludedChargers.map((id) => (
                         <div
                           key={id}
-                          className="flex items-center justify-between p-2 bg-[#182330] rounded-lg border border-[#263749]"
+                          className="flex items-center justify-between p-2 bg-[#262626] rounded-lg border border-[#383838]"
                         >
-                          <span className="text-slate-300 font-medium">Station ID: {id}</span>
+                          <span className="text-[#EEEEEE] font-medium">Station ID: {id}</span>
                           <button
                             type="button"
                             onClick={() =>
@@ -603,7 +634,7 @@ export const SettingsModal: React.FC = () => {
                                 excludedChargers: prev.excludedChargers.filter((x) => x !== id)
                               }))
                             }
-                            className="text-slate-400 hover:text-white text-xs underline"
+                            className="text-[#A8A8A8] hover:text-[#EEEEEE] text-xs underline"
                           >
                             Unblock
                           </button>
@@ -615,7 +646,7 @@ export const SettingsModal: React.FC = () => {
 
                 {/* 2d. Minimum Stalls, Max Charge & Arrival Buffers */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
-                  <div className="p-3 bg-[#141b24] rounded-xl border border-[#243343]">
+                  <div className="p-3 bg-[#202020] rounded-xl border border-[#303030]">
                     <Slider
                       label="Minimum Charger Stalls"
                       subLabel="Observed reference: 1"
@@ -629,7 +660,7 @@ export const SettingsModal: React.FC = () => {
                     />
                   </div>
 
-                  <div className="p-3 bg-[#141b24] rounded-xl border border-[#243343]">
+                  <div className="p-3 bg-[#202020] rounded-xl border border-[#303030]">
                     <Slider
                       label="Maximum Charge Limit"
                       subLabel="Observed reference: 100%"
@@ -642,7 +673,7 @@ export const SettingsModal: React.FC = () => {
                     />
                   </div>
 
-                  <div className="p-3 bg-[#141b24] rounded-xl border border-[#243343]">
+                  <div className="p-3 bg-[#202020] rounded-xl border border-[#303030]">
                     <Slider
                       label="Min Battery at Charger"
                       subLabel="Observed reference: 10%"
@@ -658,7 +689,7 @@ export const SettingsModal: React.FC = () => {
                     />
                   </div>
 
-                  <div className="p-3 bg-[#141b24] rounded-xl border border-[#243343]">
+                  <div className="p-3 bg-[#202020] rounded-xl border border-[#303030]">
                     <Slider
                       label="Min Battery at Destination"
                       subLabel="Observed reference: 10%"
@@ -671,11 +702,11 @@ export const SettingsModal: React.FC = () => {
                 </div>
 
                 {/* 2e. Amenities */}
-                <div className="p-3.5 bg-[#141b24] rounded-xl border border-[#243343]">
-                  <div className="text-xs font-semibold text-slate-300 uppercase tracking-wider mb-2">
+                <div className="p-3.5 bg-[#202020] rounded-xl border border-[#303030]">
+                  <div className="text-xs font-semibold text-[#EEEEEE] uppercase tracking-wider mb-2">
                     Required Amenities
                   </div>
-                  <div className="divide-y divide-[#222e3d]">
+                  <div className="divide-y divide-[#2a2a2a]">
                     <ToggleSwitch
                       label="Restroom Available"
                       description="Only plan stops with on-site restroom facilities"
@@ -715,9 +746,9 @@ export const SettingsModal: React.FC = () => {
 
             {/* 3. ROUTING SETTINGS */}
             {settingsTab === 'routing' && (
-              <div className="space-y-5">
-                <div>
-                  <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-2">
+              <div className="space-y-4">
+                <div className="p-4 bg-[#202020] rounded-xl border border-[#303030]">
+                  <label className="block text-xs font-semibold text-[#EEEEEE] uppercase tracking-wider mb-2">
                     Charge Stops Strategy
                   </label>
                   <SegmentedControl<ChargeStopsPreference>
@@ -730,7 +761,7 @@ export const SettingsModal: React.FC = () => {
                       { value: 'Fewest', label: 'Fewest', subLabel: 'Minimum stop count' }
                     ]}
                   />
-                  <p className="text-[11px] text-slate-400 mt-2 bg-[#121922] p-2.5 rounded-lg border border-[#232f3e]">
+                  <p className="text-[11px] text-[#A8A8A8] mt-2.5 bg-[#161616] p-2.5 rounded-lg border border-[#2a2a2a] leading-relaxed">
                     {routingSettings.chargeStops === 'Optimal' &&
                       'Optimal balances driving speed with fast battery charging curves (10% to 65% SoC) for the shortest total travel time.'}
                     {routingSettings.chargeStops === 'Fewer' &&
@@ -740,11 +771,11 @@ export const SettingsModal: React.FC = () => {
                   </p>
                 </div>
 
-                <div className="p-3.5 bg-[#141b24] rounded-xl border border-[#243343]">
-                  <div className="text-xs font-semibold text-slate-300 uppercase tracking-wider mb-2">
+                <div className="p-3.5 bg-[#202020] rounded-xl border border-[#303030]">
+                  <div className="text-xs font-semibold text-[#EEEEEE] uppercase tracking-wider mb-2">
                     Avoid on Route
                   </div>
-                  <div className="divide-y divide-[#222e3d]">
+                  <div className="divide-y divide-[#2a2a2a]">
                     <ToggleSwitch
                       label="Avoid Tolls"
                       description="Synchronized with route plan options"
@@ -769,7 +800,7 @@ export const SettingsModal: React.FC = () => {
                   </div>
                 </div>
 
-                <div className="p-3.5 bg-[#141b24] rounded-xl border border-[#243343] divide-y divide-[#222e3d]">
+                <div className="p-3.5 bg-[#202020] rounded-xl border border-[#303030] divide-y divide-[#2a2a2a]">
                   <ToggleSwitch
                     label="Real-time Traffic (Demo Preference)"
                     description="Factor historical and reported congestion delays into consumption models"
@@ -788,8 +819,8 @@ export const SettingsModal: React.FC = () => {
                   />
                 </div>
 
-                <div className="p-3.5 bg-[#141b24] rounded-xl border border-[#243343]">
-                  <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-2">
+                <div className="p-3.5 bg-[#202020] rounded-xl border border-[#303030]">
+                  <label className="block text-xs font-semibold text-[#EEEEEE] uppercase tracking-wider mb-2">
                     Weather Modeling
                   </label>
                   <SegmentedControl<WeatherChoice>
@@ -804,7 +835,7 @@ export const SettingsModal: React.FC = () => {
                       { value: 'Manual', label: 'Manual' }
                     ]}
                   />
-                  <p className="text-[11px] text-slate-400 italic bg-[#10161f] p-2.5 rounded-lg border border-[#232f3e]">
+                  <p className="text-[11px] text-[#A8A8A8] italic bg-[#161616] p-2.5 rounded-lg border border-[#2a2a2a]">
                     "{routingSettings.seasonalWeatherDescription}"
                   </p>
                 </div>
@@ -814,9 +845,9 @@ export const SettingsModal: React.FC = () => {
             {/* 4. DISPLAY & APPEARANCE */}
             {settingsTab === 'display' && (
               <div className="space-y-4">
-                <div className="p-4 bg-[#141b24] rounded-xl border border-[#243343] space-y-4">
+                <div className="p-4 bg-[#202020] rounded-xl border border-[#303030] space-y-4">
                   <div>
-                    <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-2">
+                    <label className="block text-xs font-semibold text-[#EEEEEE] uppercase tracking-wider mb-2">
                       Distance & Speed Units
                     </label>
                     <SegmentedControl
@@ -836,7 +867,7 @@ export const SettingsModal: React.FC = () => {
                   </div>
 
                   <div>
-                    <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-2">
+                    <label className="block text-xs font-semibold text-[#EEEEEE] uppercase tracking-wider mb-2">
                       Temperature Units
                     </label>
                     <SegmentedControl
@@ -856,7 +887,7 @@ export const SettingsModal: React.FC = () => {
                   </div>
 
                   <div>
-                    <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-2">
+                    <label className="block text-xs font-semibold text-[#EEEEEE] uppercase tracking-wider mb-2">
                       Theme Interface
                     </label>
                     <SegmentedControl
@@ -869,7 +900,7 @@ export const SettingsModal: React.FC = () => {
                         }))
                       }
                       options={[
-                        { value: 'dark', label: 'Dark Slate (Observed ABRP Reference)' },
+                        { value: 'dark', label: 'Dark Charcoal (Observed ABRP Reference)' },
                         { value: 'light', label: 'High Contrast' }
                       ]}
                     />
@@ -881,7 +912,7 @@ export const SettingsModal: React.FC = () => {
             {/* 5. PRIVACY & DATA */}
             {settingsTab === 'privacy' && (
               <div className="space-y-4">
-                <div className="p-4 bg-[#141b24] rounded-xl border border-[#243343] divide-y divide-[#222e3d]">
+                <div className="p-4 bg-[#202020] rounded-xl border border-[#303030] divide-y divide-[#2a2a2a]">
                   <ToggleSwitch
                     label="Save My Activity"
                     description="Store driving history and charging curves locally in browser storage"
@@ -904,10 +935,10 @@ export const SettingsModal: React.FC = () => {
                   />
                 </div>
 
-                <div className="p-4 bg-[#141b24] rounded-xl border border-[#243343] flex items-center justify-between">
+                <div className="p-4 bg-[#202020] rounded-xl border border-[#303030] flex items-center justify-between">
                   <div>
-                    <span className="font-semibold text-slate-200 block">Clear Cached Data</span>
-                    <p className="text-slate-400 text-[11px]">
+                    <span className="font-semibold text-[#EEEEEE] block">Clear Cached Data</span>
+                    <p className="text-[#A8A8A8] text-[11px]">
                       Clears local route polylines and saved preferences
                     </p>
                   </div>
@@ -931,8 +962,8 @@ export const SettingsModal: React.FC = () => {
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
                   <div>
-                    <h4 className="font-bold text-slate-200">Drive & Charge History</h4>
-                    <p className="text-slate-400 text-[11px]">
+                    <h4 className="font-bold text-[#EEEEEE]">Drive & Charge History</h4>
+                    <p className="text-[#A8A8A8] text-[11px]">
                       Past logged journeys and charging logs
                     </p>
                   </div>
@@ -952,7 +983,7 @@ export const SettingsModal: React.FC = () => {
                 </div>
 
                 {driveHistory.length === 0 ? (
-                  <div className="py-8 text-center text-slate-500 border border-dashed border-[#243343] rounded-xl">
+                  <div className="py-8 text-center text-[#707070] border border-dashed border-[#303030] rounded-xl">
                     No history records found
                   </div>
                 ) : (
@@ -960,22 +991,22 @@ export const SettingsModal: React.FC = () => {
                     {driveHistory.map((item) => (
                       <div
                         key={item.id}
-                        className="p-3 bg-[#141b24] rounded-xl border border-[#243343] flex items-center justify-between"
+                        className="p-3 bg-[#202020] rounded-xl border border-[#303030] flex items-center justify-between"
                       >
                         <div>
                           <div className="flex items-center gap-2">
-                            <span className="font-semibold text-white">{item.routeTitle}</span>
+                            <span className="font-semibold text-[#EEEEEE]">{item.routeTitle}</span>
                             {item.isDemo && (
                               <span className="text-[9px] px-1.5 py-0.2 rounded bg-cyan-950 text-[#00b0ff] font-medium border border-[#00b0ff]/30">
                                 Simulated
                               </span>
                             )}
                           </div>
-                          <p className="text-[11px] text-slate-400 mt-0.5">
+                          <p className="text-[11px] text-[#A8A8A8] mt-0.5">
                             {item.distanceMi} mi · {item.stopsCount} stops · {item.energyKwh} kWh
                           </p>
                         </div>
-                        <span className="text-slate-500 text-[11px]">{item.date}</span>
+                        <span className="text-[#707070] text-[11px]">{item.date}</span>
                       </div>
                     ))}
                   </div>
@@ -985,12 +1016,12 @@ export const SettingsModal: React.FC = () => {
 
             {/* 7. ACCOUNT */}
             {settingsTab === 'account' && (
-              <div className="space-y-4 text-center p-6 bg-[#141b24] rounded-xl border border-[#243343]">
+              <div className="space-y-4 text-center p-6 bg-[#202020] rounded-xl border border-[#303030]">
                 <div className="w-12 h-12 rounded-full bg-[#00b0ff]/20 text-[#00b0ff] flex items-center justify-center mx-auto mb-2">
                   <User className="w-6 h-6" />
                 </div>
-                <h4 className="text-sm font-bold text-white">Demonstration User Session</h4>
-                <p className="text-slate-400 text-xs max-w-sm mx-auto leading-relaxed">
+                <h4 className="text-sm font-bold text-[#EEEEEE]">Demonstration User Session</h4>
+                <p className="text-[#A8A8A8] text-xs max-w-sm mx-auto leading-relaxed">
                   Phase 1 uses an offline local demonstration profile. Authentication, fleet
                   sharing, and live cloud synchronization will be connected in subsequent phases.
                 </p>
@@ -998,7 +1029,7 @@ export const SettingsModal: React.FC = () => {
                   <button
                     type="button"
                     onClick={() => showToast('Demo session refreshed.')}
-                    className="px-4 py-2 rounded-lg bg-[#243344] hover:bg-[#2e4056] text-slate-200 border border-[#3b506b] font-semibold text-xs"
+                    className="px-4 py-2 rounded-lg bg-[#282828] hover:bg-[#323232] text-[#EEEEEE] border border-[#383838] font-semibold text-xs"
                   >
                     Refresh Session
                   </button>

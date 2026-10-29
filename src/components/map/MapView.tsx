@@ -161,7 +161,7 @@ export const MapView: React.FC = () => {
 
       // Frame route with padding based on panel state
       const bounds = L.latLngBounds(latLngs);
-      const leftPad = isPanelCollapsed ? 60 : 460;
+      const leftPad = isPanelCollapsed ? 60 : 520;
       map.fitBounds(bounds, {
         paddingTopLeft: [leftPad, 60],
         paddingBottomRight: [60, 60]
@@ -336,7 +336,7 @@ export const MapView: React.FC = () => {
 
   const handleResetBounds = () => {
     if (!mapInstanceRef.current || !activeRoute.polylineCoordinates.length) return;
-    const leftPad = isPanelCollapsed ? 60 : 460;
+    const leftPad = isPanelCollapsed ? 60 : 520;
     mapInstanceRef.current.fitBounds(L.latLngBounds(activeRoute.polylineCoordinates), {
       paddingTopLeft: [leftPad, 60],
       paddingBottomRight: [60, 60]
@@ -344,13 +344,13 @@ export const MapView: React.FC = () => {
   };
 
   return (
-    <div className="relative w-full h-full bg-[#12161a] overflow-hidden select-none">
+    <div className="relative w-full h-full bg-[#101010] overflow-hidden select-none">
       {/* Map DOM Element */}
       <div ref={mapContainerRef} className="w-full h-full z-0" />
 
       {/* Loading & Error States */}
       {isLoadingTiles && (
-        <div className="absolute top-4 left-1/2 -translate-x-1/2 z-20 bg-[#16202c]/90 backdrop-blur-md border border-[#2b3a4a] text-slate-300 text-xs px-3.5 py-1.5 rounded-full shadow-lg flex items-center gap-2 pointer-events-none">
+        <div className="absolute top-4 left-1/2 -translate-x-1/2 z-20 bg-[#181818]/90 backdrop-blur-md border border-[#2c2c2c] text-[#A8A8A8] text-xs px-3.5 py-1.5 rounded-full shadow-lg flex items-center gap-2 pointer-events-none">
           <Loader2 className="w-3.5 h-3.5 animate-spin text-[#00b0ff]" />
           <span>Loading geographic map tiles...</span>
         </div>
@@ -373,7 +373,7 @@ export const MapView: React.FC = () => {
       )}
 
       {/* Bottom Center Demonstration / Dynamic Route Status Badge */}
-      <div className="absolute bottom-3 left-1/2 -translate-x-1/2 z-10 bg-[#161f28]/95 backdrop-blur-md border border-[#2b3a4a] text-slate-300 text-[11px] px-3.5 py-1.5 rounded-full shadow-lg flex items-center gap-2 pointer-events-auto">
+      <div className="absolute bottom-3 left-1/2 -translate-x-1/2 z-10 bg-[#181818]/95 backdrop-blur-md border border-[#2c2c2c] text-[#A8A8A8] text-[11px] px-3.5 py-1.5 rounded-full shadow-lg flex items-center gap-2 pointer-events-auto">
         <span className={`w-2 h-2 rounded-full ${activeRoute.isFeasible ? 'bg-emerald-400 animate-pulse' : 'bg-rose-500'}`}></span>
         <span>
           {activeRoute.id.startsWith('default-')
@@ -384,13 +384,13 @@ export const MapView: React.FC = () => {
 
       {/* Bottom-right Map Controls */}
       <div className="absolute bottom-6 right-6 z-20 flex flex-col gap-2 pointer-events-auto">
-        <div className="flex flex-col bg-[#1a232f]/95 border border-[#2a3746] rounded-xl shadow-2xl overflow-hidden backdrop-blur-md">
+        <div className="flex flex-col bg-[#202020]/95 border border-[#303030] rounded-xl shadow-2xl overflow-hidden backdrop-blur-md">
           <button
             type="button"
             onClick={handleZoomIn}
             title="Zoom In"
             aria-label="Zoom in"
-            className="p-2.5 text-slate-300 hover:text-white hover:bg-[#253242] transition-colors border-b border-[#2a3746]"
+            className="p-2.5 text-[#EEEEEE] hover:text-white hover:bg-[#282828] transition-colors border-b border-[#303030]"
           >
             <Plus className="w-4 h-4" />
           </button>
@@ -399,7 +399,7 @@ export const MapView: React.FC = () => {
             onClick={handleZoomOut}
             title="Zoom Out"
             aria-label="Zoom out"
-            className="p-2.5 text-slate-300 hover:text-white hover:bg-[#253242] transition-colors"
+            className="p-2.5 text-[#EEEEEE] hover:text-white hover:bg-[#282828] transition-colors"
           >
             <Minus className="w-4 h-4" />
           </button>
@@ -410,7 +410,7 @@ export const MapView: React.FC = () => {
           onClick={handleResetBounds}
           title="Recenter and Frame Route"
           aria-label="Recenter Route"
-          className="p-2.5 bg-[#1a232f]/95 border border-[#2a3746] text-slate-300 hover:text-white hover:bg-[#253242] rounded-xl shadow-2xl transition-colors backdrop-blur-md"
+          className="p-2.5 bg-[#202020]/95 border border-[#303030] text-[#EEEEEE] hover:text-white hover:bg-[#282828] rounded-xl shadow-2xl transition-colors backdrop-blur-md"
         >
           <Crosshair className="w-4 h-4" />
         </button>
@@ -425,7 +425,7 @@ export const MapView: React.FC = () => {
             className={`p-2.5 rounded-xl border shadow-2xl transition-colors backdrop-blur-md ${
               isLayersMenuOpen
                 ? 'bg-[#00b0ff] text-slate-950 border-[#00b0ff]'
-                : 'bg-[#1a232f]/95 border-[#2a3746] text-slate-300 hover:text-white hover:bg-[#253242]'
+                : 'bg-[#202020]/95 border-[#303030] text-[#EEEEEE] hover:text-white hover:bg-[#282828]'
             }`}
           >
             <Layers className="w-4 h-4" />
@@ -433,8 +433,8 @@ export const MapView: React.FC = () => {
 
           {/* Layer Selector Dropdown */}
           {isLayersMenuOpen && (
-            <div className="absolute bottom-0 right-12 w-64 bg-[#18222e] border border-[#2b3a4a] rounded-xl shadow-2xl p-2 z-50 animate-in fade-in zoom-in-95 duration-150">
-              <div className="px-2.5 py-1 text-[11px] font-bold text-slate-400 uppercase tracking-wider border-b border-[#243343] mb-1">
+            <div className="absolute bottom-0 right-12 w-64 bg-[#181818] border border-[#2c2c2c] rounded-2xl shadow-2xl p-2 z-50 animate-in fade-in zoom-in-95 duration-150">
+              <div className="px-2.5 py-1 text-[11px] font-bold text-[#A8A8A8] uppercase tracking-wider border-b border-[#262626] mb-1">
                 Map Basemap Provider
               </div>
               {(Object.keys(TILE_PROVIDERS) as MapTileProvider[]).map((pid) => {
@@ -450,8 +450,8 @@ export const MapView: React.FC = () => {
                     }}
                     className={`w-full px-2.5 py-2 rounded-lg text-left text-xs flex items-center justify-between transition-colors ${
                       isSelected
-                        ? 'bg-[#253446] text-white font-semibold border border-[#3b506b]'
-                        : 'text-slate-300 hover:bg-[#1f2b38] hover:text-white'
+                        ? 'bg-[#242424] text-[#EEEEEE] font-bold border border-[#383838]'
+                        : 'text-[#A8A8A8] hover:bg-[#222222] hover:text-[#EEEEEE]'
                     }`}
                   >
                     <span>{prov.name}</span>

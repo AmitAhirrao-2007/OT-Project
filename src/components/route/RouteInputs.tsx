@@ -157,7 +157,7 @@ export const RouteInputs: React.FC<RouteInputsProps> = () => {
   );
 
   return (
-    <div className="space-y-2.5 bg-[#121922] p-3 rounded-xl border border-[#233140]">
+    <div className="space-y-2.5 bg-[#181818] p-3 rounded-xl border border-[#282828]">
       {/* Route Endpoints Box */}
       <div className="relative space-y-2">
         {/* Origin field */}
@@ -172,30 +172,30 @@ export const RouteInputs: React.FC<RouteInputsProps> = () => {
                 setIsAddingWaypoint(false);
                 setFilterQuery('');
               }}
-              className="flex-1 px-3 py-1.5 rounded-lg bg-[#182330] hover:bg-[#202e3f] border border-[#2b3d52] text-left text-xs font-semibold text-slate-100 flex items-center justify-between transition-colors"
+              className="flex-1 px-3 py-1.5 rounded-lg bg-[#222222] hover:bg-[#282828] border border-[#333333] text-left text-xs font-semibold text-[#EEEEEE] flex items-center justify-between transition-colors"
             >
               <div className="flex items-center gap-2 truncate">
                 <span className="truncate">{trip.origin.name}</span>
                 {trip.origin.subTitle && (
-                  <span className="text-[10px] text-slate-400 truncate">
+                  <span className="text-[10px] text-[#A8A8A8] truncate">
                     ({trip.origin.subTitle})
                   </span>
                 )}
               </div>
-              <ChevronDown className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+              <ChevronDown className="w-3.5 h-3.5 text-[#A8A8A8] shrink-0" />
             </button>
           </div>
 
           {/* Origin Dropdown Picker */}
           {isEditingOrigin && (
-            <div className="absolute top-9 left-4 right-0 z-50 bg-[#16202c] border border-[#2d3e52] rounded-xl shadow-2xl p-2 animate-in fade-in zoom-in-95 duration-150">
+            <div className="absolute top-9 left-4 right-0 z-50 bg-[#1e1e1e] border border-[#333333] rounded-xl shadow-2xl p-2 animate-in fade-in zoom-in-95 duration-150">
               <input
                 type="text"
                 autoFocus
                 placeholder="Search origin city..."
                 value={filterQuery}
                 onChange={(e) => setFilterQuery(e.target.value)}
-                className="w-full px-2.5 py-1.5 mb-1.5 bg-[#10171f] border border-[#26374a] rounded-lg text-xs text-slate-200 placeholder:text-slate-500 focus:outline-none focus:border-[#00b0ff]"
+                className="w-full px-2.5 py-1.5 mb-1.5 bg-[#141414] border border-[#333333] rounded-lg text-xs text-[#EEEEEE] placeholder:text-[#707070] focus:outline-none focus:border-[#00b0ff]"
               />
               <div className="max-h-48 overflow-y-auto space-y-1 custom-scrollbar">
                 {filteredLocations.map((loc) => (
@@ -203,13 +203,13 @@ export const RouteInputs: React.FC<RouteInputsProps> = () => {
                     key={loc.id}
                     type="button"
                     onClick={() => handleSelectOrigin(loc)}
-                    className="w-full px-2.5 py-1.5 rounded-lg text-left text-xs text-slate-200 hover:bg-[#223142] hover:text-white flex items-center justify-between transition-colors"
+                    className="w-full px-2.5 py-1.5 rounded-lg text-left text-xs text-[#EEEEEE] hover:bg-[#2a2a2a] flex items-center justify-between transition-colors"
                   >
                     <div>
                       <div className="font-semibold">{loc.name}</div>
-                      <div className="text-[10px] text-slate-400">{loc.subTitle}</div>
+                      <div className="text-[10px] text-[#A8A8A8]">{loc.subTitle}</div>
                     </div>
-                    <MapPin className="w-3 h-3 text-slate-500" />
+                    <MapPin className="w-3 h-3 text-[#A8A8A8]" />
                   </button>
                 ))}
               </div>
@@ -221,7 +221,7 @@ export const RouteInputs: React.FC<RouteInputsProps> = () => {
         {trip.waypoints.map((wp, index) => (
           <div key={wp.id} className="relative flex items-center gap-2 pl-4 pr-9">
             <span className="w-2 h-2 rounded-full bg-amber-400 shrink-0" />
-            <div className="flex-1 px-3 py-1.5 rounded-lg bg-[#182330] border border-[#2b3d52] text-xs text-slate-200 flex items-center justify-between">
+            <div className="flex-1 px-3 py-1.5 rounded-lg bg-[#222222] border border-[#333333] text-xs text-[#EEEEEE] flex items-center justify-between">
               <span className="font-medium truncate">{wp.name}</span>
               <div className="flex items-center gap-1">
                 {index > 0 && (
@@ -229,7 +229,7 @@ export const RouteInputs: React.FC<RouteInputsProps> = () => {
                     type="button"
                     onClick={() => handleMoveWaypointUp(index)}
                     title="Move stop earlier"
-                    className="p-0.5 rounded text-slate-400 hover:text-white"
+                    className="p-0.5 rounded text-[#A8A8A8] hover:text-[#EEEEEE]"
                   >
                     <ArrowUp className="w-3 h-3" />
                   </button>
@@ -239,7 +239,7 @@ export const RouteInputs: React.FC<RouteInputsProps> = () => {
                     type="button"
                     onClick={() => handleMoveWaypointDown(index)}
                     title="Move stop later"
-                    className="p-0.5 rounded text-slate-400 hover:text-white"
+                    className="p-0.5 rounded text-[#A8A8A8] hover:text-[#EEEEEE]"
                   >
                     <ArrowDown className="w-3 h-3" />
                   </button>
@@ -248,7 +248,7 @@ export const RouteInputs: React.FC<RouteInputsProps> = () => {
                   type="button"
                   onClick={() => handleRemoveWaypoint(wp.id, wp.name)}
                   title="Remove stop"
-                  className="p-0.5 rounded text-slate-400 hover:text-rose-400"
+                  className="p-0.5 rounded text-[#A8A8A8] hover:text-rose-400"
                 >
                   <X className="w-3.5 h-3.5" />
                 </button>
@@ -263,7 +263,7 @@ export const RouteInputs: React.FC<RouteInputsProps> = () => {
           onClick={handleSwapEndpoints}
           title="Swap Origin and Destination"
           aria-label="Swap endpoints"
-          className="absolute right-2 top-[34px] -translate-y-1/2 p-1.5 rounded-lg bg-[#1f2c3b] hover:bg-[#2b3c4f] border border-[#2f4359] text-slate-300 hover:text-white transition-colors shadow-md z-10"
+          className="absolute right-2 top-[34px] -translate-y-1/2 p-1.5 rounded-lg bg-[#252525] hover:bg-[#303030] border border-[#383838] text-[#EEEEEE] transition-colors shadow-md z-10"
         >
           <ArrowUpDown className="w-3.5 h-3.5" />
         </button>
@@ -280,30 +280,30 @@ export const RouteInputs: React.FC<RouteInputsProps> = () => {
                 setIsAddingWaypoint(false);
                 setFilterQuery('');
               }}
-              className="flex-1 px-3 py-1.5 rounded-lg bg-[#182330] hover:bg-[#202e3f] border border-[#2b3d52] text-left text-xs font-semibold text-slate-100 flex items-center justify-between transition-colors"
+              className="flex-1 px-3 py-1.5 rounded-lg bg-[#222222] hover:bg-[#282828] border border-[#333333] text-left text-xs font-semibold text-[#EEEEEE] flex items-center justify-between transition-colors"
             >
               <div className="flex items-center gap-2 truncate">
                 <span className="truncate">{trip.destination.name}</span>
                 {trip.destination.subTitle && (
-                  <span className="text-[10px] text-slate-400 truncate">
+                  <span className="text-[10px] text-[#A8A8A8] truncate">
                     ({trip.destination.subTitle})
                   </span>
                 )}
               </div>
-              <ChevronDown className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+              <ChevronDown className="w-3.5 h-3.5 text-[#A8A8A8] shrink-0" />
             </button>
           </div>
 
           {/* Destination Dropdown Picker */}
           {isEditingDestination && (
-            <div className="absolute top-9 left-4 right-0 z-50 bg-[#16202c] border border-[#2d3e52] rounded-xl shadow-2xl p-2 animate-in fade-in zoom-in-95 duration-150">
+            <div className="absolute top-9 left-4 right-0 z-50 bg-[#1e1e1e] border border-[#333333] rounded-xl shadow-2xl p-2 animate-in fade-in zoom-in-95 duration-150">
               <input
                 type="text"
                 autoFocus
                 placeholder="Search destination city..."
                 value={filterQuery}
                 onChange={(e) => setFilterQuery(e.target.value)}
-                className="w-full px-2.5 py-1.5 mb-1.5 bg-[#10171f] border border-[#26374a] rounded-lg text-xs text-slate-200 placeholder:text-slate-500 focus:outline-none focus:border-[#00b0ff]"
+                className="w-full px-2.5 py-1.5 mb-1.5 bg-[#141414] border border-[#333333] rounded-lg text-xs text-[#EEEEEE] placeholder:text-[#707070] focus:outline-none focus:border-[#00b0ff]"
               />
               <div className="max-h-48 overflow-y-auto space-y-1 custom-scrollbar">
                 {filteredLocations.map((loc) => (
@@ -311,13 +311,13 @@ export const RouteInputs: React.FC<RouteInputsProps> = () => {
                     key={loc.id}
                     type="button"
                     onClick={() => handleSelectDestination(loc)}
-                    className="w-full px-2.5 py-1.5 rounded-lg text-left text-xs text-slate-200 hover:bg-[#223142] hover:text-white flex items-center justify-between transition-colors"
+                    className="w-full px-2.5 py-1.5 rounded-lg text-left text-xs text-[#EEEEEE] hover:bg-[#2a2a2a] flex items-center justify-between transition-colors"
                   >
                     <div>
                       <div className="font-semibold">{loc.name}</div>
-                      <div className="text-[10px] text-slate-400">{loc.subTitle}</div>
+                      <div className="text-[10px] text-[#A8A8A8]">{loc.subTitle}</div>
                     </div>
-                    <MapPin className="w-3 h-3 text-slate-500" />
+                    <MapPin className="w-3 h-3 text-[#A8A8A8]" />
                   </button>
                 ))}
               </div>
@@ -327,7 +327,7 @@ export const RouteInputs: React.FC<RouteInputsProps> = () => {
       </div>
 
       {/* Add Waypoint Trigger */}
-      <div className="relative pt-1 border-t border-[#1e2a38] flex items-center justify-between">
+      <div className="relative pt-1 border-t border-[#262626] flex items-center justify-between">
         <button
           type="button"
           onClick={() => {
@@ -343,14 +343,14 @@ export const RouteInputs: React.FC<RouteInputsProps> = () => {
         </button>
 
         {isAddingWaypoint && (
-          <div className="absolute top-8 left-0 right-0 z-50 bg-[#16202c] border border-[#2d3e52] rounded-xl shadow-2xl p-2 animate-in fade-in zoom-in-95 duration-150">
+          <div className="absolute top-8 left-0 right-0 z-50 bg-[#1e1e1e] border border-[#333333] rounded-xl shadow-2xl p-2 animate-in fade-in zoom-in-95 duration-150">
             <input
               type="text"
               autoFocus
               placeholder="Search city or highway junction..."
               value={filterQuery}
               onChange={(e) => setFilterQuery(e.target.value)}
-              className="w-full px-2.5 py-1.5 mb-1.5 bg-[#10171f] border border-[#26374a] rounded-lg text-xs text-slate-200 placeholder:text-slate-500 focus:outline-none focus:border-[#00b0ff]"
+              className="w-full px-2.5 py-1.5 mb-1.5 bg-[#141414] border border-[#333333] rounded-lg text-xs text-[#EEEEEE] placeholder:text-[#707070] focus:outline-none focus:border-[#00b0ff]"
             />
             <div className="max-h-48 overflow-y-auto space-y-1 custom-scrollbar">
               {filteredLocations.map((loc) => (
@@ -358,11 +358,11 @@ export const RouteInputs: React.FC<RouteInputsProps> = () => {
                   key={loc.id}
                   type="button"
                   onClick={() => handleAddWaypoint(loc)}
-                  className="w-full px-2.5 py-1.5 rounded-lg text-left text-xs text-slate-200 hover:bg-[#223142] hover:text-white flex items-center justify-between transition-colors"
+                  className="w-full px-2.5 py-1.5 rounded-lg text-left text-xs text-[#EEEEEE] hover:bg-[#2a2a2a] flex items-center justify-between transition-colors"
                 >
                   <div>
                     <div className="font-semibold">{loc.name}</div>
-                    <div className="text-[10px] text-slate-400">{loc.subTitle}</div>
+                    <div className="text-[10px] text-[#A8A8A8]">{loc.subTitle}</div>
                   </div>
                   <Plus className="w-3 h-3 text-[#00b0ff]" />
                 </button>
@@ -373,8 +373,8 @@ export const RouteInputs: React.FC<RouteInputsProps> = () => {
       </div>
 
       {/* Origin Departure Battery SoC Slider */}
-      <div className="pt-2 border-t border-[#1e2a38] flex items-center justify-between text-xs">
-        <span className="text-slate-400 flex items-center gap-1.5">
+      <div className="pt-2 border-t border-[#262626] flex items-center justify-between text-xs">
+        <span className="text-[#A8A8A8] flex items-center gap-1.5">
           <BatteryCharging className="w-3.5 h-3.5 text-emerald-400" />
           <span>Departure Battery:</span>
         </span>
@@ -386,7 +386,7 @@ export const RouteInputs: React.FC<RouteInputsProps> = () => {
             step="5"
             value={trip.origin.batterySoc}
             onChange={(e) => handleDepartureSocChange(Number(e.target.value))}
-            className="w-24 accent-emerald-400 h-1 bg-[#1e2a38] rounded cursor-pointer"
+            className="w-24 accent-emerald-400 h-1 bg-[#282828] rounded cursor-pointer"
           />
           <span className="font-mono font-bold text-emerald-400 w-9 text-right">
             {trip.origin.batterySoc}%

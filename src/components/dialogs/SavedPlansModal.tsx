@@ -185,13 +185,13 @@ Generated with EV Route Planner`;
       maxWidth="max-w-3xl"
       footer={
         <div className="flex items-center justify-between w-full">
-          <span className="text-xs text-slate-400">
+          <span className="text-xs text-[#A8A8A8]">
             {savedPlans.length} {savedPlans.length === 1 ? 'plan' : 'plans'} saved locally
           </span>
           <button
             type="button"
             onClick={onClose}
-            className="px-4 py-2 rounded-xl bg-[#222f3e] hover:bg-[#2c3d52] text-slate-200 text-xs font-semibold border border-[#374c63] transition-colors"
+            className="px-4 py-2 rounded-xl bg-[#242424] hover:bg-[#2c2c2c] text-[#EEEEEE] text-xs font-semibold border border-[#383838] transition-colors"
           >
             Close
           </button>
@@ -200,8 +200,8 @@ Generated with EV Route Planner`;
     >
       <div className="space-y-6">
         {/* 1. Save Active Plan Form */}
-        <div className="p-4 rounded-xl bg-[#141d27] border border-[#233142]">
-          <h3 className="text-xs font-bold text-slate-300 uppercase tracking-wider mb-2 flex items-center gap-1.5">
+        <div className="p-4 rounded-xl bg-[#202020] border border-[#303030]">
+          <h3 className="text-xs font-bold text-[#EEEEEE] uppercase tracking-wider mb-2 flex items-center gap-1.5">
             <Bookmark className="w-4 h-4 text-[#00b0ff]" />
             <span>Save Current Active Plan</span>
           </h3>
@@ -212,7 +212,7 @@ Generated with EV Route Planner`;
               value={planTitle}
               onChange={(e) => setPlanTitle(e.target.value)}
               placeholder="e.g. Patna to Delhi Summer Trip"
-              className="flex-1 w-full px-3.5 py-2.5 bg-[#10171f] border border-[#2a3a4d] rounded-xl text-xs text-slate-100 placeholder:text-slate-500 focus:outline-none focus:border-[#00b0ff]"
+              className="flex-1 w-full px-3.5 py-2.5 bg-[#161616] border border-[#333333] rounded-xl text-xs text-[#EEEEEE] placeholder:text-[#707070] focus:outline-none focus:border-[#00b0ff]"
             />
             <button
               type="submit"
@@ -223,12 +223,12 @@ Generated with EV Route Planner`;
             </button>
           </form>
 
-          <div className="mt-2.5 flex items-center gap-3 text-[11px] text-slate-400">
-            <span>Vehicle: <strong className="text-slate-200">{vehicle.name}</strong></span>
+          <div className="mt-2.5 flex items-center gap-3 text-[11px] text-[#A8A8A8]">
+            <span>Vehicle: <strong className="text-[#EEEEEE]">{vehicle.name}</strong></span>
             <span>•</span>
-            <span>Duration: <strong className="text-white">{activeRoute.totalDuration}</strong></span>
+            <span>Duration: <strong className="text-[#EEEEEE]">{activeRoute.totalDuration}</strong></span>
             <span>•</span>
-            <span>Distance: <strong className="text-white">{formatDistance(activeRoute.totalDistanceMi, displaySettings.units)}</strong></span>
+            <span>Distance: <strong className="text-[#EEEEEE]">{formatDistance(activeRoute.totalDistanceMi, displaySettings.units)}</strong></span>
             <span>•</span>
             <span>{activeRoute.stopCount} stops</span>
           </div>
@@ -236,35 +236,35 @@ Generated with EV Route Planner`;
 
         {/* 2. Saved Plans List */}
         <div>
-          <h3 className="text-xs font-bold text-slate-300 uppercase tracking-wider mb-3 flex items-center gap-1.5">
+          <h3 className="text-xs font-bold text-[#EEEEEE] uppercase tracking-wider mb-3 flex items-center gap-1.5">
             <FolderOpen className="w-4 h-4 text-emerald-400" />
             <span>Saved Itineraries</span>
           </h3>
 
           {savedPlans.length === 0 ? (
-            <div className="py-8 text-center text-slate-400 bg-[#121820] rounded-xl border border-[#202b38]">
-              <p className="text-xs text-slate-400">No saved plans found in local storage.</p>
+            <div className="py-8 text-center text-[#707070] bg-[#181818] rounded-xl border border-[#2a2a2a]">
+              <p className="text-xs text-[#707070]">No saved plans found in local storage.</p>
             </div>
           ) : (
             <div className="space-y-3 max-h-[380px] overflow-y-auto pr-1 custom-scrollbar">
               {savedPlans.map((plan) => (
                 <div
                   key={plan.id}
-                  className="p-3.5 rounded-xl bg-[#141c26] border border-[#222e3e] hover:border-[#2f4258] transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-3"
+                  className="p-3.5 rounded-xl bg-[#202020] border border-[#303030] hover:border-[#404040] transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-3"
                 >
                   <div className="flex-1">
                     <div className="flex items-center gap-2">
-                      <h4 className="text-sm font-bold text-white">{plan.title}</h4>
+                      <h4 className="text-sm font-bold text-[#EEEEEE]">{plan.title}</h4>
                     </div>
 
-                    <div className="flex flex-wrap items-center gap-2.5 mt-1.5 text-xs text-slate-400">
+                    <div className="flex flex-wrap items-center gap-2.5 mt-1.5 text-xs text-[#A8A8A8]">
                       <span className="flex items-center gap-1">
-                        <Car className="w-3.5 h-3.5 text-slate-500" />
+                        <Car className="w-3.5 h-3.5 text-[#707070]" />
                         <span>{plan.vehicleName}</span>
                       </span>
                       <span>•</span>
-                      <span className="flex items-center gap-1 text-slate-300">
-                        <Compass className="w-3.5 h-3.5 text-slate-500" />
+                      <span className="flex items-center gap-1 text-[#EEEEEE]">
+                        <Compass className="w-3.5 h-3.5 text-[#707070]" />
                         <span>{plan.totalDuration}</span>
                       </span>
                       <span>•</span>
@@ -276,7 +276,7 @@ Generated with EV Route Planner`;
                       </span>
                     </div>
 
-                    <div className="mt-1 flex items-center gap-1 text-[11px] text-slate-500">
+                    <div className="mt-1 flex items-center gap-1 text-[11px] text-[#707070]">
                       <Calendar className="w-3 h-3" />
                       <span>Saved {new Date(plan.createdAt).toLocaleDateString()}</span>
                     </div>
@@ -296,7 +296,7 @@ Generated with EV Route Planner`;
                       type="button"
                       onClick={() => handleShareSummary(plan)}
                       title="Copy formatted trip plan to clipboard"
-                      className="p-1.5 rounded-lg bg-[#1a2430] hover:bg-[#243343] border border-[#293b4d] text-slate-300 hover:text-white transition-colors"
+                      className="p-1.5 rounded-lg bg-[#282828] hover:bg-[#323232] border border-[#383838] text-[#EEEEEE] transition-colors"
                     >
                       {copiedPlanId === plan.id ? (
                         <Check className="w-4 h-4 text-emerald-400" />
@@ -309,16 +309,16 @@ Generated with EV Route Planner`;
                       type="button"
                       onClick={() => handleDownloadJson(plan)}
                       title="Download JSON file"
-                      className="p-1.5 rounded-lg bg-[#1a2430] hover:bg-[#243343] border border-[#293b4d] text-slate-300 hover:text-white transition-colors"
+                      className="p-1.5 rounded-lg bg-[#282828] hover:bg-[#323232] border border-[#383838] text-[#A8A8A8] hover:text-[#EEEEEE] transition-colors"
                     >
-                      <Download className="w-4 h-4 text-slate-400" />
+                      <Download className="w-4 h-4" />
                     </button>
 
                     <button
                       type="button"
                       onClick={() => handleDeletePlan(plan.id, plan.title)}
                       title="Delete saved plan"
-                      className="p-1.5 rounded-lg bg-[#1a2430] hover:bg-rose-950/60 border border-[#293b4d] text-slate-400 hover:text-rose-400 transition-colors"
+                      className="p-1.5 rounded-lg bg-[#282828] hover:bg-rose-950/60 border border-[#383838] text-[#A8A8A8] hover:text-rose-400 transition-colors"
                     >
                       <Trash2 className="w-4 h-4" />
                     </button>

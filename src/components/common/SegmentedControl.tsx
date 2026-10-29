@@ -21,7 +21,7 @@ export function SegmentedControl<T extends string>({
   return (
     <div
       role="radiogroup"
-      className={`inline-flex items-center p-1 bg-[#151c24] border border-[#2a3746] rounded-lg ${className}`}
+      className={`inline-flex items-center p-1 bg-[#181818] border border-[#2c2c2c] rounded-xl ${className}`}
     >
       {options.map((opt) => {
         const isSelected = opt.value === value;
@@ -32,20 +32,20 @@ export function SegmentedControl<T extends string>({
             role="radio"
             aria-checked={isSelected}
             onClick={() => onChange(opt.value)}
-            className={`flex-1 flex flex-col items-center justify-center px-3 py-1.5 text-xs font-medium rounded-md transition-all duration-150 relative ${
+            className={`flex-1 flex flex-col items-center justify-center px-3 py-1.5 text-xs rounded-lg transition-all duration-150 relative ${
               isSelected
-                ? 'bg-[#2b3a4a] text-white shadow-sm font-semibold border border-[#3b4f66]'
-                : 'text-slate-400 hover:text-slate-200 hover:bg-[#1f2935]'
+                ? 'bg-[#EEEEEE] text-[#121212] font-bold shadow-md'
+                : 'text-[#A8A8A8] hover:text-[#EEEEEE] hover:bg-[#222222]'
             }`}
           >
             <span className="flex items-center gap-1.5">
-              {opt.label}
+              <span>{opt.label}</span>
               {opt.badge && (
                 <span
-                  className={`text-[10px] px-1.5 py-0.2 rounded font-normal ${
+                  className={`text-[10px] px-1.5 py-0.2 rounded font-semibold ${
                     isSelected
-                      ? 'bg-[#00b0ff] text-slate-950 font-bold'
-                      : 'bg-emerald-900/60 text-emerald-300'
+                      ? 'bg-emerald-600 text-white'
+                      : 'bg-emerald-950/70 text-emerald-400 border border-emerald-800/40'
                   }`}
                 >
                   {opt.badge}
@@ -53,7 +53,11 @@ export function SegmentedControl<T extends string>({
               )}
             </span>
             {opt.subLabel && (
-              <span className="text-[10px] text-slate-400 mt-0.5">
+              <span
+                className={`text-[10px] mt-0.5 ${
+                  isSelected ? 'text-[#444444]' : 'text-[#707070]'
+                }`}
+              >
                 {opt.subLabel}
               </span>
             )}

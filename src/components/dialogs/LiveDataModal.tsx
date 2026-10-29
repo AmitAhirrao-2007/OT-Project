@@ -17,7 +17,7 @@ export const LiveDataModal: React.FC = () => {
         <button
           type="button"
           onClick={() => setIsLiveDataModalOpen(false)}
-          className="px-4 py-2 rounded-lg bg-[#222f3e] hover:bg-[#2c3c4e] text-slate-200 text-xs font-semibold"
+          className="px-4 py-2 rounded-lg bg-[#242424] hover:bg-[#2c2c2c] text-[#EEEEEE] border border-[#383838] text-xs font-semibold"
         >
           Close
         </button>
@@ -36,17 +36,17 @@ export const LiveDataModal: React.FC = () => {
           </div>
         </div>
 
-        <p className="text-slate-300 leading-relaxed">
+        <p className="text-[#EEEEEE] leading-relaxed">
           In production, Live Data feeds actual battery State of Charge (SoC), real-time battery
           cell temperature, ambient weather, and elevation consumption deltas directly into the
           routing engine to dynamically adjust charging recommendations on the road.
         </p>
 
-        <div className="p-3.5 bg-[#141b24] rounded-xl border border-[#243343] space-y-2.5">
-          <div className="font-semibold text-slate-200 uppercase tracking-wider text-[11px]">
+        <div className="p-3.5 bg-[#202020] rounded-xl border border-[#303030] space-y-2.5">
+          <div className="font-semibold text-[#EEEEEE] uppercase tracking-wider text-[11px]">
             Supported Telemetry Protocols
           </div>
-          <div className="space-y-2 text-slate-300">
+          <div className="space-y-2 text-[#A8A8A8]">
             <div className="flex items-center gap-2">
               <Bluetooth className="w-4 h-4 text-[#00b0ff]" />
               <span>OBD-II Bluetooth Low Energy (BLE 4.0+)</span>
@@ -62,7 +62,7 @@ export const LiveDataModal: React.FC = () => {
           </div>
         </div>
 
-        <p className="text-slate-400 italic">
+        <p className="text-[#707070] italic">
           Note: This is a reference-based prototype environment. Live vehicle connections are not
           simulated without legitimate physical hardware or verified API credentials.
         </p>

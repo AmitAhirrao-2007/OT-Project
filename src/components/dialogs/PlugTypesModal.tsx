@@ -67,7 +67,7 @@ export const PlugTypesModal: React.FC = () => {
       maxWidth="max-w-lg"
       footer={
         <div className="flex items-center justify-between w-full">
-          <span className="text-xs text-slate-400">
+          <span className="text-xs text-[#A8A8A8]">
             {vehicle.selectedPlugTypes.length} connector(s) selected
           </span>
           <button
@@ -89,8 +89,8 @@ export const PlugTypesModal: React.FC = () => {
               onClick={() => handleToggle(opt.type)}
               className={`p-3.5 rounded-xl border transition-all cursor-pointer flex items-start justify-between gap-3 ${
                 isSelected
-                  ? 'bg-[#1b2633] border-[#00b0ff]/60 shadow-sm'
-                  : 'bg-[#141b24] border-[#253342] hover:bg-[#18212c]'
+                  ? 'bg-[#242424] border-[#00b0ff]/60 shadow-sm'
+                  : 'bg-[#202020] border-[#303030] hover:bg-[#262626]'
               }`}
             >
               <div className="flex items-start gap-3">
@@ -98,16 +98,16 @@ export const PlugTypesModal: React.FC = () => {
                   className={`w-5 h-5 rounded-md flex items-center justify-center shrink-0 mt-0.5 border ${
                     isSelected
                       ? 'bg-[#00b0ff] border-[#00b0ff] text-slate-950 font-bold'
-                      : 'border-[#384a5e] bg-[#1a232f]'
+                      : 'border-[#383838] bg-[#181818]'
                   }`}
                 >
                   {isSelected && <Check className="w-3.5 h-3.5 stroke-[3]" />}
                 </div>
                 <div>
-                  <span className="text-sm font-semibold text-white block">
+                  <span className="text-sm font-semibold text-[#EEEEEE] block">
                     {opt.label}
                   </span>
-                  <p className="text-xs text-slate-400 mt-0.5 leading-relaxed">
+                  <p className="text-xs text-[#A8A8A8] mt-0.5 leading-relaxed">
                     {opt.desc}
                   </p>
                 </div>
@@ -115,7 +115,7 @@ export const PlugTypesModal: React.FC = () => {
 
               <Zap
                 className={`w-4 h-4 shrink-0 ${
-                  isSelected ? 'text-[#00b0ff]' : 'text-slate-600'
+                  isSelected ? 'text-[#00b0ff]' : 'text-[#707070]'
                 }`}
               />
             </div>

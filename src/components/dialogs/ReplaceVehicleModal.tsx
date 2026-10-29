@@ -23,7 +23,7 @@ export const ReplaceVehicleModal: React.FC = () => {
         <button
           type="button"
           onClick={() => setIsReplaceVehicleModalOpen(false)}
-          className="px-4 py-2 rounded-lg bg-[#222f3e] hover:bg-[#2c3c4e] text-slate-200 text-xs font-semibold"
+          className="px-4 py-2 rounded-lg bg-[#242424] hover:bg-[#2c2c2c] text-[#EEEEEE] border border-[#383838] text-xs font-semibold"
         >
           Cancel
         </button>
@@ -38,8 +38,8 @@ export const ReplaceVehicleModal: React.FC = () => {
               onClick={() => replaceVehicleWith(v)}
               className={`p-3.5 rounded-xl border transition-all cursor-pointer flex items-center justify-between gap-3 ${
                 isSelected
-                  ? 'bg-[#1b2633] border-[#00b0ff] shadow-md ring-1 ring-[#00b0ff]/30'
-                  : 'bg-[#141b24] border-[#253342] hover:bg-[#18212c] hover:border-[#33465b]'
+                  ? 'bg-[#242424] border-[#00b0ff] shadow-md ring-1 ring-[#00b0ff]/30'
+                  : 'bg-[#202020] border-[#303030] hover:bg-[#262626] hover:border-[#404040]'
               }`}
             >
               <div className="flex items-center gap-3.5">
@@ -47,24 +47,24 @@ export const ReplaceVehicleModal: React.FC = () => {
                   className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${
                     isSelected
                       ? 'bg-[#00b0ff]/20 text-[#00b0ff] border border-[#00b0ff]/40'
-                      : 'bg-[#1a232f] text-slate-400 border border-[#2b3a4a]'
+                      : 'bg-[#282828] text-[#A8A8A8] border border-[#383838]'
                   }`}
                 >
                   <Car className="w-5 h-5" />
                 </div>
                 <div>
                   <div className="flex items-center gap-2">
-                    <span className="text-sm font-bold text-white">{v.name}</span>
+                    <span className="text-sm font-bold text-[#EEEEEE]">{v.name}</span>
                     {isSelected && (
                       <span className="text-[10px] px-1.5 py-0.2 rounded bg-cyan-950 text-[#00b0ff] font-semibold border border-[#00b0ff]/40">
                         Active
                       </span>
                     )}
                   </div>
-                  <span className="text-xs text-slate-400 block mt-0.5">
+                  <span className="text-xs text-[#A8A8A8] block mt-0.5">
                     {v.model}
                   </span>
-                  <div className="flex items-center gap-3 text-[11px] text-slate-300 mt-1">
+                  <div className="flex items-center gap-3 text-[11px] text-[#A8A8A8] mt-1 font-mono">
                     <span className="flex items-center gap-1">
                       <BatteryCharging className="w-3 h-3 text-emerald-400" />
                       {v.usableBatteryKwh} kWh usable

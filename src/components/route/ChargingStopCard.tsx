@@ -61,9 +61,9 @@ export const ChargingStopCard: React.FC<ChargingStopCardProps> = ({ stop, index 
       className="relative flex flex-col"
     >
       {/* Driving leg banner prior to this stop */}
-      <div className="flex items-center gap-2 pl-7 py-2 text-xs text-slate-400">
-        <div className="w-px h-6 bg-[#2a3746] absolute left-3.5 -top-2"></div>
-        <span className="font-medium text-slate-300">{stop.legDriveDuration}</span>
+      <div className="flex items-center gap-2 pl-7 py-2 text-xs text-[#A8A8A8]">
+        <div className="w-px h-6 bg-[#2c2c2c] absolute left-3.5 -top-2"></div>
+        <span className="font-medium text-[#EEEEEE]">{stop.legDriveDuration}</span>
         <span>·</span>
         <span>{formatDistance(stop.legDistanceMi, displaySettings.units)}</span>
       </div>
@@ -73,12 +73,12 @@ export const ChargingStopCard: React.FC<ChargingStopCardProps> = ({ stop, index 
         onClick={handleCardClick}
         className={`group relative rounded-xl border p-3.5 transition-all duration-150 cursor-pointer ${
           !stop.isFeasible
-            ? 'bg-[#22161c] border-rose-600/70 shadow-md ring-1 ring-rose-500/30'
+            ? 'bg-[#25151b] border-rose-600/70 shadow-md ring-1 ring-rose-500/30'
             : isSelected
-            ? 'bg-[#1e2a38] border-amber-400 shadow-md ring-1 ring-amber-400/40'
+            ? 'bg-[#282828] border-amber-400/90 shadow-md ring-1 ring-amber-400/40'
             : isHovered
-            ? 'bg-[#1b2533] border-[#3d4f64]'
-            : 'bg-[#17202c] border-[#253342] hover:bg-[#1a2432] hover:border-[#334458]'
+            ? 'bg-[#2c2c2c] border-[#444444]'
+            : 'bg-[#242424] border-[#363636] hover:bg-[#2a2a2a] hover:border-[#404040]'
         }`}
       >
         {/* Top Row: Time, Station Name, Power & Stalls */}
@@ -88,21 +88,21 @@ export const ChargingStopCard: React.FC<ChargingStopCardProps> = ({ stop, index 
             <div className={`w-6 h-6 rounded-full border text-xs font-semibold flex items-center justify-center shrink-0 mt-0.5 ${
               !stop.isFeasible
                 ? 'bg-rose-900/40 border-rose-700 text-rose-200'
-                : 'bg-[#243344] border-[#3b4e64] text-slate-200'
+                : 'bg-[#1c1c1c] border-[#383838] text-[#EEEEEE]'
             }`}>
               {index + 1}
             </div>
 
             <div className="flex flex-col">
               <div className="flex items-center gap-2">
-                <span className="text-xs font-semibold text-slate-400">
+                <span className="text-xs font-semibold text-[#A8A8A8]">
                   {stop.arrivalTime}
                 </span>
-                <span className="text-sm font-semibold text-white group-hover:text-[#00b0ff] transition-colors">
+                <span className="text-sm font-semibold text-[#EEEEEE] group-hover:text-[#00b0ff] transition-colors">
                   {stop.name}
                 </span>
               </div>
-              <p className="text-xs text-slate-400 line-clamp-1 mt-0.5" title={stop.address}>
+              <p className="text-xs text-[#A8A8A8] line-clamp-1 mt-0.5" title={stop.address}>
                 {stop.address}
               </p>
             </div>
@@ -114,7 +114,7 @@ export const ChargingStopCard: React.FC<ChargingStopCardProps> = ({ stop, index 
               <Zap className="w-3 h-3 fill-amber-400" />
               {stop.powerKw} kW
             </span>
-            <span className="text-[11px] text-slate-400">
+            <span className="text-[11px] text-[#A8A8A8]">
               {stop.stallsAvailable !== undefined
                 ? `${stop.stallsAvailable}/${stop.stallsTotal} stalls`
                 : `${stop.stallsTotal} stalls`}
@@ -133,27 +133,27 @@ export const ChargingStopCard: React.FC<ChargingStopCardProps> = ({ stop, index 
         )}
 
         {/* Middle Row: Battery Delta & Charging Duration */}
-        <div className="mt-3 pt-2.5 border-t border-[#233140] flex items-center justify-between">
+        <div className="mt-3 pt-2.5 border-t border-[#303030] flex items-center justify-between">
           <div className="flex items-center gap-2">
             {/* Battery state of charge range */}
             <div className="flex items-center gap-1.5 text-xs font-semibold">
               <span className="text-rose-400">{stop.arrivalSoc}%</span>
-              <span className="text-slate-500">→</span>
+              <span className="text-[#707070]">→</span>
               <span className="text-emerald-400">{stop.departureSoc}%</span>
             </div>
-            <span className="text-slate-600">·</span>
-            <span className="text-xs text-slate-300 font-medium">
+            <span className="text-[#555555]">·</span>
+            <span className="text-xs text-[#EEEEEE] font-medium">
               {stop.chargeDurationMinutes} min charge
             </span>
           </div>
 
           {/* Amenities & Action Buttons */}
-          <div className="flex items-center gap-1.5 text-slate-400">
+          <div className="flex items-center gap-1.5 text-[#A8A8A8]">
             {stop.amenities.slice(0, 4).map((a, i) => (
               <span
                 key={i}
                 title={a}
-                className="p-1 rounded bg-[#1e2a38] text-slate-300 hover:text-white"
+                className="p-1 rounded bg-[#1c1c1c] text-[#A8A8A8] hover:text-[#EEEEEE]"
               >
                 {renderAmenityIcon(a)}
               </span>
@@ -168,7 +168,7 @@ export const ChargingStopCard: React.FC<ChargingStopCardProps> = ({ stop, index 
               }}
               title="Station Details & Settings"
               aria-label="View station details"
-              className="ml-1 p-1 rounded hover:bg-[#253547] text-slate-400 hover:text-white"
+              className="ml-1 p-1 rounded hover:bg-[#333333] text-[#A8A8A8] hover:text-[#EEEEEE]"
             >
               <Info className="w-3.5 h-3.5" />
             </button>
@@ -176,7 +176,7 @@ export const ChargingStopCard: React.FC<ChargingStopCardProps> = ({ stop, index 
         </div>
 
         {/* Progress bar showing SoC charge gain */}
-        <div className="mt-2.5 w-full bg-[#121922] h-1.5 rounded-full overflow-hidden flex">
+        <div className="mt-2.5 w-full bg-[#161616] h-1.5 rounded-full overflow-hidden flex">
           <div
             className="bg-rose-500/80 h-full"
             style={{ width: `${stop.arrivalSoc}%` }}
@@ -186,7 +186,7 @@ export const ChargingStopCard: React.FC<ChargingStopCardProps> = ({ stop, index 
             style={{ width: `${stop.departureSoc - stop.arrivalSoc}%` }}
           />
           <div
-            className="bg-slate-700/40 h-full"
+            className="bg-[#2c2c2c] h-full"
             style={{ width: `${100 - stop.departureSoc}%` }}
           />
         </div>

@@ -98,11 +98,11 @@ export const StationDetailsModal: React.FC = () => {
     >
       <div className="space-y-4">
         {/* Address and Coordinates Banner */}
-        <div className="p-3 bg-[#131b24] rounded-xl border border-[#222f3e] flex items-start gap-2.5">
+        <div className="p-3 bg-[#202020] rounded-xl border border-[#303030] flex items-start gap-2.5">
           <MapPin className="w-4 h-4 text-[#00b0ff] shrink-0 mt-0.5" />
           <div className="text-xs">
-            <p className="text-slate-200 font-medium">{selectedStop.address}</p>
-            <p className="text-slate-500 mt-0.5">
+            <p className="text-[#EEEEEE] font-medium">{selectedStop.address}</p>
+            <p className="text-[#707070] mt-0.5">
               Coordinates: {selectedStop.coordinates[0].toFixed(4)}° N,{' '}
               {selectedStop.coordinates[1].toFixed(4)}° E
             </p>
@@ -111,8 +111,8 @@ export const StationDetailsModal: React.FC = () => {
 
         {/* Charger Specs Grid */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
-          <div className="p-2.5 bg-[#16202c] rounded-xl border border-[#243343] text-center">
-            <span className="text-[10px] text-slate-400 uppercase tracking-wider block">
+          <div className="p-2.5 bg-[#202020] rounded-xl border border-[#303030] text-center">
+            <span className="text-[10px] text-[#A8A8A8] uppercase tracking-wider block">
               Max Power
             </span>
             <span className="text-base font-bold text-amber-400 flex items-center justify-center gap-1 mt-0.5">
@@ -121,11 +121,11 @@ export const StationDetailsModal: React.FC = () => {
             </span>
           </div>
 
-          <div className="p-2.5 bg-[#16202c] rounded-xl border border-[#243343] text-center">
-            <span className="text-[10px] text-slate-400 uppercase tracking-wider block">
+          <div className="p-2.5 bg-[#202020] rounded-xl border border-[#303030] text-center">
+            <span className="text-[10px] text-[#A8A8A8] uppercase tracking-wider block">
               Stalls
             </span>
-            <span className="text-base font-bold text-slate-100 mt-0.5 block">
+            <span className="text-base font-bold text-[#EEEEEE] mt-0.5 block">
               {selectedStop.stallsTotal} units
             </span>
             {selectedStop.stallsAvailable !== undefined && (
@@ -135,20 +135,20 @@ export const StationDetailsModal: React.FC = () => {
             )}
           </div>
 
-          <div className="p-2.5 bg-[#16202c] rounded-xl border border-[#243343] text-center">
-            <span className="text-[10px] text-slate-400 uppercase tracking-wider block">
+          <div className="p-2.5 bg-[#202020] rounded-xl border border-[#303030] text-center">
+            <span className="text-[10px] text-[#A8A8A8] uppercase tracking-wider block">
               Timing
             </span>
-            <span className="text-sm font-bold text-slate-100 mt-0.5 block font-mono">
+            <span className="text-sm font-bold text-[#EEEEEE] mt-0.5 block font-mono">
               {selectedStop.arrivalTime}
             </span>
-            <span className="text-[10px] text-slate-400 font-mono">
+            <span className="text-[10px] text-[#A8A8A8] font-mono">
               Depart {selectedStop.departureTime}
             </span>
           </div>
 
-          <div className="p-2.5 bg-[#16202c] rounded-xl border border-[#243343] text-center">
-            <span className="text-[10px] text-slate-400 uppercase tracking-wider block">
+          <div className="p-2.5 bg-[#202020] rounded-xl border border-[#303030] text-center">
+            <span className="text-[10px] text-[#A8A8A8] uppercase tracking-wider block">
               Est. Tariff
             </span>
             <span className="text-base font-bold text-emerald-400 mt-0.5 block">
@@ -158,9 +158,9 @@ export const StationDetailsModal: React.FC = () => {
         </div>
 
         {/* Battery State & Charge Curve Window */}
-        <div className="p-3.5 bg-[#141c26] rounded-xl border border-[#243343]">
+        <div className="p-3.5 bg-[#202020] rounded-xl border border-[#303030]">
           <div className="flex items-center justify-between text-xs mb-2">
-            <span className="font-semibold text-slate-300">
+            <span className="font-semibold text-[#EEEEEE]">
               Session Charge Window
             </span>
             <span className="font-bold text-[#00b0ff]">
@@ -170,7 +170,7 @@ export const StationDetailsModal: React.FC = () => {
           </div>
 
           {/* Bar Visual */}
-          <div className="w-full bg-[#10161f] h-3.5 rounded-full overflow-hidden flex border border-[#253241]">
+          <div className="w-full bg-[#161616] h-3.5 rounded-full overflow-hidden flex border border-[#2a2a2a]">
             <div
               className="bg-rose-500 h-full flex items-center justify-center text-[9px] font-bold text-white"
               style={{ width: `${selectedStop.arrivalSoc}%` }}
@@ -188,19 +188,19 @@ export const StationDetailsModal: React.FC = () => {
               +{selectedStop.departureSoc - selectedStop.arrivalSoc}%
             </div>
             <div
-              className="bg-slate-800 h-full"
+              className="bg-[#242424] h-full"
               style={{ width: `${100 - selectedStop.departureSoc}%` }}
             />
           </div>
 
-          <div className="flex justify-between text-[11px] text-slate-400 mt-2">
+          <div className="flex justify-between text-[11px] text-[#A8A8A8] mt-2 font-mono">
             <span>
               Arrival SoC:{' '}
-              <strong className="text-rose-400 font-mono">{selectedStop.arrivalSoc}%</strong>
+              <strong className="text-rose-400">{selectedStop.arrivalSoc}%</strong>
             </span>
             <span>
               Target SoC:{' '}
-              <strong className="text-emerald-400 font-mono">
+              <strong className="text-emerald-400">
                 {selectedStop.departureSoc}%
               </strong>
             </span>
@@ -208,15 +208,15 @@ export const StationDetailsModal: React.FC = () => {
         </div>
 
         {/* Amenities List */}
-        <div className="p-3.5 bg-[#141c26] rounded-xl border border-[#243343]">
-          <span className="text-xs font-semibold text-slate-300 uppercase tracking-wider block mb-2">
+        <div className="p-3.5 bg-[#202020] rounded-xl border border-[#303030]">
+          <span className="text-xs font-semibold text-[#EEEEEE] uppercase tracking-wider block mb-2">
             Wayside Amenities
           </span>
           <div className="flex flex-wrap gap-2 text-xs">
             {selectedStop.amenities.map((amenity) => (
               <span
                 key={amenity}
-                className="px-2.5 py-1 rounded-md bg-[#1b2533] border border-[#293848] text-slate-200 capitalize flex items-center gap-1.5"
+                className="px-2.5 py-1 rounded-md bg-[#262626] border border-[#383838] text-[#EEEEEE] capitalize flex items-center gap-1.5"
               >
                 <CheckCircle2 className="w-3 h-3 text-emerald-400" />
                 <span>{amenity}</span>
@@ -227,7 +227,7 @@ export const StationDetailsModal: React.FC = () => {
 
         {/* Station Notes / Reference remarks */}
         {selectedStop.notes && (
-          <p className="text-xs text-slate-400 italic bg-[#10161f] p-3 rounded-lg border border-[#222e3d]">
+          <p className="text-xs text-[#A8A8A8] italic bg-[#161616] p-3 rounded-lg border border-[#2a2a2a]">
             "{selectedStop.notes}"
           </p>
         )}

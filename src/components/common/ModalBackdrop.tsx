@@ -9,6 +9,7 @@ interface ModalProps {
   children: React.ReactNode;
   maxWidth?: string;
   footer?: React.ReactNode;
+  headerAction?: React.ReactNode;
 }
 
 export const Modal: React.FC<ModalProps> = ({
@@ -18,7 +19,8 @@ export const Modal: React.FC<ModalProps> = ({
   subtitle,
   children,
   maxWidth = 'max-w-xl',
-  footer
+  footer,
+  headerAction
 }) => {
   const dialogRef = useRef<HTMLDialogElement>(null);
 
@@ -60,30 +62,33 @@ export const Modal: React.FC<ModalProps> = ({
           onClose();
         }
       }}
-      className="fixed inset-0 z-50 p-0 m-auto bg-transparent backdrop:bg-black/70 backdrop:backdrop-blur-sm border-none overflow-visible max-h-[90vh] focus:outline-none"
+      className="fixed inset-0 z-50 p-0 m-auto bg-transparent backdrop:bg-black/75 backdrop:backdrop-blur-sm border-none overflow-visible max-h-[90vh] focus:outline-none"
     >
       <div
-        className={`w-full ${maxWidth} bg-[#18212b] border border-[#2b3a4a] text-slate-100 rounded-xl shadow-2xl overflow-hidden flex flex-col max-h-[85vh] animate-in fade-in-50 zoom-in-95 duration-150`}
+        className={`w-full ${maxWidth} bg-[#141414] border border-[#282828] text-[#EEEEEE] rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[85vh] animate-in fade-in-50 zoom-in-95 duration-150`}
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-[#263444] bg-[#1d2734]">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-[#262626] bg-[#181818]">
           <div>
-            <h2 id="modal-title" className="text-lg font-semibold text-white">
+            <h2 id="modal-title" className="text-base font-bold text-[#EEEEEE]">
               {title}
             </h2>
             {subtitle && (
-              <p className="text-xs text-slate-400 mt-0.5">{subtitle}</p>
+              <p className="text-xs text-[#A8A8A8] mt-0.5">{subtitle}</p>
             )}
           </div>
-          <button
-            type="button"
-            onClick={onClose}
-            aria-label="Close dialog"
-            className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-[#2b3a4a] transition-colors"
-          >
-            <X className="w-5 h-5" />
-          </button>
+          <div className="flex items-center gap-2">
+            {headerAction}
+            <button
+              type="button"
+              onClick={onClose}
+              aria-label="Close dialog"
+              className="p-1.5 rounded-lg text-[#A8A8A8] hover:text-[#EEEEEE] hover:bg-[#282828] transition-colors"
+            >
+              <X className="w-5 h-5" />
+            </button>
+          </div>
         </div>
 
         {/* Content Body */}
@@ -93,7 +98,7 @@ export const Modal: React.FC<ModalProps> = ({
 
         {/* Footer */}
         {footer && (
-          <div className="px-6 py-3.5 border-t border-[#263444] bg-[#161e27] flex items-center justify-end gap-3">
+          <div className="px-6 py-3.5 border-t border-[#262626] bg-[#161616] flex items-center justify-end gap-3">
             {footer}
           </div>
         )}

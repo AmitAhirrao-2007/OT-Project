@@ -24,15 +24,15 @@ const PlannerApp: React.FC = () => {
   } = usePlanner();
 
   return (
-    <div className="relative w-screen h-screen overflow-hidden flex flex-row bg-[#12161a] text-slate-100 font-sans">
-      {/* Route-Results Panel on the left */}
-      <RoutePanel />
-
-      {/* Full-viewport interactive map area */}
-      <main className="relative flex-1 h-full overflow-hidden">
+    <div className="relative w-screen h-screen overflow-hidden bg-[#101010] text-[#EEEEEE] font-sans">
+      {/* Full-viewport interactive map occupying the entire background */}
+      <main className="absolute inset-0 w-full h-full overflow-hidden z-0">
         <MapView />
         <TopNav />
       </main>
+
+      {/* Floating Route-Results Panel on the left */}
+      <RoutePanel />
 
       {/* Modals & Dialogs */}
       <PlanOptionsModal />

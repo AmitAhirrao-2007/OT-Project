@@ -58,6 +58,61 @@ This document provides a comprehensive, rigorous audit of the EV Route Planner w
   - Unit conversions (Metric / Imperial) across all cards and map components.
 
 * **Partially Implemented (Functional UI with Local Mock State):**
+  - Saved Route Plans Hub with JSON export and text itinerary clipboard formatting.
+  - Charger Discovery Explorer across major Indian EV corridors.
+  - Charge Card (RFID tag) local registration and network assignment.
+  - Multi-vehicle catalogue with specification inspection and active replacement.
+
+---
+
+## 3. Visual Fidelity & UI Polish Verification (ABRP Reference Recreation)
+
+Following the master UI polish pass, the interface closely mirrors the observable visual design of A Better Routeplanner:
+
+1. **Full-Viewport Interactive Map & Floating Route Panel:**
+   - Map stretches 100% viewport (`absolute inset-0`).
+   - Left route panel floats over the map (`top-4 left-4 bottom-4`, width $\sim 495\text{ px}$, `rounded-2xl`, `#121212` background, `#282828` border, deep shadow).
+   - Leaflet map bounds are framed dynamically with left padding ($520\text{ px}$) so route polyline geometry is prominently visible in the open map region.
+
+2. **Authentic Neutral Dark Color Palette:**
+   - Completely replaced slate-blue panels (`#141b24`, `#182330`, `#253446`) with neutral dark charcoal:
+     - Main surface: `#101010` / `#121212`
+     - Card background: `#202020` / `#242424`
+     - Borders: `#2c2c2c` / `#303030` / `#383838`
+     - Primary text: `#EEEEEE`
+     - Secondary text: `#A8A8A8`
+     - Muted text: `#707070`
+     - Electric accent: `#00b0ff`
+     - Battery SoC green: `#10b981`
+     - Charger amber: `#f59e0b`
+
+3. **Segmented Alternative Duration Selector:**
+   - Selected option: Light grey/white background (`#EEEEEE`) with bold dark text (`#121212`) and green badge (`FASTER` / `+X MIN`).
+   - Unselected options: Medium charcoal (`#242424`) with light grey text (`#A8A8A8`).
+
+4. **Coordinated Bottom Action Bar:**
+   - "Options" button styled in dark charcoal `#262626` with fine border `#383838`.
+   - "Replan" button styled in high-contrast vibrant cyan `#00b0ff` with bold dark text.
+
+5. **Plan Options Dialog:**
+   - Centered dark modal `#141414` with backdrop blur.
+   - "Done" button placed in the top-right header alongside close button, plus bottom footer action.
+   - Avoidances grouped in neutral charcoal card `#202020` with clean toggle switches.
+   - Destination battery reserve slider with neutral `#2C2C2C` track and `#00b0ff` accent.
+
+6. **Settings Dialog:**
+   - Top Account Profile Card with 4-segment decoration bar matching ABRP tier progress.
+   - Tab navigation with right chevrons on active and inactive items.
+   - Grouped neutral charcoal cards across Vehicle specifications, Charging parameters, Routing preferences, and Display settings.
+
+7. **Automated E2E Verification & Screenshots:**
+   - Desktop view: `docs/screenshots/planner-desktop.png`
+   - Plan Options dialog: `docs/screenshots/plan-options-modal.png`
+   - Settings dialog: `docs/screenshots/settings-modal.png`
+   - Mobile responsive view: `docs/screenshots/planner-mobile.png`
+   - 37 Vitest tests passing (`npm test`).
+   - TypeScript verification passing with 0 errors (`npm run typecheck`).
+   - Production build passing in 3.77s (`npm run build`).
   - Saved Route Plans (saving, listing, loading from localStorage).
   - Drive & Charge History (local storage persistence).
   - Charge Cards management (local RFID pass adding/deleting).
@@ -67,3 +122,4 @@ This document provides a comprehensive, rigorous audit of the EV Route Planner w
   - Live Charger Occupancy (requires OCPI CPO protocol connection).
   - User Authentication & Cloud Sync (requires Firebase/Supabase Auth).
   - Live Traffic Congestion (requires TomTom / Google Traffic API key).
+

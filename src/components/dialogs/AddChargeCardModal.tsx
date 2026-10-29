@@ -49,7 +49,7 @@ export const AddChargeCardModal: React.FC<AddChargeCardModalProps> = ({ isOpen, 
           <button
             type="button"
             onClick={onClose}
-            className="px-4 py-2 rounded-lg bg-[#222f3e] hover:bg-[#2c3c4e] text-slate-200 text-xs font-semibold"
+            className="px-4 py-2 rounded-lg bg-[#242424] hover:bg-[#2c2c2c] text-[#EEEEEE] border border-[#383838] text-xs font-semibold"
           >
             Cancel
           </button>
@@ -64,7 +64,7 @@ export const AddChargeCardModal: React.FC<AddChargeCardModalProps> = ({ isOpen, 
       }
     >
       <form onSubmit={handleSubmit} className="space-y-4 text-xs">
-        <div className="p-3 bg-[#131b24] rounded-xl border border-[#232f3e] flex items-center gap-2 text-slate-300">
+        <div className="p-3 bg-[#202020] rounded-xl border border-[#303030] flex items-center gap-2 text-[#EEEEEE]">
           <ShieldCheck className="w-4 h-4 text-emerald-400 shrink-0" />
           <span>
             Demonstration entry only. Stored locally in your browser storage. No financial or bank card data is requested.
@@ -72,26 +72,26 @@ export const AddChargeCardModal: React.FC<AddChargeCardModalProps> = ({ isOpen, 
         </div>
 
         <div>
-          <label className="block text-slate-300 font-medium mb-1">Card Label / Name</label>
+          <label className="block text-[#EEEEEE] font-semibold mb-1">Card Label / Name</label>
           <input
             type="text"
             required
             placeholder="e.g. My Adani RFID Tag"
             value={cardName}
             onChange={(e) => setCardName(e.target.value)}
-            className="w-full bg-[#141c26] border border-[#2b3a4a] rounded-lg px-3 py-2 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-[#00b0ff]"
+            className="w-full bg-[#161616] border border-[#333333] rounded-lg px-3 py-2 text-sm text-[#EEEEEE] placeholder-[#707070] focus:outline-none focus:border-[#00b0ff]"
           />
         </div>
 
         <div>
-          <label className="block text-slate-300 font-medium mb-1">Charging Network</label>
+          <label className="block text-[#EEEEEE] font-semibold mb-1">Charging Network</label>
           <select
             value={network}
             onChange={(e) => setNetwork(e.target.value)}
-            className="w-full bg-[#141c26] border border-[#2b3a4a] rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-[#00b0ff]"
+            className="w-full bg-[#161616] border border-[#333333] rounded-lg px-3 py-2 text-sm text-[#EEEEEE] focus:outline-none focus:border-[#00b0ff]"
           >
             {availableNetworks.map((n) => (
-              <option key={n} value={n} className="bg-[#141c26]">
+              <option key={n} value={n} className="bg-[#161616] text-[#EEEEEE]">
                 {n}
               </option>
             ))}
@@ -99,16 +99,16 @@ export const AddChargeCardModal: React.FC<AddChargeCardModalProps> = ({ isOpen, 
         </div>
 
         <div>
-          <label className="block text-slate-300 font-medium mb-1">Tag / Account Digits (Last 4)</label>
+          <label className="block text-[#EEEEEE] font-semibold mb-1">Tag / Account Digits (Last 4)</label>
           <div className="relative">
-            <CreditCard className="w-4 h-4 text-slate-500 absolute left-3 top-2.5" />
+            <CreditCard className="w-4 h-4 text-[#707070] absolute left-3 top-2.5" />
             <input
               type="text"
               maxLength={4}
               placeholder="7890"
               value={lastFour}
               onChange={(e) => setLastFour(e.target.value)}
-              className="w-full bg-[#141c26] border border-[#2b3a4a] rounded-lg pl-9 pr-3 py-2 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-[#00b0ff]"
+              className="w-full bg-[#161616] border border-[#333333] rounded-lg pl-9 pr-3 py-2 text-sm text-[#EEEEEE] placeholder-[#707070] focus:outline-none focus:border-[#00b0ff]"
             />
           </div>
         </div>

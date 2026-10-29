@@ -9,20 +9,21 @@ export default {
     extend: {
       colors: {
         abrp: {
-          dark: '#12161a',
-          panel: '#181f26',
-          panelHeader: '#1e2630',
-          card: '#222b35',
-          cardHover: '#2a3542',
-          border: '#2c3744',
+          dark: '#101010',
+          panel: '#121212',
+          panelHeader: '#181818',
+          card: '#242424',
+          cardHover: '#2e2e2e',
+          border: '#2e2e2e',
+          borderCard: '#383838',
           accent: '#00b0ff',
           accentHover: '#0095d9',
-          green: '#22c55e',
-          yellow: '#eab308',
+          green: '#10b981',
+          yellow: '#f59e0b',
           orange: '#f97316',
-          muted: '#8e9aa8',
-          text: '#f1f5f9',
-          textSub: '#94a3b8'
+          muted: '#707070',
+          text: '#EEEEEE',
+          textSub: '#A8A8A8'
         }
       }
     },
