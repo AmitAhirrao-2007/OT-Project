@@ -185,13 +185,13 @@ Generated with EV Route Planner`;
       maxWidth="max-w-3xl"
       footer={
         <div className="flex items-center justify-between w-full">
-          <span className="text-xs text-[#A8A8A8]">
+          <span className="text-xs text-content-tertiary">
             {savedPlans.length} {savedPlans.length === 1 ? 'plan' : 'plans'} saved locally
           </span>
           <button
             type="button"
             onClick={onClose}
-            className="px-4 py-2 rounded-xl bg-[#242424] hover:bg-[#2c2c2c] text-[#EEEEEE] text-xs font-semibold border border-[#383838] transition-colors"
+            className="px-4 py-2 rounded-xl bg-surface-subtle hover:bg-surface-hover text-content-primary text-xs font-semibold border border-edge-default transition-colors shadow-sm"
           >
             Close
           </button>
@@ -200,9 +200,9 @@ Generated with EV Route Planner`;
     >
       <div className="space-y-6">
         {/* 1. Save Active Plan Form */}
-        <div className="p-4 rounded-xl bg-[#202020] border border-[#303030]">
-          <h3 className="text-xs font-bold text-[#EEEEEE] uppercase tracking-wider mb-2 flex items-center gap-1.5">
-            <Bookmark className="w-4 h-4 text-[#00b0ff]" />
+        <div className="p-4 rounded-xl bg-surface-subtle border border-edge-subtle">
+          <h3 className="text-xs font-bold text-content-primary uppercase tracking-wider mb-2 flex items-center gap-1.5">
+            <Bookmark className="w-4 h-4 text-brand-primary" />
             <span>Save Current Active Plan</span>
           </h3>
 
@@ -211,24 +211,24 @@ Generated with EV Route Planner`;
               type="text"
               value={planTitle}
               onChange={(e) => setPlanTitle(e.target.value)}
-              placeholder="e.g. Patna to Delhi Summer Trip"
-              className="flex-1 w-full px-3.5 py-2.5 bg-[#161616] border border-[#333333] rounded-xl text-xs text-[#EEEEEE] placeholder:text-[#707070] focus:outline-none focus:border-[#00b0ff]"
+              placeholder="e.g. Patna to Delhi Route"
+              className="flex-1 w-full px-3.5 py-2.5 bg-surface-panel border border-edge-default rounded-xl text-xs text-content-primary placeholder:text-content-tertiary focus:outline-none focus:border-brand-primary"
             />
             <button
               type="submit"
-              className="w-full sm:w-auto px-4 py-2.5 rounded-xl bg-[#00b0ff] hover:bg-[#009be0] text-slate-950 text-xs font-bold shadow-lg shadow-cyan-500/20 flex items-center justify-center gap-1.5 transition-all shrink-0"
+              className="w-full sm:w-auto px-4 py-2.5 rounded-xl bg-brand-primary hover:bg-brand-hover text-brand-inverse text-xs font-bold shadow-sm flex items-center justify-center gap-1.5 transition-all shrink-0"
             >
               <BookmarkCheck className="w-4 h-4" />
               <span>Save Plan</span>
             </button>
           </form>
 
-          <div className="mt-2.5 flex items-center gap-3 text-[11px] text-[#A8A8A8]">
-            <span>Vehicle: <strong className="text-[#EEEEEE]">{vehicle.name}</strong></span>
+          <div className="mt-2.5 flex items-center gap-3 text-[11px] text-content-secondary">
+            <span>Vehicle: <strong className="text-content-primary">{vehicle.name}</strong></span>
             <span>•</span>
-            <span>Duration: <strong className="text-[#EEEEEE]">{activeRoute.totalDuration}</strong></span>
+            <span>Duration: <strong className="text-content-primary">{activeRoute.totalDuration}</strong></span>
             <span>•</span>
-            <span>Distance: <strong className="text-[#EEEEEE]">{formatDistance(activeRoute.totalDistanceMi, displaySettings.units)}</strong></span>
+            <span>Distance: <strong className="text-content-primary">{formatDistance(activeRoute.totalDistanceMi, displaySettings.units)}</strong></span>
             <span>•</span>
             <span>{activeRoute.stopCount} stops</span>
           </div>
@@ -236,47 +236,47 @@ Generated with EV Route Planner`;
 
         {/* 2. Saved Plans List */}
         <div>
-          <h3 className="text-xs font-bold text-[#EEEEEE] uppercase tracking-wider mb-3 flex items-center gap-1.5">
-            <FolderOpen className="w-4 h-4 text-emerald-400" />
+          <h3 className="text-xs font-bold text-content-primary uppercase tracking-wider mb-3 flex items-center gap-1.5">
+            <FolderOpen className="w-4 h-4 text-status-success" />
             <span>Saved Itineraries</span>
           </h3>
 
           {savedPlans.length === 0 ? (
-            <div className="py-8 text-center text-[#707070] bg-[#181818] rounded-xl border border-[#2a2a2a]">
-              <p className="text-xs text-[#707070]">No saved plans found in local storage.</p>
+            <div className="py-8 text-center text-content-tertiary bg-surface-subtle rounded-xl border border-edge-subtle">
+              <p className="text-xs">No saved plans found in local storage.</p>
             </div>
           ) : (
             <div className="space-y-3 max-h-[380px] overflow-y-auto pr-1 custom-scrollbar">
               {savedPlans.map((plan) => (
                 <div
                   key={plan.id}
-                  className="p-3.5 rounded-xl bg-[#202020] border border-[#303030] hover:border-[#404040] transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-3"
+                  className="p-3.5 rounded-xl bg-surface-subtle border border-edge-subtle hover:border-edge-default transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-3"
                 >
                   <div className="flex-1">
                     <div className="flex items-center gap-2">
-                      <h4 className="text-sm font-bold text-[#EEEEEE]">{plan.title}</h4>
+                      <h4 className="text-sm font-bold text-content-primary">{plan.title}</h4>
                     </div>
 
-                    <div className="flex flex-wrap items-center gap-2.5 mt-1.5 text-xs text-[#A8A8A8]">
+                    <div className="flex flex-wrap items-center gap-2.5 mt-1.5 text-xs text-content-secondary">
                       <span className="flex items-center gap-1">
-                        <Car className="w-3.5 h-3.5 text-[#707070]" />
+                        <Car className="w-3.5 h-3.5 text-content-tertiary" />
                         <span>{plan.vehicleName}</span>
                       </span>
                       <span>•</span>
-                      <span className="flex items-center gap-1 text-[#EEEEEE]">
-                        <Compass className="w-3.5 h-3.5 text-[#707070]" />
+                      <span className="flex items-center gap-1 text-content-primary font-medium">
+                        <Compass className="w-3.5 h-3.5 text-content-tertiary" />
                         <span>{plan.totalDuration}</span>
                       </span>
                       <span>•</span>
                       <span>{formatDistance(plan.totalDistanceMi, displaySettings.units)}</span>
                       <span>•</span>
-                      <span className="flex items-center gap-1 text-amber-400">
-                        <Zap className="w-3 h-3 fill-amber-400" />
+                      <span className="flex items-center gap-1 text-amber-600 dark:text-amber-400 font-semibold">
+                        <Zap className="w-3.5 h-3.5 fill-current" />
                         <span>{plan.stopCount} charging stops</span>
                       </span>
                     </div>
 
-                    <div className="mt-1 flex items-center gap-1 text-[11px] text-[#707070]">
+                    <div className="mt-1 flex items-center gap-1 text-[11px] text-content-tertiary">
                       <Calendar className="w-3 h-3" />
                       <span>Saved {new Date(plan.createdAt).toLocaleDateString()}</span>
                     </div>
@@ -287,7 +287,7 @@ Generated with EV Route Planner`;
                     <button
                       type="button"
                       onClick={() => handleLoadPlan(plan)}
-                      className="px-3 py-1.5 rounded-lg bg-[#00b0ff] hover:bg-[#009be0] text-slate-950 text-xs font-bold transition-all shadow-md shadow-cyan-500/20"
+                      className="px-3 py-1.5 rounded-lg bg-brand-primary hover:bg-brand-hover text-brand-inverse text-xs font-bold transition-all shadow-sm"
                     >
                       Load
                     </button>
@@ -296,12 +296,12 @@ Generated with EV Route Planner`;
                       type="button"
                       onClick={() => handleShareSummary(plan)}
                       title="Copy formatted trip plan to clipboard"
-                      className="p-1.5 rounded-lg bg-[#282828] hover:bg-[#323232] border border-[#383838] text-[#EEEEEE] transition-colors"
+                      className="p-1.5 rounded-lg bg-surface-panel hover:bg-surface-hover border border-edge-default text-content-primary transition-colors shadow-sm"
                     >
                       {copiedPlanId === plan.id ? (
-                        <Check className="w-4 h-4 text-emerald-400" />
+                        <Check className="w-4 h-4 text-status-success" />
                       ) : (
-                        <Share2 className="w-4 h-4 text-[#00b0ff]" />
+                        <Share2 className="w-4 h-4 text-brand-primary" />
                       )}
                     </button>
 
@@ -309,7 +309,7 @@ Generated with EV Route Planner`;
                       type="button"
                       onClick={() => handleDownloadJson(plan)}
                       title="Download JSON file"
-                      className="p-1.5 rounded-lg bg-[#282828] hover:bg-[#323232] border border-[#383838] text-[#A8A8A8] hover:text-[#EEEEEE] transition-colors"
+                      className="p-1.5 rounded-lg bg-surface-panel hover:bg-surface-hover border border-edge-default text-content-secondary hover:text-content-primary transition-colors shadow-sm"
                     >
                       <Download className="w-4 h-4" />
                     </button>
@@ -318,7 +318,7 @@ Generated with EV Route Planner`;
                       type="button"
                       onClick={() => handleDeletePlan(plan.id, plan.title)}
                       title="Delete saved plan"
-                      className="p-1.5 rounded-lg bg-[#282828] hover:bg-rose-950/60 border border-[#383838] text-[#A8A8A8] hover:text-rose-400 transition-colors"
+                      className="p-1.5 rounded-lg bg-surface-panel hover:bg-status-dangerSubtle border border-edge-default text-content-secondary hover:text-status-danger transition-colors shadow-sm"
                     >
                       <Trash2 className="w-4 h-4" />
                     </button>

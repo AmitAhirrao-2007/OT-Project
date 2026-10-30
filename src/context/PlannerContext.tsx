@@ -80,6 +80,7 @@ interface PlannerContextType {
   setRoutingSettings: React.Dispatch<React.SetStateAction<RoutingSettings>>;
   displaySettings: DisplaySettings;
   setDisplaySettings: React.Dispatch<React.SetStateAction<DisplaySettings>>;
+  resolvedTheme: 'light' | 'dark';
   privacySettings: PrivacySettings;
   setPrivacySettings: React.Dispatch<React.SetStateAction<PrivacySettings>>;
   driveHistory: DriveHistoryItem[];
@@ -188,6 +189,38 @@ export const PlannerProvider: React.FC<{ children: ReactNode }> = ({ children })
       return initialDriveHistory;
     }
   });
+
+  // Active theme calculation & DOM synchronization (Light / Dark / System)
+  const [resolvedTheme, setResolvedTheme] = useState<'light' | 'dark'>('light');
+
+  useEffect(() => {
+    const applyTheme = () => {
+      let isDark = false;
+      if (displaySettings.theme === 'dark') {
+        isDark = true;
+      } else if (displaySettings.theme === 'light') {
+        isDark = false;
+      } else if (displaySettings.theme === 'system') {
+        isDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+      }
+
+      setResolvedTheme(isDark ? 'dark' : 'light');
+      if (isDark) {
+        document.documentElement.classList.add('dark');
+      } else {
+        document.documentElement.classList.remove('dark');
+      }
+    };
+
+    applyTheme();
+
+    if (displaySettings.theme === 'system') {
+      const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+      const listener = () => applyTheme();
+      mediaQuery.addEventListener('change', listener);
+      return () => mediaQuery.removeEventListener('change', listener);
+    }
+  }, [displaySettings.theme]);
 
   // Save to LocalStorage on state changes
   useEffect(() => {
@@ -363,6 +396,7 @@ export const PlannerProvider: React.FC<{ children: ReactNode }> = ({ children })
         setRoutingSettings,
         displaySettings,
         setDisplaySettings,
+        resolvedTheme,
         privacySettings,
         setPrivacySettings,
         driveHistory,

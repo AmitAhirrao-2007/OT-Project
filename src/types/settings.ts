@@ -47,10 +47,12 @@ export interface RoutingSettings {
   seasonalWeatherDescription: string;
 }
 
+export type ThemeChoice = 'light' | 'dark' | 'system';
+
 export interface DisplaySettings {
   units: UnitSystem;
   temperature: TempUnit;
-  theme: 'dark' | 'light';
+  theme: ThemeChoice;
 }
 
 export interface PrivacySettings {

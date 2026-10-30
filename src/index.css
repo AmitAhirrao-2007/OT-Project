@@ -2,20 +2,106 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Design Tokens for Neutral Dark Visual System (ABRP Reference) */
+/* =========================================================================
+   PROFESSIONAL AUTOMOTIVE DESIGN SYSTEM TOKENS
+   LIGHT MODE (DEFAULT) & DARK MODE
+   ========================================================================= */
+
 :root {
-  --bg-main: #121212;
-  --bg-surface: #181818;
-  --bg-card: #242424;
-  --bg-card-hover: #2e2e2e;
-  --border-subtle: #2e2e2e;
-  --border-card: #383838;
-  --text-primary: #EEEEEE;
-  --text-secondary: #A8A8A8;
-  --text-muted: #707070;
-  --accent-blue: #00b0ff;
-  --accent-green: #10b981;
-  --accent-amber: #f59e0b;
+  /* Surface Tokens - Light Palette */
+  --color-surface-canvas: #F5F6F8;
+  --color-surface-panel: #FFFFFF;
+  --color-surface-card: #FFFFFF;
+  --color-surface-subtle: #F0F2F5;
+  --color-surface-hover: #E9ECEF;
+  --color-surface-active: #DFE3E8;
+
+  /* Typography / Content Tokens */
+  --color-text-primary: #1C2026;
+  --color-text-secondary: #525B6A;
+  --color-text-muted: #7E8896;
+  --color-text-inverse: #FFFFFF;
+
+  /* Border & Divider Tokens */
+  --color-border-subtle: #E6E9EE;
+  --color-border-default: #D6DAE1;
+  --color-border-strong: #B4BAC5;
+
+  /* Accent / Brand Actions */
+  --color-accent-primary: #1565C0;
+  --color-accent-hover: #0D47A1;
+  --color-accent-subtle: #E3F2FD;
+  --color-accent-contrast: #FFFFFF;
+
+  /* Semantic Status Tokens */
+  --color-status-success: #1E7E43;
+  --color-status-success-subtle: #E8F5E9;
+  --color-status-warning: #B26A00;
+  --color-status-warning-subtle: #FFF3E0;
+  --color-status-danger: #C62828;
+  --color-status-danger-subtle: #FFEBEE;
+
+  /* Shadows */
+  --shadow-panel: 0 12px 32px -4px rgba(22, 28, 36, 0.12), 0 4px 12px -2px rgba(22, 28, 36, 0.06);
+  --shadow-card: 0 2px 6px -1px rgba(22, 28, 36, 0.06);
+  --shadow-dropdown: 0 16px 36px -4px rgba(22, 28, 36, 0.16);
+
+  /* Leaflet Container Defaults */
+  --map-bg: #E4E8EC;
+  --map-tile-filter: none;
+  --tooltip-bg: #FFFFFF;
+  --tooltip-text: #1C2026;
+  --tooltip-border: #D6DAE1;
+  --attribution-bg: rgba(255, 255, 255, 0.88);
+  --attribution-text: #525B6A;
+}
+
+.dark {
+  /* Surface Tokens - Dark Palette (Restrained Charcoal) */
+  --color-surface-canvas: #0E1013;
+  --color-surface-panel: #16181D;
+  --color-surface-card: #1E2128;
+  --color-surface-subtle: #262A33;
+  --color-surface-hover: #2D323D;
+  --color-surface-active: #363C49;
+
+  /* Typography / Content Tokens */
+  --color-text-primary: #F0F2F5;
+  --color-text-secondary: #A0A8B5;
+  --color-text-muted: #6C7482;
+  --color-text-inverse: #0E1013;
+
+  /* Border & Divider Tokens */
+  --color-border-subtle: #282C35;
+  --color-border-default: #343A46;
+  --color-border-strong: #464E5D;
+
+  /* Accent / Brand Actions */
+  --color-accent-primary: #3880FF;
+  --color-accent-hover: #5A96FF;
+  --color-accent-subtle: #16243D;
+  --color-accent-contrast: #FFFFFF;
+
+  /* Semantic Status Tokens */
+  --color-status-success: #2E9D58;
+  --color-status-success-subtle: #132C1E;
+  --color-status-warning: #D98200;
+  --color-status-warning-subtle: #302008;
+  --color-status-danger: #E53935;
+  --color-status-danger-subtle: #331517;
+
+  /* Shadows */
+  --shadow-panel: 0 16px 40px -4px rgba(0, 0, 0, 0.5);
+  --shadow-card: 0 4px 12px -2px rgba(0, 0, 0, 0.3);
+  --shadow-dropdown: 0 20px 48px -4px rgba(0, 0, 0, 0.65);
+
+  /* Leaflet Container Defaults */
+  --map-bg: #121418;
+  --tooltip-bg: #1E2128;
+  --tooltip-text: #F0F2F5;
+  --tooltip-border: #343A46;
+  --attribution-bg: rgba(22, 24, 29, 0.9);
+  --attribution-text: #A0A8B5;
 }
 
 /* Modern web guidance: dialog scroll containment */
@@ -35,29 +121,39 @@ dialog::backdrop {
 }
 
 .custom-scrollbar::-webkit-scrollbar-track {
-  background: #141414;
+  background: transparent;
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb {
-  background: #2a2a2a;
+  background: var(--color-border-default);
   border-radius: 4px;
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-  background: #3a3a3a;
+  background: var(--color-border-strong);
 }
 
-/* Leaflet Container & Neutral Dark Tiles */
+/* Leaflet Container & Dynamic Map Tile Styling */
 .leaflet-container {
   width: 100%;
   height: 100%;
-  background-color: #101010 !important;
+  background-color: var(--map-bg) !important;
   font-family: inherit;
 }
 
-/* High-contrast neutral dark mode filter for OpenStreetMap tiles: Zero API key, zero watermark */
-.leaflet-tile-pane .osm-dark-tiles {
-  filter: invert(100%) hue-rotate(180deg) brightness(85%) contrast(100%) saturate(30%);
+/* Light Mode OSM Tiles: natural crisp basemap without artificial filters */
+.leaflet-tile-pane .osm-light-tiles {
+  filter: saturate(90%) contrast(98%);
+}
+
+/* Dark Mode OSM Tiles: clean high-contrast inverted dark mode without oversaturated neon */
+.dark .leaflet-tile-pane .osm-dark-tiles {
+  filter: invert(100%) hue-rotate(180deg) brightness(88%) contrast(96%) saturate(40%);
+}
+
+/* Natural light OSM fallback if dark tiles are requested in light mode */
+html:not(.dark) .leaflet-tile-pane .osm-dark-tiles {
+  filter: saturate(90%) contrast(98%);
 }
 
 .leaflet-tile-pane .esri-dark-tiles {
@@ -70,30 +166,32 @@ dialog::backdrop {
 }
 
 .leaflet-tooltip {
-  background-color: #1a1a1a !important;
-  color: #eeeeee !important;
-  border: 1px solid #383838 !important;
-  border-radius: 8px !important;
+  background-color: var(--tooltip-bg) !important;
+  color: var(--tooltip-text) !important;
+  border: 1px solid var(--tooltip-border) !important;
+  border-radius: 6px !important;
   padding: 6px 10px !important;
   font-size: 11px !important;
-  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.7) !important;
+  font-weight: 500 !important;
+  box-shadow: var(--shadow-card) !important;
 }
 
 .leaflet-tooltip-top:before {
-  border-top-color: #1a1a1a !important;
+  border-top-color: var(--tooltip-bg) !important;
 }
 
 /* Attribution styling */
 .leaflet-control-attribution {
-  background: rgba(18, 18, 18, 0.92) !important;
-  color: #888888 !important;
+  background: var(--attribution-bg) !important;
+  color: var(--attribution-text) !important;
   font-size: 10px !important;
   backdrop-filter: blur(4px);
   border-top-left-radius: 6px;
+  padding: 2px 6px !important;
 }
 
 .leaflet-control-attribution a {
-  color: #a8a8a8 !important;
+  color: var(--color-accent-primary) !important;
   text-decoration: none !important;
 }
 

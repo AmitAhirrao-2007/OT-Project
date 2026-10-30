@@ -25,9 +25,9 @@ export const ToggleSwitch: React.FC<ToggleSwitchProps> = ({
       }`}
     >
       <div className="flex flex-col">
-        {label && <span className="text-sm font-medium text-[#EEEEEE]">{label}</span>}
+        {label && <span className="text-sm font-medium text-content-primary">{label}</span>}
         {description && (
-          <span className="text-xs text-[#A8A8A8] mt-0.5 leading-relaxed">
+          <span className="text-xs text-content-secondary mt-0.5 leading-relaxed">
             {description}
           </span>
         )}
@@ -43,8 +43,8 @@ export const ToggleSwitch: React.FC<ToggleSwitchProps> = ({
         />
         <div
           className={`w-11 h-6 rounded-full transition-colors duration-200 ease-in-out ${
-            checked ? 'bg-[#00b0ff]' : 'bg-[#2a2a2a]'
-          } border border-[#383838]`}
+            checked ? 'bg-brand-primary' : 'bg-surface-hover'
+          } border border-edge-default`}
         >
           <div
             className={`w-5 h-5 rounded-full bg-white shadow-sm transform transition-transform duration-200 ease-in-out mt-0.5 ${

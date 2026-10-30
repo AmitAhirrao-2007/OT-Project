@@ -21,7 +21,7 @@ export function SegmentedControl<T extends string>({
   return (
     <div
       role="radiogroup"
-      className={`inline-flex items-center p-1 bg-[#181818] border border-[#2c2c2c] rounded-xl ${className}`}
+      className={`inline-flex items-center p-1 bg-surface-subtle border border-edge-subtle rounded-lg ${className}`}
     >
       {options.map((opt) => {
         const isSelected = opt.value === value;
@@ -32,10 +32,10 @@ export function SegmentedControl<T extends string>({
             role="radio"
             aria-checked={isSelected}
             onClick={() => onChange(opt.value)}
-            className={`flex-1 flex flex-col items-center justify-center px-3 py-1.5 text-xs rounded-lg transition-all duration-150 relative ${
+            className={`flex-1 flex flex-col items-center justify-center px-3 py-1.5 text-xs rounded-md transition-all duration-150 relative ${
               isSelected
-                ? 'bg-[#EEEEEE] text-[#121212] font-bold shadow-md'
-                : 'text-[#A8A8A8] hover:text-[#EEEEEE] hover:bg-[#222222]'
+                ? 'bg-surface-panel text-content-primary font-bold shadow-card border border-edge-default'
+                : 'text-content-secondary hover:text-content-primary hover:bg-surface-hover'
             }`}
           >
             <span className="flex items-center gap-1.5">
@@ -44,8 +44,8 @@ export function SegmentedControl<T extends string>({
                 <span
                   className={`text-[10px] px-1.5 py-0.2 rounded font-semibold ${
                     isSelected
-                      ? 'bg-emerald-600 text-white'
-                      : 'bg-emerald-950/70 text-emerald-400 border border-emerald-800/40'
+                      ? 'bg-status-success text-white'
+                      : 'bg-status-successSubtle text-status-success border border-status-success/30'
                   }`}
                 >
                   {opt.badge}
@@ -55,7 +55,7 @@ export function SegmentedControl<T extends string>({
             {opt.subLabel && (
               <span
                 className={`text-[10px] mt-0.5 ${
-                  isSelected ? 'text-[#444444]' : 'text-[#707070]'
+                  isSelected ? 'text-content-secondary' : 'text-content-muted'
                 }`}
               >
                 {opt.subLabel}

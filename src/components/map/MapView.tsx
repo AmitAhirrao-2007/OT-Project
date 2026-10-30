@@ -4,7 +4,7 @@ import 'leaflet/dist/leaflet.css';
 import { usePlanner } from '../../context/PlannerContext';
 import { Crosshair, Plus, Minus, Layers, AlertTriangle, Loader2, Check } from 'lucide-react';
 
-export type MapTileProvider = 'osm-dark' | 'esri-dark' | 'osm-standard';
+export type MapTileProvider = 'osm-auto' | 'osm-light' | 'osm-dark' | 'esri-dark';
 
 interface TileProviderConfig {
   id: MapTileProvider;
@@ -16,9 +16,27 @@ interface TileProviderConfig {
 }
 
 const TILE_PROVIDERS: Record<MapTileProvider, TileProviderConfig> = {
+  'osm-auto': {
+    id: 'osm-auto',
+    name: 'Theme Adaptive Basemap',
+    url: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+    attribution:
+      '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> contributors',
+    className: 'osm-dark-tiles',
+    maxZoom: 19
+  },
+  'osm-light': {
+    id: 'osm-light',
+    name: 'OpenStreetMap Light Terrain',
+    url: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+    attribution:
+      '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> contributors',
+    className: 'osm-light-tiles',
+    maxZoom: 19
+  },
   'osm-dark': {
     id: 'osm-dark',
-    name: 'Dark Terrain (OSM Filtered)',
+    name: 'OpenStreetMap Dark Terrain',
     url: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
     attribution:
       '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> contributors',
@@ -32,15 +50,6 @@ const TILE_PROVIDERS: Record<MapTileProvider, TileProviderConfig> = {
     attribution: 'Tiles &copy; Esri &mdash; Esri, DeLorme, NAVTEQ',
     className: 'esri-dark-tiles',
     maxZoom: 16
-  },
-  'osm-standard': {
-    id: 'osm-standard',
-    name: 'OpenStreetMap Standard',
-    url: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-    attribution:
-      '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> contributors',
-    className: '',
-    maxZoom: 19
   }
 };
 
@@ -51,7 +60,7 @@ export const MapView: React.FC = () => {
   const polylineLayerRef = useRef<L.FeatureGroup | null>(null);
   const markersLayerRef = useRef<L.LayerGroup | null>(null);
 
-  const [activeProvider, setActiveProvider] = useState<MapTileProvider>('osm-dark');
+  const [activeProvider, setActiveProvider] = useState<MapTileProvider>('osm-auto');
   const [isLayersMenuOpen, setIsLayersMenuOpen] = useState(false);
   const [isLoadingTiles, setIsLoadingTiles] = useState(true);
   const [tileErrorCount, setTileErrorCount] = useState(0);
@@ -65,7 +74,8 @@ export const MapView: React.FC = () => {
     setIsStationDetailsOpen,
     hoveredStopId,
     setHoveredStopId,
-    isPanelCollapsed
+    isPanelCollapsed,
+    resolvedTheme
   } = usePlanner();
 
   // Function to switch tile layer cleanly
@@ -112,13 +122,20 @@ export const MapView: React.FC = () => {
     polylineLayerRef.current = L.featureGroup().addTo(map);
     mapInstanceRef.current = map;
 
-    switchTileLayer('osm-dark');
+    switchTileLayer('osm-auto');
 
     return () => {
       map.remove();
       mapInstanceRef.current = null;
     };
   }, [switchTileLayer]);
+
+  // Sync adaptive tile theme
+  useEffect(() => {
+    if (activeProvider === 'osm-auto') {
+      switchTileLayer('osm-auto');
+    }
+  }, [resolvedTheme, activeProvider, switchTileLayer]);
 
   // Handle panel collapse / expand responsive resize
   useEffect(() => {
@@ -344,53 +361,53 @@ export const MapView: React.FC = () => {
   };
 
   return (
-    <div className="relative w-full h-full bg-[#101010] overflow-hidden select-none">
+    <div className="relative w-full h-full bg-surface-canvas overflow-hidden select-none">
       {/* Map DOM Element */}
       <div ref={mapContainerRef} className="w-full h-full z-0" />
 
       {/* Loading & Error States */}
       {isLoadingTiles && (
-        <div className="absolute top-4 left-1/2 -translate-x-1/2 z-20 bg-[#181818]/90 backdrop-blur-md border border-[#2c2c2c] text-[#A8A8A8] text-xs px-3.5 py-1.5 rounded-full shadow-lg flex items-center gap-2 pointer-events-none">
-          <Loader2 className="w-3.5 h-3.5 animate-spin text-[#00b0ff]" />
+        <div className="absolute top-4 left-1/2 -translate-x-1/2 z-20 bg-surface-panel/90 backdrop-blur-md border border-edge-default text-content-secondary text-xs px-3.5 py-1.5 rounded-full shadow-card flex items-center gap-2 pointer-events-none">
+          <Loader2 className="w-3.5 h-3.5 animate-spin text-brand-primary" />
           <span>Loading geographic map tiles...</span>
         </div>
       )}
 
       {tileErrorCount > 3 && (
-        <div className="absolute top-14 left-1/2 -translate-x-1/2 z-20 bg-rose-950/90 backdrop-blur-md border border-rose-800 text-rose-200 text-xs px-4 py-2 rounded-xl shadow-xl flex items-center gap-2">
-          <AlertTriangle className="w-4 h-4 text-rose-400 shrink-0" />
+        <div className="absolute top-14 left-1/2 -translate-x-1/2 z-20 bg-status-dangerSubtle border border-status-danger text-status-danger text-xs px-4 py-2 rounded-xl shadow-dropdown flex items-center gap-2">
+          <AlertTriangle className="w-4 h-4 text-status-danger shrink-0" />
           <span>
             Tile network warning: Some tiles failed to download. Switching layers may help.
           </span>
           <button
             type="button"
-            onClick={() => switchTileLayer('osm-standard')}
-            className="underline font-bold text-white ml-1"
+            onClick={() => switchTileLayer('osm-light')}
+            className="underline font-bold ml-1 text-content-primary"
           >
-            Switch to Standard OSM
+            Switch to Light OSM
           </button>
         </div>
       )}
 
       {/* Bottom Center Demonstration / Dynamic Route Status Badge */}
-      <div className="absolute bottom-3 left-1/2 -translate-x-1/2 z-10 bg-[#181818]/95 backdrop-blur-md border border-[#2c2c2c] text-[#A8A8A8] text-[11px] px-3.5 py-1.5 rounded-full shadow-lg flex items-center gap-2 pointer-events-auto">
-        <span className={`w-2 h-2 rounded-full ${activeRoute.isFeasible ? 'bg-emerald-400 animate-pulse' : 'bg-rose-500'}`}></span>
+      <div className="absolute bottom-3 left-1/2 -translate-x-1/2 z-10 bg-surface-panel/95 backdrop-blur-md border border-edge-default text-content-secondary text-[11px] px-3.5 py-1.5 rounded-full shadow-card flex items-center gap-2 pointer-events-auto">
+        <span className={`w-2 h-2 rounded-full ${activeRoute.isFeasible ? 'bg-status-success animate-pulse' : 'bg-status-danger'}`}></span>
         <span>
           {activeRoute.id.startsWith('default-')
-            ? `Reference Demonstration · ${trip.origin.name} → ${trip.destination.name} · ${vehicle.name}`
+            ? `Reference Route · ${trip.origin.name} → ${trip.destination.name} · ${vehicle.name}`
             : `Dynamic Route · ${trip.origin.name} → ${trip.destination.name} · ${vehicle.name}`}
         </span>
       </div>
 
       {/* Bottom-right Map Controls */}
       <div className="absolute bottom-6 right-6 z-20 flex flex-col gap-2 pointer-events-auto">
-        <div className="flex flex-col bg-[#202020]/95 border border-[#303030] rounded-xl shadow-2xl overflow-hidden backdrop-blur-md">
+        <div className="flex flex-col bg-surface-panel border border-edge-default rounded-xl shadow-dropdown overflow-hidden backdrop-blur-md">
           <button
             type="button"
             onClick={handleZoomIn}
             title="Zoom In"
             aria-label="Zoom in"
-            className="p-2.5 text-[#EEEEEE] hover:text-white hover:bg-[#282828] transition-colors border-b border-[#303030]"
+            className="p-2.5 text-content-primary hover:bg-surface-hover transition-colors border-b border-edge-subtle"
           >
             <Plus className="w-4 h-4" />
           </button>
@@ -399,7 +416,7 @@ export const MapView: React.FC = () => {
             onClick={handleZoomOut}
             title="Zoom Out"
             aria-label="Zoom out"
-            className="p-2.5 text-[#EEEEEE] hover:text-white hover:bg-[#282828] transition-colors"
+            className="p-2.5 text-content-primary hover:bg-surface-hover transition-colors"
           >
             <Minus className="w-4 h-4" />
           </button>
@@ -410,7 +427,7 @@ export const MapView: React.FC = () => {
           onClick={handleResetBounds}
           title="Recenter and Frame Route"
           aria-label="Recenter Route"
-          className="p-2.5 bg-[#202020]/95 border border-[#303030] text-[#EEEEEE] hover:text-white hover:bg-[#282828] rounded-xl shadow-2xl transition-colors backdrop-blur-md"
+          className="p-2.5 bg-surface-panel border border-edge-default text-content-primary hover:bg-surface-hover rounded-xl shadow-dropdown transition-colors backdrop-blur-md"
         >
           <Crosshair className="w-4 h-4" />
         </button>
@@ -422,10 +439,10 @@ export const MapView: React.FC = () => {
             onClick={() => setIsLayersMenuOpen(!isLayersMenuOpen)}
             title="Map Layer Styles"
             aria-label="Toggle map layer style"
-            className={`p-2.5 rounded-xl border shadow-2xl transition-colors backdrop-blur-md ${
+            className={`p-2.5 rounded-xl border shadow-dropdown transition-colors backdrop-blur-md ${
               isLayersMenuOpen
-                ? 'bg-[#00b0ff] text-slate-950 border-[#00b0ff]'
-                : 'bg-[#202020]/95 border-[#303030] text-[#EEEEEE] hover:text-white hover:bg-[#282828]'
+                ? 'bg-brand-primary text-brand-contrast border-brand-primary'
+                : 'bg-surface-panel border-edge-default text-content-primary hover:bg-surface-hover'
             }`}
           >
             <Layers className="w-4 h-4" />
@@ -433,8 +450,8 @@ export const MapView: React.FC = () => {
 
           {/* Layer Selector Dropdown */}
           {isLayersMenuOpen && (
-            <div className="absolute bottom-0 right-12 w-64 bg-[#181818] border border-[#2c2c2c] rounded-2xl shadow-2xl p-2 z-50 animate-in fade-in zoom-in-95 duration-150">
-              <div className="px-2.5 py-1 text-[11px] font-bold text-[#A8A8A8] uppercase tracking-wider border-b border-[#262626] mb-1">
+            <div className="absolute bottom-0 right-12 w-64 bg-surface-panel border border-edge-default rounded-xl shadow-dropdown p-2 z-50 animate-in fade-in zoom-in-95 duration-150">
+              <div className="px-2.5 py-1 text-[11px] font-bold text-content-muted uppercase tracking-wider border-b border-edge-subtle mb-1">
                 Map Basemap Provider
               </div>
               {(Object.keys(TILE_PROVIDERS) as MapTileProvider[]).map((pid) => {
@@ -450,12 +467,12 @@ export const MapView: React.FC = () => {
                     }}
                     className={`w-full px-2.5 py-2 rounded-lg text-left text-xs flex items-center justify-between transition-colors ${
                       isSelected
-                        ? 'bg-[#242424] text-[#EEEEEE] font-bold border border-[#383838]'
-                        : 'text-[#A8A8A8] hover:bg-[#222222] hover:text-[#EEEEEE]'
+                        ? 'bg-surface-subtle text-content-primary font-bold border border-edge-default'
+                        : 'text-content-secondary hover:bg-surface-hover hover:text-content-primary'
                     }`}
                   >
                     <span>{prov.name}</span>
-                    {isSelected && <Check className="w-3.5 h-3.5 text-[#00b0ff]" />}
+                    {isSelected && <Check className="w-3.5 h-3.5 text-brand-primary" />}
                   </button>
                 );
               })}

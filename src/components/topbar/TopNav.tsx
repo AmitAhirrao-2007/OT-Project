@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { usePlanner, SettingsTab } from '../../context/PlannerContext';
+import { ThemeChoice } from '../../types/settings';
 import {
   User,
   Menu,
@@ -12,7 +13,9 @@ import {
   History,
   Sliders,
   Bookmark,
-  Search
+  Search,
+  Sun,
+  Moon
 } from 'lucide-react';
 
 export const TopNav: React.FC = () => {
@@ -21,7 +24,11 @@ export const TopNav: React.FC = () => {
     setIsLoginModalOpen,
     setIsOptionsModalOpen,
     setIsChargerFinderOpen,
-    setIsSavedPlansOpen
+    setIsSavedPlansOpen,
+    displaySettings,
+    setDisplaySettings,
+    resolvedTheme,
+    showToast
   } = usePlanner();
 
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -35,6 +42,17 @@ export const TopNav: React.FC = () => {
     { label: 'Drive & Charge History', icon: History, tab: 'history' }
   ];
 
+  const handleCycleTheme = () => {
+    const cycle: Record<ThemeChoice, ThemeChoice> = {
+      light: 'dark',
+      dark: 'system',
+      system: 'light'
+    };
+    const nextTheme = cycle[displaySettings.theme] || 'light';
+    setDisplaySettings((prev) => ({ ...prev, theme: nextTheme }));
+    showToast(`Appearance: ${nextTheme === 'system' ? 'System (Auto)' : nextTheme.charAt(0).toUpperCase() + nextTheme.slice(1)}`);
+  };
+
   return (
     <>
       <div className="absolute top-4 right-4 z-30 flex items-center gap-2 pointer-events-auto">
@@ -43,9 +61,9 @@ export const TopNav: React.FC = () => {
           type="button"
           onClick={() => setIsChargerFinderOpen(true)}
           title="Charger Finder & Hub Explorer"
-          className="hidden sm:flex items-center gap-1.5 px-3 py-2 rounded-xl bg-[#202020]/95 hover:bg-[#282828] border border-[#303030] text-[#EEEEEE] text-xs font-semibold shadow-xl backdrop-blur-md transition-colors"
+          className="hidden sm:flex items-center gap-1.5 px-3 py-2 rounded-xl bg-surface-panel/95 hover:bg-surface-hover border border-edge-default text-content-primary text-xs font-semibold shadow-card backdrop-blur-md transition-colors"
         >
-          <Search className="w-3.5 h-3.5 text-amber-400" />
+          <Search className="w-3.5 h-3.5 text-amber-500" />
           <span>Chargers</span>
         </button>
 
@@ -54,9 +72,9 @@ export const TopNav: React.FC = () => {
           type="button"
           onClick={() => setIsSavedPlansOpen(true)}
           title="Saved Route Plans"
-          className="hidden sm:flex items-center gap-1.5 px-3 py-2 rounded-xl bg-[#202020]/95 hover:bg-[#282828] border border-[#303030] text-[#EEEEEE] text-xs font-semibold shadow-xl backdrop-blur-md transition-colors"
+          className="hidden sm:flex items-center gap-1.5 px-3 py-2 rounded-xl bg-surface-panel/95 hover:bg-surface-hover border border-edge-default text-content-primary text-xs font-semibold shadow-card backdrop-blur-md transition-colors"
         >
-          <Bookmark className="w-3.5 h-3.5 text-emerald-400" />
+          <Bookmark className="w-3.5 h-3.5 text-status-success" />
           <span>Saved Plans</span>
         </button>
 
@@ -65,19 +83,36 @@ export const TopNav: React.FC = () => {
           type="button"
           onClick={() => setIsOptionsModalOpen(true)}
           title="Quick Plan Options"
-          className="hidden sm:flex items-center gap-1.5 px-3 py-2 rounded-xl bg-[#202020]/95 hover:bg-[#282828] border border-[#303030] text-[#EEEEEE] text-xs font-semibold shadow-xl backdrop-blur-md transition-colors"
+          className="hidden sm:flex items-center gap-1.5 px-3 py-2 rounded-xl bg-surface-panel/95 hover:bg-surface-hover border border-edge-default text-content-primary text-xs font-semibold shadow-card backdrop-blur-md transition-colors"
         >
-          <Sliders className="w-3.5 h-3.5 text-[#00b0ff]" />
+          <Sliders className="w-3.5 h-3.5 text-brand-primary" />
           <span>Plan Options</span>
+        </button>
+
+        {/* Quick Theme Toggle Button */}
+        <button
+          type="button"
+          onClick={handleCycleTheme}
+          title={`Appearance: ${displaySettings.theme} (click to cycle)`}
+          aria-label="Toggle theme appearance"
+          className="p-2 rounded-xl bg-surface-panel/95 hover:bg-surface-hover border border-edge-default text-content-primary shadow-card backdrop-blur-md transition-colors flex items-center justify-center"
+        >
+          {displaySettings.theme === 'system' ? (
+            <Monitor className="w-4 h-4 text-brand-primary" />
+          ) : resolvedTheme === 'dark' ? (
+            <Moon className="w-4 h-4 text-amber-400" />
+          ) : (
+            <Sun className="w-4 h-4 text-amber-500" />
+          )}
         </button>
 
         {/* Login Button */}
         <button
           type="button"
           onClick={() => setIsLoginModalOpen(true)}
-          className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-[#202020]/95 hover:bg-[#282828] border border-[#303030] text-[#EEEEEE] text-xs font-semibold shadow-xl backdrop-blur-md transition-colors"
+          className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-surface-panel/95 hover:bg-surface-hover border border-edge-default text-content-primary text-xs font-semibold shadow-card backdrop-blur-md transition-colors"
         >
-          <User className="w-3.5 h-3.5 text-[#A8A8A8]" />
+          <User className="w-3.5 h-3.5 text-content-tertiary" />
           <span>Login</span>
         </button>
 
@@ -88,16 +123,16 @@ export const TopNav: React.FC = () => {
             onClick={() => setIsMenuOpen(!isMenuOpen)}
             title="Open Menu"
             aria-label="Navigation menu"
-            className="p-2 rounded-xl bg-[#202020]/95 hover:bg-[#282828] border border-[#303030] text-[#EEEEEE] shadow-xl backdrop-blur-md transition-colors"
+            className="p-2 rounded-xl bg-surface-panel/95 hover:bg-surface-hover border border-edge-default text-content-primary shadow-card backdrop-blur-md transition-colors"
           >
             {isMenuOpen ? <X className="w-4 h-4" /> : <Menu className="w-4 h-4" />}
           </button>
 
           {/* Dropdown Menu */}
           {isMenuOpen && (
-            <div className="absolute right-0 mt-2 w-64 bg-[#181818] border border-[#2c2c2c] rounded-2xl shadow-2xl overflow-hidden py-2 z-50 animate-in fade-in zoom-in-95 duration-150">
-              <div className="px-3.5 py-2 border-b border-[#262626] mb-1">
-                <span className="text-[11px] font-bold text-[#A8A8A8] uppercase tracking-wider">
+            <div className="absolute right-0 mt-2 w-64 bg-surface-panel border border-edge-default rounded-2xl shadow-panel overflow-hidden py-2 z-50 animate-in fade-in zoom-in-95 duration-150">
+              <div className="px-3.5 py-2 border-b border-edge-subtle mb-1">
+                <span className="text-[11px] font-bold text-content-tertiary uppercase tracking-wider">
                   Tools & Itineraries
                 </span>
               </div>
@@ -108,9 +143,9 @@ export const TopNav: React.FC = () => {
                   setIsMenuOpen(false);
                   setIsChargerFinderOpen(true);
                 }}
-                className="w-full px-3.5 py-2 text-left text-xs font-medium text-[#EEEEEE] hover:bg-[#242424] flex items-center gap-2.5 transition-colors"
+                className="w-full px-3.5 py-2 text-left text-xs font-medium text-content-primary hover:bg-surface-hover flex items-center gap-2.5 transition-colors"
               >
-                <Search className="w-4 h-4 text-amber-400" />
+                <Search className="w-4 h-4 text-amber-500" />
                 <span>Charger Discovery Explorer</span>
               </button>
 
@@ -120,14 +155,14 @@ export const TopNav: React.FC = () => {
                   setIsMenuOpen(false);
                   setIsSavedPlansOpen(true);
                 }}
-                className="w-full px-3.5 py-2 text-left text-xs font-medium text-[#EEEEEE] hover:bg-[#242424] flex items-center gap-2.5 transition-colors"
+                className="w-full px-3.5 py-2 text-left text-xs font-medium text-content-primary hover:bg-surface-hover flex items-center gap-2.5 transition-colors"
               >
-                <Bookmark className="w-4 h-4 text-emerald-400" />
+                <Bookmark className="w-4 h-4 text-status-success" />
                 <span>Saved Route Plans</span>
               </button>
 
-              <div className="px-3.5 py-2 border-b border-t border-[#262626] my-1">
-                <span className="text-[11px] font-bold text-[#A8A8A8] uppercase tracking-wider">
+              <div className="px-3.5 py-2 border-b border-t border-edge-subtle my-1">
+                <span className="text-[11px] font-bold text-content-tertiary uppercase tracking-wider">
                   Settings & Profiles
                 </span>
               </div>
@@ -142,24 +177,24 @@ export const TopNav: React.FC = () => {
                       setIsMenuOpen(false);
                       openSettingsTab(item.tab);
                     }}
-                    className="w-full px-3.5 py-2 text-left text-xs font-medium text-[#EEEEEE] hover:bg-[#242424] flex items-center gap-2.5 transition-colors"
+                    className="w-full px-3.5 py-2 text-left text-xs font-medium text-content-primary hover:bg-surface-hover flex items-center gap-2.5 transition-colors"
                   >
-                    <Icon className="w-4 h-4 text-[#00b0ff]" />
+                    <Icon className="w-4 h-4 text-brand-primary" />
                     <span>{item.label}</span>
                   </button>
                 );
               })}
 
-              <div className="mt-1 pt-1 border-t border-[#262626]">
+              <div className="mt-1 pt-1 border-t border-edge-subtle">
                 <button
                   type="button"
                   onClick={() => {
                     setIsMenuOpen(false);
                     setIsLoginModalOpen(true);
                   }}
-                  className="w-full px-3.5 py-2 text-left text-xs font-medium text-[#EEEEEE] hover:bg-[#242424] flex items-center gap-2.5 transition-colors"
+                  className="w-full px-3.5 py-2 text-left text-xs font-medium text-content-primary hover:bg-surface-hover flex items-center gap-2.5 transition-colors"
                 >
-                  <User className="w-4 h-4 text-emerald-400" />
+                  <User className="w-4 h-4 text-status-success" />
                   <span>Account & Cloud Sync</span>
                 </button>
               </div>

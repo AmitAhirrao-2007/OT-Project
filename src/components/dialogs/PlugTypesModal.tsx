@@ -67,13 +67,13 @@ export const PlugTypesModal: React.FC = () => {
       maxWidth="max-w-lg"
       footer={
         <div className="flex items-center justify-between w-full">
-          <span className="text-xs text-[#A8A8A8]">
+          <span className="text-xs text-content-tertiary">
             {vehicle.selectedPlugTypes.length} connector(s) selected
           </span>
           <button
             type="button"
             onClick={handleDone}
-            className="px-5 py-2 rounded-lg bg-[#00b0ff] hover:bg-[#009be0] text-slate-950 font-bold text-xs shadow-md transition-colors"
+            className="px-5 py-2 rounded-lg bg-brand-primary hover:bg-brand-hover text-brand-inverse font-bold text-xs shadow-sm transition-colors"
           >
             Done
           </button>
@@ -89,35 +89,37 @@ export const PlugTypesModal: React.FC = () => {
               onClick={() => handleToggle(opt.type)}
               className={`p-3.5 rounded-xl border transition-all cursor-pointer flex items-start justify-between gap-3 ${
                 isSelected
-                  ? 'bg-[#242424] border-[#00b0ff]/60 shadow-sm'
-                  : 'bg-[#202020] border-[#303030] hover:bg-[#262626]'
+                  ? 'bg-surface-panel border-brand-primary/60 ring-1 ring-brand-primary/20 shadow-sm'
+                  : 'bg-surface-subtle border-edge-subtle hover:bg-surface-hover hover:border-edge-default'
               }`}
             >
               <div className="flex items-start gap-3">
                 <div
                   className={`w-5 h-5 rounded-md flex items-center justify-center shrink-0 mt-0.5 border ${
                     isSelected
-                      ? 'bg-[#00b0ff] border-[#00b0ff] text-slate-950 font-bold'
-                      : 'border-[#383838] bg-[#181818]'
+                      ? 'bg-brand-primary border-brand-primary text-brand-inverse font-bold'
+                      : 'bg-surface-canvas border-edge-default text-transparent'
                   }`}
                 >
-                  {isSelected && <Check className="w-3.5 h-3.5 stroke-[3]" />}
+                  <Check className="w-3.5 h-3.5" />
                 </div>
                 <div>
-                  <span className="text-sm font-semibold text-[#EEEEEE] block">
-                    {opt.label}
-                  </span>
-                  <p className="text-xs text-[#A8A8A8] mt-0.5 leading-relaxed">
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm font-semibold text-content-primary">
+                      {opt.label}
+                    </span>
+                    {opt.type === 'CCS' && (
+                      <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20 flex items-center gap-0.5">
+                        <Zap className="w-2.5 h-2.5 fill-current" />
+                        DC Fast
+                      </span>
+                    )}
+                  </div>
+                  <p className="text-xs text-content-secondary mt-0.5 leading-relaxed">
                     {opt.desc}
                   </p>
                 </div>
               </div>
-
-              <Zap
-                className={`w-4 h-4 shrink-0 ${
-                  isSelected ? 'text-[#00b0ff]' : 'text-[#707070]'
-                }`}
-              />
             </div>
           );
         })}
@@ -125,4 +127,3 @@ export const PlugTypesModal: React.FC = () => {
     </Modal>
   );
 };
-

@@ -62,20 +62,20 @@ export const Modal: React.FC<ModalProps> = ({
           onClose();
         }
       }}
-      className="fixed inset-0 z-50 p-0 m-auto bg-transparent backdrop:bg-black/75 backdrop:backdrop-blur-sm border-none overflow-visible max-h-[90vh] focus:outline-none"
+      className="fixed inset-0 z-50 p-0 m-auto bg-transparent backdrop:bg-black/50 dark:backdrop:bg-black/75 backdrop:backdrop-blur-sm border-none overflow-visible max-h-[90vh] focus:outline-none"
     >
       <div
-        className={`w-full ${maxWidth} bg-[#141414] border border-[#282828] text-[#EEEEEE] rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[85vh] animate-in fade-in-50 zoom-in-95 duration-150`}
+        className={`w-full ${maxWidth} bg-surface-panel border border-edge-default text-content-primary rounded-xl shadow-dropdown overflow-hidden flex flex-col max-h-[85vh] animate-in fade-in-50 zoom-in-95 duration-150`}
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-[#262626] bg-[#181818]">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-edge-subtle bg-surface-panel">
           <div>
-            <h2 id="modal-title" className="text-base font-bold text-[#EEEEEE]">
+            <h2 id="modal-title" className="text-base font-bold text-content-primary">
               {title}
             </h2>
             {subtitle && (
-              <p className="text-xs text-[#A8A8A8] mt-0.5">{subtitle}</p>
+              <p className="text-xs text-content-secondary mt-0.5">{subtitle}</p>
             )}
           </div>
           <div className="flex items-center gap-2">
@@ -84,7 +84,7 @@ export const Modal: React.FC<ModalProps> = ({
               type="button"
               onClick={onClose}
               aria-label="Close dialog"
-              className="p-1.5 rounded-lg text-[#A8A8A8] hover:text-[#EEEEEE] hover:bg-[#282828] transition-colors"
+              className="p-1.5 rounded-lg text-content-muted hover:text-content-primary hover:bg-surface-hover transition-colors"
             >
               <X className="w-5 h-5" />
             </button>
@@ -92,13 +92,13 @@ export const Modal: React.FC<ModalProps> = ({
         </div>
 
         {/* Content Body */}
-        <div className="px-6 py-5 overflow-y-auto flex-1 space-y-4 custom-scrollbar text-sm">
+        <div className="px-6 py-5 overflow-y-auto flex-1 space-y-4 custom-scrollbar text-sm text-content-primary">
           {children}
         </div>
 
         {/* Footer */}
         {footer && (
-          <div className="px-6 py-3.5 border-t border-[#262626] bg-[#161616] flex items-center justify-end gap-3">
+          <div className="px-6 py-3.5 border-t border-edge-subtle bg-surface-subtle flex items-center justify-end gap-3">
             {footer}
           </div>
         )}

@@ -47,7 +47,7 @@ export const initialRoutingSettings: RoutingSettings = {
 export const initialDisplaySettings: DisplaySettings = {
   units: 'imperial', // captured reference shows mi & mph
   temperature: 'F',
-  theme: 'dark'
+  theme: 'light' // Default to Light mode per professional automotive design specification
 };
 
 export const initialPrivacySettings: PrivacySettings = {

@@ -74,7 +74,7 @@ export const PlanOptionsModal: React.FC = () => {
         <button
           type="button"
           onClick={handleDone}
-          className="px-3.5 py-1.5 rounded-lg bg-[#00b0ff] hover:bg-[#009be0] text-slate-950 font-bold text-xs shadow-md shadow-cyan-500/20 transition-all mr-1"
+          className="px-3.5 py-1.5 rounded-lg bg-brand-primary hover:bg-brand-hover text-brand-inverse font-bold text-xs shadow-sm transition-all mr-1"
         >
           Done
         </button>
@@ -88,14 +88,14 @@ export const PlanOptionsModal: React.FC = () => {
               setChargingSettings((c) => ({ ...c, preferredNetworks: initialPlanOptions.preferredNetworks }));
               showToast('Reset plan options to reference defaults.');
             }}
-            className="text-xs text-[#A8A8A8] hover:text-[#EEEEEE] underline"
+            className="text-xs text-content-secondary hover:text-content-primary underline"
           >
             Reset defaults
           </button>
           <button
             type="button"
             onClick={handleDone}
-            className="px-5 py-2 rounded-lg bg-[#00b0ff] hover:bg-[#009be0] text-slate-950 font-bold text-xs shadow-md shadow-cyan-500/20 transition-all"
+            className="px-5 py-2 rounded-lg bg-brand-primary hover:bg-brand-hover text-brand-inverse font-bold text-xs shadow-sm transition-all"
           >
             Done
           </button>
@@ -104,8 +104,8 @@ export const PlanOptionsModal: React.FC = () => {
     >
       <div className="space-y-4 text-xs">
         {/* Charge Stops Strategy */}
-        <div className="p-3.5 bg-[#202020] rounded-xl border border-[#303030]">
-          <label className="block text-[#EEEEEE] font-semibold uppercase tracking-wider text-[11px] mb-2">
+        <div className="p-3.5 bg-surface-subtle rounded-xl border border-edge-subtle">
+          <label className="block text-content-primary font-semibold uppercase tracking-wider text-[11px] mb-2">
             Charge Stops Strategy
           </label>
           <SegmentedControl<ChargeStopsPreference>
@@ -121,7 +121,7 @@ export const PlanOptionsModal: React.FC = () => {
         </div>
 
         {/* Destination Arrival SoC Slider */}
-        <div className="p-3.5 bg-[#202020] rounded-xl border border-[#303030]">
+        <div className="p-3.5 bg-surface-subtle rounded-xl border border-edge-subtle">
           <Slider
             label="Destination Arrival Battery"
             subLabel="Minimum buffer upon reaching final destination"
@@ -134,11 +134,11 @@ export const PlanOptionsModal: React.FC = () => {
         </div>
 
         {/* Avoid on Route Toggles */}
-        <div className="p-3.5 bg-[#202020] rounded-xl border border-[#303030]">
-          <div className="text-[#EEEEEE] font-semibold uppercase tracking-wider text-[11px] mb-2">
+        <div className="p-3.5 bg-surface-subtle rounded-xl border border-edge-subtle">
+          <div className="text-content-primary font-semibold uppercase tracking-wider text-[11px] mb-2">
             Avoid on Route
           </div>
-          <div className="divide-y divide-[#2a2a2a]">
+          <div className="divide-y divide-edge-subtle">
             <ToggleSwitch
               label="Avoid Tolls"
               description="Prefer toll-free national/state highways where available"
@@ -167,9 +167,9 @@ export const PlanOptionsModal: React.FC = () => {
         </div>
 
         {/* Charging Network Preferences */}
-        <div className="p-3.5 bg-[#202020] rounded-xl border border-[#303030]">
+        <div className="p-3.5 bg-surface-subtle rounded-xl border border-edge-subtle">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-[#EEEEEE] font-semibold uppercase tracking-wider text-[11px]">
+            <span className="text-content-primary font-semibold uppercase tracking-wider text-[11px]">
               Charging Networks
             </span>
             <button
@@ -178,14 +178,14 @@ export const PlanOptionsModal: React.FC = () => {
                 setIsOptionsModalOpen(false);
                 openSettingsTab('charging');
               }}
-              className="text-[#00b0ff] hover:underline flex items-center gap-1 font-semibold text-[11px]"
+              className="text-brand-primary hover:underline flex items-center gap-1 font-semibold text-[11px]"
             >
               <Edit3 className="w-3 h-3" />
               <span>Edit in Settings</span>
             </button>
           </div>
 
-          <p className="text-[#A8A8A8] text-[11px] mb-2.5">
+          <p className="text-content-secondary text-[11px] mb-2.5">
             Select preferred networks to prioritize along the travel corridor.
           </p>
 
@@ -199,8 +199,8 @@ export const PlanOptionsModal: React.FC = () => {
                   onClick={() => togglePreferredNetwork(network)}
                   className={`px-2.5 py-1.5 rounded-lg text-xs font-medium border flex items-center gap-1.5 transition-colors ${
                     isPreferred
-                      ? 'bg-[#00b0ff]/20 text-[#00b0ff] border-[#00b0ff]/60 font-semibold'
-                      : 'bg-[#282828] text-[#A8A8A8] border-[#383838] hover:text-[#EEEEEE] hover:bg-[#303030]'
+                      ? 'bg-brand-subtle text-brand-primary border-brand-primary/40 font-semibold'
+                      : 'bg-surface-panel text-content-secondary border-edge-default hover:text-content-primary hover:bg-surface-hover shadow-sm'
                   }`}
                 >
                   {isPreferred ? <Check className="w-3.5 h-3.5" /> : <Plus className="w-3.5 h-3.5 opacity-60" />}
