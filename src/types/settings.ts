@@ -18,6 +18,11 @@ export interface PlanOptions {
   avoidFerriesAndTrains: boolean;
   avoidBorders: boolean;
   preferredNetworks: string[];
+  useRcspOptimizer?: boolean;
+  socDiscretizationStepPercent?: number; // default: 5% (supported: 1, 2, 5)
+  routePreference?: 'fastest' | 'shortest'; // road preference, default 'fastest'
+  enableSimulatedQueues?: boolean; // default true for demo
+  simulatedQueueSeed?: number; // seed for simulation generation
 }
 
 export interface ChargingSettings {
@@ -45,6 +50,7 @@ export interface RoutingSettings {
   adjustSpeed: boolean;
   weatherChoice: WeatherChoice;
   seasonalWeatherDescription: string;
+  routePreference?: 'fastest' | 'shortest';
 }
 
 export type ThemeChoice = 'light' | 'dark' | 'system';

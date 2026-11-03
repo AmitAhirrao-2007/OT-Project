@@ -1,104 +1,62 @@
-import { ChargingStop, RouteOption, Waypoint } from '../types/route';
-import { VehicleProfile } from '../types/vehicle';
-import { ChargingSettings, PlanOptions, RoutingSettings } from '../types/settings';
+import {
+  ChargingStop,
+  RouteOption,
+  RouteGeometryStatus,
+  Waypoint,
+  RouteCalculationRequest,
+  InfeasibilityDetails
+} from '../types/route';
 import { ChargingStation } from '../types/station';
 import { chargingStations } from '../data/stationCatalogue';
 import { calculateChargingDuration, calculateLegEnergy, checkLegFeasibility } from './energyModel';
 import { demoTrip } from '../data/demoRoute';
+import { solveRcsp } from './rcspSolver';
+import {
+  validateStationRoadAccess,
+  evaluateBackupCharger,
+  RoadAccessValidationResult
+} from './roadAccessService';
+import {
+  classifyTariff,
+  classifyStallAvailability,
+  normalizeNetworkName
+} from './catalogueService';
+import { globalLiveDataService } from './providers/liveDataService';
+import {
+  formatHoursMinutes,
+  parseDurationStringToMinutes,
+  parsePricePerKwh,
+  addMinutesToTimeString
+} from '../utils/timeUtils';
+import {
+  haversineDistanceMi,
+  getEligibleStations,
+  projectStationOnPolyline
+} from '../utils/geoUtils';
+import {
+  calculateTomTomTrafficRoute,
+  calculateRoadRouteAlternatives,
+  CandidateRoadPath
+} from './traffic/trafficService';
+import { TrafficRouteSummary } from '../types/traffic';
 
-export interface RouteCalculationRequest {
-  origin: Waypoint;
-  destination: Waypoint;
-  waypoints?: Waypoint[];
-  vehicle: VehicleProfile;
-  planOptions: PlanOptions;
-  chargingSettings: ChargingSettings;
-  routingSettings: RoutingSettings;
-}
+export {
+  formatHoursMinutes,
+  parseDurationStringToMinutes,
+  parsePricePerKwh,
+  addMinutesToTimeString,
+  haversineDistanceMi,
+  getEligibleStations,
+  projectStationOnPolyline
+};
+
+export type { RouteCalculationRequest };
 
 export interface RouteCalculationResult {
   routeOptions: RouteOption[];
   activeRouteId: string;
 }
 
-/**
- * Calculates straight line distance between two coordinates in miles using the Haversine formula.
- */
-export function haversineDistanceMi(coord1: [number, number], coord2: [number, number]): number {
-  const [lat1, lon1] = coord1;
-  const [lat2, lon2] = coord2;
-  const R = 3958.8; // Radius of the Earth in miles
-  const dLat = ((lat2 - lat1) * Math.PI) / 180;
-  const dLon = ((lon2 - lon1) * Math.PI) / 180;
-  const a =
-    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-    Math.cos((lat1 * Math.PI) / 180) *
-      Math.cos((lat2 * Math.PI) / 180) *
-      Math.sin(dLon / 2) *
-      Math.sin(dLon / 2);
-  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-  return R * c;
-}
-
-/**
- * Formats minutes into standard "X h Y min" or "Y min" string.
- */
-export function formatHoursMinutes(totalMinutes: number): string {
-  const hours = Math.floor(totalMinutes / 60);
-  const minutes = Math.round(totalMinutes % 60);
-  if (hours === 0) return `${minutes} min`;
-  if (minutes === 0) return `${hours} h`;
-  return `${hours} h ${minutes} min`;
-}
-
-/**
- * Parses duration strings such as "3 h 38 min" or "41 min" into total integer minutes.
- */
-export function parseDurationStringToMinutes(str: string): number {
-  if (!str) return 0;
-  let total = 0;
-  const hMatch = str.match(/(\d+)\s*h/i);
-  const mMatch = str.match(/(\d+)\s*min/i);
-  if (hMatch) total += parseInt(hMatch[1], 10) * 60;
-  if (mMatch) total += parseInt(mMatch[1], 10);
-  return total || 0;
-}
-
-/**
- * Parses station tariff strings such as "₹22.50 / kWh" into numeric tariff values.
- */
-export function parsePricePerKwh(priceStr?: string): number {
-  if (!priceStr) return 21.0;
-  const match = priceStr.match(/(\d+(?:\.\d+)?)/);
-  return match ? parseFloat(match[1]) : 21.0;
-}
-
-/**
- * Adds minutes to an HH:MM AM/PM string, wrapping around 24 hours.
- */
-export function addMinutesToTimeString(startTime: string, minutesToAdd: number): string {
-  const match = startTime.match(/(\d+):(\d+)\s*(AM|PM)?/i);
-  let hours = 12;
-  let mins = 0;
-
-  if (match) {
-    hours = parseInt(match[1], 10);
-    mins = parseInt(match[2], 10);
-    const meridiem = match[3]?.toUpperCase();
-    if (meridiem === 'PM' && hours < 12) hours += 12;
-    if (meridiem === 'AM' && hours === 12) hours = 0;
-  }
-
-  const totalMin = (hours * 60 + mins + Math.round(minutesToAdd)) % (24 * 60);
-  const newHours24 = Math.floor(totalMin / 60);
-  const newMins = totalMin % 60;
-
-  const displayHours = newHours24 % 12 === 0 ? 12 : newHours24 % 12;
-  const displayMeridiem = newHours24 >= 12 ? 'PM' : 'AM';
-  const displayMins = newMins.toString().padStart(2, '0');
-
-  return `${displayHours}:${displayMins} ${displayMeridiem}`;
-}
 
 /**
  * Checks whether the requested journey strictly corresponds to the Patna-to-Delhi demonstration corridor.
@@ -112,9 +70,17 @@ export function isDefaultPatnaDelhiCorridor(
 ): boolean {
   if (waypoints.length > 0) return false;
 
+  // The demo corridor is strictly for the exact default "Patna" to "Delhi" trip.
+  // If the user selects a specific street address, locality (e.g. Kankarbagh), or custom place,
+  // it must use dynamic routing with their exact coordinates.
+  if (origin.isCustom || destination.isCustom) return false;
+  if (origin.name !== 'Patna' || (destination.name !== 'Delhi' && destination.name !== 'New Delhi')) {
+    return false;
+  }
+
   const PATNA: [number, number] = [25.5941, 85.1376];
   const DELHI: [number, number] = [28.6139, 77.2090];
-  const tol = 0.25; // ~25 km coordinate tolerance
+  const tol = 0.05; // strict coordinate match for the calibrated demo fixture
 
   const originMatchesPatna =
     Math.abs(origin.coordinates[0] - PATNA[0]) < tol &&
@@ -133,7 +99,12 @@ export function isDefaultPatnaDelhiCorridor(
  */
 export async function fetchRoadGeometry(
   points: [number, number][]
-): Promise<{ coordinates: [number, number][]; distanceMi: number; durationMinutes: number } | null> {
+): Promise<{
+  coordinates: [number, number][];
+  distanceMi: number;
+  durationMinutes: number;
+  legs?: { distanceMi: number; durationMinutes: number }[];
+} | null> {
   if (points.length < 2) return null;
   try {
     const controller = new AbortController();
@@ -157,124 +128,31 @@ export async function fetchRoadGeometry(
     const distanceMi = route.distance * 0.000621371; // meters to miles
     const durationMinutes = route.duration / 60; // seconds to minutes
 
+    const legs = Array.isArray(route.legs)
+      ? route.legs.map((l: { distance: number; duration: number }) => ({
+          distanceMi: Math.max(1, Math.round(l.distance * 0.000621371)),
+          durationMinutes: Math.max(1, Math.round(l.duration / 60))
+        }))
+      : undefined;
+
     return {
       coordinates: geojsonCoords,
       distanceMi: Math.max(1, Math.round(distanceMi)),
-      durationMinutes: Math.max(1, Math.round(durationMinutes))
+      durationMinutes: Math.max(1, Math.round(durationMinutes)),
+      legs
     };
   } catch {
     return null;
   }
 }
 
-/**
- * Filter stations that match vehicle plug types, minimum stalls, and user exclusions.
- * Distinguishes zero available stalls (0) from unknown/untracked stalls (undefined).
- */
-export function getEligibleStations(
-  stations: ChargingStation[],
-  vehicle: VehicleProfile,
-  planOptions: PlanOptions,
-  chargingSettings: ChargingSettings
-): ChargingStation[] {
-  const preferred = planOptions.preferredNetworks || chargingSettings.preferredNetworks || [];
-  const avoided = chargingSettings.avoidedNetworks || [];
-  const excluded = chargingSettings.excludedChargers || [];
-  const minStalls = chargingSettings.minimumChargerStalls || 1;
-
-  return stations
-    .filter((station) => {
-      // 1. Check excluded chargers
-      if (excluded.includes(station.id)) return false;
-
-      // 2. Check avoided networks
-      if (avoided.includes(station.network)) return false;
-
-      // 3. Check connector compatibility with selected vehicle plug types
-      const hasCompatiblePlug = station.connectors.some((c) =>
-        vehicle.selectedPlugTypes.includes(c.type)
-      );
-      if (!hasCompatiblePlug) return false;
-
-      // 4. Check minimum total stalls
-      if (station.totalStalls < minStalls) return false;
-
-      // 5. If minimum stalls requirement > 1 and available stalls is known, enforce availability
-      if (minStalls > 1 && station.availableStalls !== undefined && station.availableStalls < minStalls) {
-        return false;
-      }
-
-      return true;
-    })
-    .sort((a, b) => {
-      // Prioritize preferred networks
-      const aPref = preferred.includes(a.network) ? 1 : 0;
-      const bPref = preferred.includes(b.network) ? 1 : 0;
-      return bPref - aPref;
-    });
-}
-
-/**
- * Projects a station onto a route polyline, returning its detour distance (perpendicular distance)
- * and progression distance from route origin in miles.
- */
-export function projectStationOnPolyline(
-  stationCoord: [number, number],
-  polyline: [number, number][]
-): { detourMi: number; distFromOriginMi: number } {
-  if (polyline.length < 2) {
-    return { detourMi: 9999, distFromOriginMi: 0 };
-  }
-
-  let minDetour = Infinity;
-  let bestProgression = 0;
-  let accumulatedDist = 0;
-
-  for (let i = 0; i < polyline.length - 1; i++) {
-    const p1 = polyline[i];
-    const p2 = polyline[i + 1];
-    const segLen = haversineDistanceMi(p1, p2);
-
-    // Flat earth approximation for segment projection factor t
-    const midLatRad = ((p1[0] + p2[0]) / 2) * (Math.PI / 180);
-    const cosLat = Math.cos(midLatRad);
-    const dx = (p2[1] - p1[1]) * cosLat;
-    const dy = p2[0] - p1[0];
-    const segLenSq = dx * dx + dy * dy;
-
-    let t = 0;
-    if (segLenSq > 0) {
-      const px = (stationCoord[1] - p1[1]) * cosLat;
-      const py = stationCoord[0] - p1[0];
-      t = Math.max(0, Math.min(1, (px * dx + py * dy) / segLenSq));
-    }
-
-    const projCoord: [number, number] = [
-      p1[0] + t * (p2[0] - p1[0]),
-      p1[1] + t * (p2[1] - p1[1])
-    ];
-
-    const dist = haversineDistanceMi(stationCoord, projCoord);
-    if (dist < minDetour) {
-      minDetour = dist;
-      bestProgression = accumulatedDist + t * segLen;
-    }
-
-    accumulatedDist += segLen;
-  }
-
-  return {
-    detourMi: Number(minDetour.toFixed(2)),
-    distFromOriginMi: Number(bestProgression.toFixed(1))
-  };
-}
 
 /**
  * Recomputes the Patna-to-Delhi demonstration fixture with full physical battery feasibility,
  * genuine vehicle charging capabilities, station tariff data, and arrival timing.
  */
 function replanPatnaDelhiFixture(req: RouteCalculationRequest): RouteCalculationResult {
-  const { origin, vehicle, planOptions, chargingSettings, routingSettings } = req;
+  const { origin, destination, vehicle, planOptions, chargingSettings, routingSettings } = req;
   const initialSoc = origin.batterySoc !== undefined ? origin.batterySoc : 95;
   const minChargerReserve = chargingSettings.preferredMinArrivalBatteryCharger || 10;
   const minDestReserve =
@@ -343,6 +221,8 @@ function replanPatnaDelhiFixture(req: RouteCalculationRequest): RouteCalculation
       // Advance battery SoC for next leg
       currentSoc = targetSoc;
 
+      const commSummary = req.communitySummaries?.get(stop.stationId);
+
       return {
         ...stop,
         stallsAvailable: stop.stallsAvailable !== undefined ? stop.stallsAvailable : undefined,
@@ -355,7 +235,12 @@ function replanPatnaDelhiFixture(req: RouteCalculationRequest): RouteCalculation
         departureTime,
         isFeasible: legFeasible,
         isPreferred,
-        isExcluded
+        isExcluded,
+        communityReliabilityScore: commSummary?.overallScore ?? stop.communityReliabilityScore ?? null,
+        communityConfidenceTier: commSummary?.confidenceTier ?? stop.communityConfidenceTier ?? 'insufficient_evidence',
+        communityWarning: commSummary?.activeWarnings?.[0] ?? stop.communityWarning,
+        communityQueueMinutes: commSummary?.queueEstimate?.estimatedWaitMinutes ?? stop.communityQueueMinutes,
+        cpoConflict: commSummary?.cpoConflict ?? stop.cpoConflict
       };
     });
 
@@ -370,10 +255,57 @@ function replanPatnaDelhiFixture(req: RouteCalculationRequest): RouteCalculation
       allStopsFeasible = false;
     }
 
+    let infeasibilityDetails: InfeasibilityDetails | undefined = undefined;
+    if (!allStopsFeasible) {
+      let lastFeasibleIdx = -1;
+      for (let i = 0; i < updatedStops.length; i++) {
+        if (updatedStops[i].isFeasible && updatedStops[i].arrivalSoc >= minChargerReserve) {
+          lastFeasibleIdx = i;
+        } else {
+          break;
+        }
+      }
+
+      const lastStop = lastFeasibleIdx >= 0 ? updatedStops[lastFeasibleIdx] : undefined;
+      const lastCoord = lastStop ? lastStop.coordinates : origin.coordinates;
+      const remainingMiles = Math.max(1, Math.round(haversineDistanceMi(lastCoord, destination.coordinates)));
+      const remainingEnergyKwh = Math.round(((remainingMiles * vehicle.referenceConsumptionWhPerMi) / 1000) * 10) / 10;
+      const requiredSocPercent = Math.min(100, Math.round((remainingEnergyKwh / vehicle.usableBatteryKwh) * 100));
+
+      infeasibilityDetails = {
+        lastReachableStation: lastStop ? {
+          id: lastStop.stationId,
+          name: lastStop.name,
+          coordinates: lastStop.coordinates,
+          arrivalSoc: lastStop.arrivalSoc
+        } : undefined,
+        remainingDistanceMi: remainingMiles,
+        remainingEnergyKwh,
+        requiredSocPercent,
+        reason: lastStop
+          ? `Battery depleted after charging at "${lastStop.name}". Next leg to destination requires ${remainingEnergyKwh} kWh (${requiredSocPercent}% SoC), exceeding available battery reserve.`
+          : `Battery depleted before reaching first charging stop or destination. Required range is ${remainingMiles} mi (${remainingEnergyKwh} kWh).`,
+        suggestedAction: initialSoc < 90
+          ? `Charge vehicle to 100% SoC before departure (currently ${initialSoc}%).`
+          : `Add an intermediate charging stop or lower minimum arrival battery reserve.`
+      };
+    }
+
     const chargingDurationMinutes = updatedStops.reduce((sum, s) => sum + s.chargeDurationMinutes, 0);
     const stopBufferMinutes = updatedStops.length * 5;
     const totalDurationMinutes = opt.drivingDurationMinutes + chargingDurationMinutes + stopBufferMinutes;
     const totalDurationStr = formatHoursMinutes(totalDurationMinutes);
+
+    const demoTrafficSummary: TrafficRouteSummary = {
+      status: 'unavailable',
+      provider: 'TomTom Orbis Traffic',
+      trafficTravelTimeMinutes: opt.drivingDurationMinutes,
+      freeFlowTravelTimeMinutes: opt.drivingDurationMinutes,
+      trafficDelayMinutes: 0,
+      lastUpdated: new Date().toISOString(),
+      segments: [],
+      incidents: []
+    };
 
     return {
       ...opt,
@@ -387,7 +319,15 @@ function replanPatnaDelhiFixture(req: RouteCalculationRequest): RouteCalculation
       label: totalDurationStr,
       totalEnergyKwh: Math.round((opt.totalDistanceMi * vehicle.referenceConsumptionWhPerMi) / 1000),
       estimatedExpenseInr: totalExpenseInr,
-      isFeasible: allStopsFeasible
+      isFeasible: allStopsFeasible,
+      isCompleteEvJourney: allStopsFeasible && updatedStops.length > 0,
+      chargerDataStatus: 'catalogue_verified' as const,
+      feasibilityNote: allStopsFeasible ? undefined : 'Road route available — complete EV journey not currently feasible.',
+      infeasibilityDetails,
+      trafficSummary: demoTrafficSummary,
+      geometrySource: 'osrm' as const,
+      geometryStatus: 'OSRM_ROAD_GEOMETRY' as const,
+      roadValidated: true
     };
   });
 
@@ -428,62 +368,110 @@ export async function calculateTripRoutes(
     destination.coordinates
   ];
 
-  // 2. Fetch road geometry from OSRM with fallback to interpolated highway curve
-  const initialRoadData = await fetchRoadGeometry(initialEndpoints);
-  const roadDistanceMi = initialRoadData
-    ? initialRoadData.distanceMi
-    : Math.round(
-        initialEndpoints.reduce((acc, pt, i) => {
-          if (i === 0) return acc;
-          return acc + haversineDistanceMi(initialEndpoints[i - 1], pt) * 1.28;
-        }, 0)
+  // 2. Fetch road geometry and provider-supported alternative paths
+  const roadAlternatives = await calculateRoadRouteAlternatives(initialEndpoints, {
+    routeType: planOptions.routePreference || routingSettings.routePreference || 'fastest',
+    avoidTolls: planOptions.avoidTolls || routingSettings.avoidTolls,
+    avoidHighways: planOptions.avoidHighways || routingSettings.avoidHighways,
+    avoidFerries: planOptions.avoidFerriesAndTrains || routingSettings.avoidFerries,
+    maxAlternatives: 3
+  });
+
+  const pathPlans: {
+    roadPath: CandidateRoadPath;
+    id: string;
+    name: string;
+    badge: string;
+    targetSoc: number;
+    alternativeIndex: number;
+  }[] = [];
+
+  if (roadAlternatives.length >= 3) {
+    pathPlans.push(
+      { roadPath: roadAlternatives[0], id: 'route-optimal', name: roadAlternatives[0].name, badge: 'Fastest', targetSoc: 72, alternativeIndex: 0 },
+      { roadPath: roadAlternatives[1], id: 'route-fewer', name: roadAlternatives[1].name, badge: 'Alt Road 1', targetSoc: 78, alternativeIndex: 1 },
+      { roadPath: roadAlternatives[2], id: 'route-fewest', name: roadAlternatives[2].name, badge: 'Alt Road 2', targetSoc: 85, alternativeIndex: 2 }
+    );
+  } else if (roadAlternatives.length === 2) {
+    pathPlans.push(
+      { roadPath: roadAlternatives[0], id: 'route-optimal', name: roadAlternatives[0].name, badge: 'Fastest', targetSoc: 72, alternativeIndex: 0 },
+      { roadPath: roadAlternatives[1], id: 'route-fewer', name: roadAlternatives[1].name, badge: 'Alt Road 1', targetSoc: 78, alternativeIndex: 1 }
+    );
+    if (planOptions.useRcspOptimizer) {
+      pathPlans.push(
+        { roadPath: roadAlternatives[1], id: 'route-fewest', name: `${roadAlternatives[1].name} (Fewest Stops)`, badge: '+Fewest Stops', targetSoc: 88, alternativeIndex: 2 }
       );
+    }
+  } else if (roadAlternatives.length === 1) {
+    const p0 = roadAlternatives[0];
+    pathPlans.push(
+      { roadPath: p0, id: 'route-optimal', name: p0.name || 'Primary Route', badge: 'Fastest', targetSoc: 72, alternativeIndex: 0 }
+    );
+    if (planOptions.useRcspOptimizer) {
+      pathPlans.push(
+        { roadPath: p0, id: 'route-fewer', name: 'Fewer Stops', badge: '+14 min', targetSoc: 82, alternativeIndex: 1 },
+        { roadPath: p0, id: 'route-fewest', name: 'Fewest Stops', badge: '+42 min', targetSoc: 90, alternativeIndex: 2 }
+      );
+    }
+  } else {
+    // Fallback geometric path with genuine Haversine distance and interpolated coordinates
+    let directDistMi = 0;
+    for (let i = 1; i < initialEndpoints.length; i++) {
+      directDistMi += haversineDistanceMi(initialEndpoints[i - 1], initialEndpoints[i]);
+    }
+    const estDist = Math.max(1, Math.round(directDistMi * 1.25));
+    const estMinutes = Math.max(1, Math.round(estDist * 1.35));
 
-  const roadDurationMinutes = initialRoadData
-    ? initialRoadData.durationMinutes
-    : Math.round(roadDistanceMi * 1.35);
-
-  const initialPolyline =
-    initialRoadData?.coordinates ||
-    initialEndpoints.reduce<[number, number][]>((acc, pt, i) => {
-      if (i === 0) return [pt];
-      const prev = initialEndpoints[i - 1];
-      const steps = 8;
-      for (let s = 1; s <= steps; s++) {
-        acc.push([
-          prev[0] + ((pt[0] - prev[0]) * s) / steps,
-          prev[1] + ((pt[1] - prev[1]) * s) / steps
+    // Interpolate points between endpoints to provide a visible connected polyline
+    const interpolatedCoords: [number, number][] = [];
+    for (let i = 1; i < initialEndpoints.length; i++) {
+      const p1 = initialEndpoints[i - 1];
+      const p2 = initialEndpoints[i];
+      const steps = Math.max(8, Math.min(60, Math.round(haversineDistanceMi(p1, p2) / 8)));
+      for (let s = 0; s < steps; s++) {
+        const frac = s / steps;
+        interpolatedCoords.push([
+          Number((p1[0] + (p2[0] - p1[0]) * frac).toFixed(5)),
+          Number((p1[1] + (p2[1] - p1[1]) * frac).toFixed(5))
         ]);
       }
-      return acc;
-    }, []);
+    }
+    interpolatedCoords.push(initialEndpoints[initialEndpoints.length - 1]);
 
-  // 3. Spatially identify candidate charging stations along the route corridor
-  const eligibleStations = getEligibleStations(chargingStations, vehicle, planOptions, chargingSettings);
-  const maxDetourMi = 25; // max 25 miles from route corridor
-
-  interface StationWithProjection {
-    station: ChargingStation;
-    detourMi: number;
-    distFromOriginMi: number;
-  }
-
-  const corridorStations: StationWithProjection[] = [];
-  for (const st of eligibleStations) {
-    const proj = projectStationOnPolyline(st.coordinates, initialPolyline);
-    if (proj.detourMi <= maxDetourMi && proj.distFromOriginMi > 5 && proj.distFromOriginMi < roadDistanceMi - 5) {
-      corridorStations.push({
-        station: st,
-        detourMi: proj.detourMi,
-        distFromOriginMi: proj.distFromOriginMi
-      });
+    const fallbackPath: CandidateRoadPath = {
+      id: 'road-path-0',
+      name: 'Direct Road Estimate',
+      coordinates: interpolatedCoords,
+      distanceMi: estDist,
+      durationMinutes: estMinutes,
+      freeFlowDurationMinutes: estMinutes,
+      trafficDelayMinutes: 0,
+      trafficSummary: {
+        status: 'unavailable',
+        provider: 'Fallback',
+        trafficTravelTimeMinutes: estMinutes,
+        freeFlowTravelTimeMinutes: estMinutes,
+        trafficDelayMinutes: 0,
+        lastUpdated: new Date().toISOString(),
+        segments: [],
+        incidents: []
+      },
+      legs: [{ distanceMi: estDist, durationMinutes: estMinutes, trafficDelayMinutes: 0 }],
+      routeType: 'fastest',
+      source: 'geometric_fallback'
+    };
+    pathPlans.push(
+      { roadPath: fallbackPath, id: 'route-optimal', name: 'Direct Estimate', badge: 'Approx. Geometry', targetSoc: 72, alternativeIndex: 0 }
+    );
+    if (planOptions.useRcspOptimizer) {
+      pathPlans.push(
+        { roadPath: fallbackPath, id: 'route-fewer', name: 'Fewer Stops', badge: '+14 min', targetSoc: 82, alternativeIndex: 1 },
+        { roadPath: fallbackPath, id: 'route-fewest', name: 'Fewest Stops', badge: '+42 min', targetSoc: 90, alternativeIndex: 2 }
+      );
     }
   }
 
-  // Sort corridor stations by their progression along the route
-  corridorStations.sort((a, b) => a.distFromOriginMi - b.distFromOriginMi);
-
-  // 4. Battery constraints
+  // 3. Battery and charging constraints
   const initialSoc = origin.batterySoc !== undefined ? origin.batterySoc : 95;
   const minChargerReserve = chargingSettings.preferredMinArrivalBatteryCharger || 10;
   const minDestReserve =
@@ -492,21 +480,163 @@ export async function calculateTripRoutes(
     10;
   const maxChargeLimit = Math.min(100, chargingSettings.maximumChargeLimit || 100);
 
-  // 5. Strategy variations
-  const strategies: { id: string; name: string; targetSoc: number; badge?: string }[] = [
-    { id: 'route-optimal', name: 'Optimal', targetSoc: 72, badge: 'Faster' },
-    { id: 'route-fewer', name: 'Fewer stops', targetSoc: 82, badge: '+14 min' },
-    { id: 'route-fewest', name: 'Fewest stops', targetSoc: 90, badge: '+42 min' }
-  ];
+  const stationsToUse = globalLiveDataService.getReconciledStations(chargingStations);
+  const eligibleStations = getEligibleStations(stationsToUse, vehicle, planOptions, chargingSettings);
+  const maxDetourMi = 25; // max 25 miles from route corridor
+
+  interface StationWithProjection {
+    station: ChargingStation;
+    detourMi: number;
+    distFromOriginMi: number;
+    accessValidation: RoadAccessValidationResult;
+    isPinned?: boolean;
+  }
 
   const generatedOptions: RouteOption[] = [];
 
-  for (const strat of strategies) {
+  // 4. Run the EV optimizer independently against EACH candidate road path
+  for (const plan of pathPlans) {
+    const roadPath = plan.roadPath;
+    const roadPolyline = roadPath.coordinates;
+    const roadDistanceMi = roadPath.distanceMi;
+    const roadDurationMinutes = roadPath.durationMinutes;
+
+    // Spatially identify candidate charging stations along this specific candidate road corridor
+    // Start with local curated stations and expand with National EV PCS registry stations
+    const combinedEligible = [...eligibleStations];
+
+    try {
+      if (typeof fetch === 'function' && roadPolyline && roadPolyline.length >= 2) {
+        const controller = new AbortController();
+        const timeout = setTimeout(() => controller.abort(), 2000);
+        const pcsRes = await fetch('/api/stations/corridor', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            polyline: roadPolyline,
+            corridorRadiusMi: maxDetourMi,
+            excludeLev: true,
+            minPowerKw: 25,
+            limit: 150
+          }),
+          signal: controller.signal
+        });
+        clearTimeout(timeout);
+
+        if (pcsRes.ok) {
+          const pcsData = await pcsRes.json();
+          if (Array.isArray(pcsData.stations)) {
+            const seenIds = new Set(combinedEligible.map((s) => s.id));
+            const compatiblePcs = getEligibleStations(pcsData.stations, vehicle, planOptions, chargingSettings);
+            for (const pcsSt of compatiblePcs) {
+              if (!seenIds.has(pcsSt.id)) {
+                seenIds.add(pcsSt.id);
+                combinedEligible.push(pcsSt);
+              }
+            }
+          }
+        }
+      }
+    } catch {
+      // In offline or unit-test environments without proxy server, rely on curated stations
+    }
+
+    const corridorStations: StationWithProjection[] = [];
+    for (const st of combinedEligible) {
+      const proj = projectStationOnPolyline(st.coordinates, roadPolyline);
+      if (proj.detourMi <= maxDetourMi && proj.distFromOriginMi > 5 && proj.distFromOriginMi < roadDistanceMi - 5) {
+        const access = validateStationRoadAccess(
+          st,
+          roadPolyline,
+          proj.distFromOriginMi,
+          proj.detourMi
+        );
+
+        if (access.isAccessible) {
+          corridorStations.push({
+            station: st,
+            detourMi: access.actualDetourMi,
+            distFromOriginMi: proj.distFromOriginMi,
+            accessValidation: access
+          });
+        }
+      }
+    }
+
+    let isTripFeasible = true;
+    let totalExpenseInr = 0;
+    let chargerDataStatus: 'catalogue_verified' | 'unavailable_outside_catalogue' | 'incomplete_data' | 'unverified_poi' =
+      corridorStations.length > 0 ? 'catalogue_verified' : 'unavailable_outside_catalogue';
+    let feasibilityNote: string | undefined = undefined;
+
+    // Check user-pinned charging stops in waypoints and integrate them into corridor stations
+    const pinnedChargers = waypoints.filter((w) => w.type === 'charging_pinned');
+    for (const pw of pinnedChargers) {
+      if (pw.verificationState === 'unverified_charger_poi' || !pw.stationId) {
+        isTripFeasible = false;
+        chargerDataStatus = 'unverified_poi';
+        feasibilityNote = `Pinned stop "${pw.name}" is an unverified POI lacking technical charging specifications.`;
+      } else {
+        const station: ChargingStation =
+          combinedEligible.find((s) => s.id === pw.stationId) ||
+          chargingStations.find((s) => s.id === pw.stationId) || {
+            id: pw.stationId,
+            name: pw.name,
+            network: pw.subTitle?.split('·')[0]?.trim() || 'CPO',
+            canonicalNetwork: pw.subTitle?.split('·')[0]?.trim() || 'CPO',
+            address: pw.address || pw.subTitle || 'Pinned Charging Location',
+            coordinates: pw.coordinates,
+            ratedPowerKw: pw.powerKw || 50,
+            totalStalls: 2,
+            availableStalls: 2,
+            stallAvailabilityStatus: 'unknown' as const,
+            connectors: [{ type: 'CCS2', maxPowerKw: pw.powerKw || 50, count: 2, availableCount: 2, canonicalType: 'CCS 2' }],
+            amenities: [],
+            pricePerKwh: '₹21.00 / kWh',
+            tariffClassification: 'estimated_default' as const,
+            operationalStatus: 'operational' as const,
+            statusTimestamp: new Date().toISOString(),
+            openingHours: '24/7',
+            paymentMethods: ['App'],
+            dataSource: 'Operator API' as const
+          };
+
+        if (station) {
+          const supportsPlug = station.connectors.some((c) => {
+            const cType = c.type.toLowerCase();
+            return vehicle.selectedPlugTypes.some((vp) =>
+              cType.includes(vp.toLowerCase()) || vp.toLowerCase().includes(cType)
+            );
+          });
+          if (!supportsPlug) {
+            isTripFeasible = false;
+            feasibilityNote = `Connector mismatch: Station "${station.name}" (${station.connectors.map((c) => c.type).join(', ')}) does not support vehicle selected plug types (${vehicle.selectedPlugTypes.join(', ')}).`;
+          }
+
+          const proj = projectStationOnPolyline(pw.coordinates, roadPolyline);
+          const access = validateStationRoadAccess(
+            station,
+            roadPolyline,
+            proj.distFromOriginMi,
+            proj.detourMi
+          );
+
+          corridorStations.push({
+            station,
+            detourMi: access.actualDetourMi,
+            distFromOriginMi: proj.distFromOriginMi,
+            accessValidation: access,
+            isPinned: true
+          });
+        }
+      }
+    }
+
+    corridorStations.sort((a, b) => a.distFromOriginMi - b.distFromOriginMi);
+
     let currentSoc = initialSoc;
     let currDistFromOrigin = 0;
     let accumulatedTime = origin.departureTime || '08:00 AM';
-    let isTripFeasible = true;
-    let totalExpenseInr = 0;
     const stops: ChargingStop[] = [];
 
     while (currDistFromOrigin < roadDistanceMi) {
@@ -515,8 +645,13 @@ export async function calculateTripRoutes(
       const directDestArrivalSoc = Number((currentSoc - directDestEnergy.socPercent).toFixed(1));
 
       // Can we reach final destination directly with required reserve?
-      if (directDestArrivalSoc >= minDestReserve) {
-        break; // Destination reachable directly
+      // (Only skip charging if there are NO upcoming mandatory pinned charging stops)
+      const hasUpcomingPinned = corridorStations.some(
+        (cand) => cand.isPinned && cand.distFromOriginMi > currDistFromOrigin
+      );
+
+      if (directDestArrivalSoc >= minDestReserve && !hasUpcomingPinned) {
+        break; // Destination reachable directly and no pinned stops ahead
       }
 
       // We need a charging stop. Find all reachable candidate stations ahead of currDistFromOrigin
@@ -529,18 +664,21 @@ export async function calculateTripRoutes(
       });
 
       if (reachableCandidates.length === 0) {
-        // Infeasible! No reachable station ahead under current battery reserve
         isTripFeasible = false;
+        if (corridorStations.length === 0) {
+          chargerDataStatus = 'unavailable_outside_catalogue';
+          feasibilityNote = 'No verified charging stations found along corridor in local catalogue (20 Indian stations) or National Registry. Real global routing requires live OCPI network connection.';
+        } else if (!feasibilityNote) {
+          feasibilityNote = `Battery depleted before reaching next charger (Arrival SoC: ${directDestArrivalSoc}%).`;
+        }
         break;
       }
 
-      // Pick the best station among reachable ones:
-      // Score factors:
-      // - Farther along = more battery capacity utilized
-      // - Preferred network bonus
-      // - Higher station kW power
-      // - Lower detour distance
+      // Pick the best station among reachable ones (User-pinned chargers take absolute priority):
       reachableCandidates.sort((a, b) => {
+        if (a.isPinned && !b.isPinned) return -1;
+        if (!a.isPinned && b.isPinned) return 1;
+
         const preferred = planOptions.preferredNetworks || chargingSettings.preferredNetworks || [];
         const aPref = preferred.includes(a.station.network) ? 30 : 0;
         const bPref = preferred.includes(b.station.network) ? 30 : 0;
@@ -549,8 +687,18 @@ export async function calculateTripRoutes(
         const aDetourPenalty = a.detourMi * 1.5;
         const bDetourPenalty = b.detourMi * 1.5;
 
-        const aScore = a.distFromOriginMi + aPref + aPowerScore - aDetourPenalty;
-        const bScore = b.distFromOriginMi + bPref + bPowerScore - bDetourPenalty;
+        const summaryA = req.communitySummaries?.get(a.station.id);
+        const summaryB = req.communitySummaries?.get(b.station.id);
+        const aRelScore = summaryA?.overallScore ?? 75;
+        const bRelScore = summaryB?.overallScore ?? 75;
+        const aRelPenalty = (summaryA?.activeWarnings.length || 0) > 0 ? 25 : 0;
+        const bRelPenalty = (summaryB?.activeWarnings.length || 0) > 0 ? 25 : 0;
+
+        const aQueueWait = req.queueWaitMinutesMap?.get(a.station.id) ?? 0;
+        const bQueueWait = req.queueWaitMinutesMap?.get(b.station.id) ?? 0;
+
+        const aScore = a.distFromOriginMi + aPref + aPowerScore - aDetourPenalty + aRelScore * 0.15 - aRelPenalty - aQueueWait * 0.5;
+        const bScore = b.distFromOriginMi + bPref + bPowerScore - bDetourPenalty + bRelScore * 0.15 - bRelPenalty - bQueueWait * 0.5;
         return bScore - aScore;
       });
 
@@ -559,13 +707,11 @@ export async function calculateTripRoutes(
       const legEnergy = calculateLegEnergy({ distanceMi: legDist, vehicle });
       const arrivalSoc = Number((currentSoc - legEnergy.socPercent).toFixed(1));
 
-      // Target departure SoC
       const targetSoc = Math.min(
         maxChargeLimit,
-        Math.max(arrivalSoc + 25, strat.targetSoc)
+        Math.max(arrivalSoc + 25, plan.targetSoc)
       );
 
-      // Use vehicle's genuine maxDcChargingKw
       const actualPowerKw = Math.min(vehicle.maxDcChargingKw, chosen.station.ratedPowerKw);
       const chargeEstimate = calculateChargingDuration({
         usableCapacityKwh: vehicle.usableBatteryKwh,
@@ -588,8 +734,19 @@ export async function calculateTripRoutes(
 
       const preferred = planOptions.preferredNetworks || chargingSettings.preferredNetworks || [];
 
+      const backupEval = evaluateBackupCharger(
+        chosen.station,
+        chargingStations,
+        vehicle,
+        arrivalSoc,
+        req.communitySummaries,
+        minChargerReserve
+      );
+
+      const commSummary = req.communitySummaries?.get(chosen.station.id);
+
       stops.push({
-        id: `custom-stop-${strat.id}-${stops.length + 1}`,
+        id: `custom-stop-${plan.id}-${stops.length + 1}`,
         stationId: chosen.station.id,
         name: chosen.station.name,
         network: chosen.station.network,
@@ -610,29 +767,209 @@ export async function calculateTripRoutes(
         priceEstimate: chosen.station.pricePerKwh,
         isFeasible: arrivalSoc >= minChargerReserve,
         isPreferred: preferred.includes(chosen.station.network),
-        isExcluded: false
+        isPinned: Boolean(chosen.isPinned),
+        isExcluded: false,
+        roadAccessStatus: chosen.accessValidation.accessStatus,
+        carriagewayAccess: chosen.accessValidation.carriageway,
+        entranceCoordinates: chosen.accessValidation.entranceCoordinates,
+        actualDetourMi: chosen.detourMi,
+        backupStationId: backupEval.backupStationId,
+        backupStationName: backupEval.backupStationName,
+        backupReachable: backupEval.backupReachable,
+        reachabilityClassification: backupEval.reachabilityClassification,
+        communityReliabilityScore: commSummary?.overallScore ?? null,
+        communityConfidenceTier: commSummary?.confidenceTier ?? 'insufficient_evidence',
+        communityWarning: commSummary?.activeWarnings?.[0],
+        communityQueueMinutes: commSummary?.queueEstimate?.estimatedWaitMinutes,
+        cpoConflict: commSummary?.cpoConflict,
+        accessRestrictions: chosen.accessValidation.accessRestrictions,
+        accessNotes: chosen.accessValidation.accessNotes,
+        canonicalNetwork: normalizeNetworkName(chosen.station.network).canonicalNetwork,
+        tariffClassification: classifyTariff(chosen.station.pricePerKwh).classification,
+        stallAvailabilityStatus: classifyStallAvailability(chosen.station.totalStalls, chosen.station.availableStalls).status,
+        provenanceConfidence: chosen.station.accessMetadata?.accessConfidence ?? 0.8
       });
 
       currDistFromOrigin = chosen.distFromOriginMi;
       currentSoc = targetSoc;
     }
 
-    // 6. Geometry routing through the selected charging stops
-    let finalPolyline = initialPolyline;
+    // Verify destination reserve feasibility
+    const remainingDist = roadDistanceMi - currDistFromOrigin;
+    const remainingEnergy = calculateLegEnergy({ distanceMi: remainingDist, vehicle });
+    const projectedArrivalSoc = Number((currentSoc - remainingEnergy.socPercent).toFixed(1));
+    if (projectedArrivalSoc < minDestReserve) {
+      isTripFeasible = false;
+    }
+
+    // Feature B: Connect origin -> stops in sequence -> destination with real road geometry
+    let finalPolyline = roadPolyline && roadPolyline.length >= 2 ? roadPolyline : initialEndpoints;
     let finalDistanceMi = roadDistanceMi;
     let finalDriveMinutes = roadDurationMinutes;
+    let optGeometrySource: 'osrm' | 'tomtom' | 'estimated' =
+      roadPath.source === 'orbis_v3' || roadPath.source === 'legacy_v1'
+        ? 'tomtom'
+        : roadPath.source === 'osrm'
+        ? 'osrm'
+        : 'estimated';
 
     if (stops.length > 0) {
-      const stopWaypoints: [number, number][] = [
-        origin.coordinates,
-        ...stops.map((s) => s.coordinates),
-        destination.coordinates
-      ];
-      const stopsRoadData = await fetchRoadGeometry(stopWaypoints);
-      if (stopsRoadData) {
-        finalPolyline = stopsRoadData.coordinates;
-        finalDistanceMi = stopsRoadData.distanceMi;
-        finalDriveMinutes = stopsRoadData.durationMinutes;
+      const stopWaypoints: [number, number][] = [origin.coordinates];
+      for (const s of stops) {
+        const last = stopWaypoints[stopWaypoints.length - 1];
+        if (Math.abs(last[0] - s.coordinates[0]) > 0.0005 || Math.abs(last[1] - s.coordinates[1]) > 0.0005) {
+          stopWaypoints.push(s.coordinates);
+        }
+      }
+      stopWaypoints.push(destination.coordinates);
+
+      try {
+        const tomtomMultiRoad = await calculateTomTomTrafficRoute(stopWaypoints);
+        const roadMultiData = tomtomMultiRoad
+          ? {
+              coordinates: tomtomMultiRoad.coordinates,
+              distanceMi: tomtomMultiRoad.distanceMi,
+              durationMinutes: tomtomMultiRoad.durationMinutes,
+              legs: tomtomMultiRoad.legs
+            }
+          : await fetchRoadGeometry(stopWaypoints);
+
+        if (roadMultiData && roadMultiData.coordinates && roadMultiData.coordinates.length >= 2) {
+          finalPolyline = roadMultiData.coordinates;
+          finalDistanceMi = roadMultiData.distanceMi;
+          finalDriveMinutes = roadMultiData.durationMinutes;
+          if (tomtomMultiRoad) {
+            optGeometrySource = 'tomtom';
+          } else {
+            optGeometrySource = 'osrm';
+          }
+
+          // Revalidate individual legs with actual road distance if legs returned
+          if (roadMultiData.legs && roadMultiData.legs.length === stops.length + 1) {
+            let legSoc = initialSoc;
+            let legTime = origin.departureTime || '08:00 AM';
+            let allStopsFeasible = true;
+            let recalculatedExpense = 0;
+
+            for (let i = 0; i < stops.length; i++) {
+              const legRoadDist = roadMultiData.legs[i].distanceMi;
+              const legRoadMins = roadMultiData.legs[i].durationMinutes;
+              const legEnergy = calculateLegEnergy({ distanceMi: legRoadDist, vehicle });
+              const arrSoc = Number((legSoc - legEnergy.socPercent).toFixed(1));
+
+              if (arrSoc < minChargerReserve) {
+                allStopsFeasible = false;
+              }
+
+              const targetSoc = Math.min(
+                maxChargeLimit,
+                Math.max(arrSoc + 20, stops[i].departureSoc)
+              );
+              const actualKw = Math.min(vehicle.maxDcChargingKw, stops[i].powerKw);
+              const chargeEst = calculateChargingDuration({
+                usableCapacityKwh: vehicle.usableBatteryKwh,
+                degradationPercent: vehicle.batteryDegradationPercent,
+                maxDcChargingKw: actualKw,
+                stationPowerKw: stops[i].powerKw,
+                currentSocPercent: Math.max(0, arrSoc),
+                targetSocPercent: targetSoc
+              });
+
+              const chargeMins = Math.max(5, chargeEst.durationMinutes);
+              const arrivalTime = addMinutesToTimeString(legTime, legRoadMins);
+              const departureTime = addMinutesToTimeString(arrivalTime, chargeMins);
+              legTime = departureTime;
+
+              const tariff = parsePricePerKwh(stops[i].priceEstimate);
+              recalculatedExpense += Math.round(chargeEst.energyAddedKwh * tariff);
+
+              stops[i] = {
+                ...stops[i],
+                legDistanceMi: legRoadDist,
+                legDriveDuration: formatHoursMinutes(legRoadMins),
+                arrivalSoc: arrSoc,
+                departureSoc: targetSoc,
+                chargeDurationMinutes: chargeMins,
+                energyAddedKwh: chargeEst.energyAddedKwh,
+                arrivalTime,
+                departureTime,
+                isFeasible: arrSoc >= minChargerReserve
+              };
+
+              legSoc = targetSoc;
+            }
+
+            const finalLegDist = roadMultiData.legs[roadMultiData.legs.length - 1].distanceMi;
+            const finalEnergy = calculateLegEnergy({ distanceMi: finalLegDist, vehicle });
+            const finalArrSoc = Number((legSoc - finalEnergy.socPercent).toFixed(1));
+            if (finalArrSoc < minDestReserve) {
+              allStopsFeasible = false;
+            }
+
+            totalExpenseInr = recalculatedExpense;
+            if (!allStopsFeasible) {
+              isTripFeasible = false;
+            }
+          }
+        }
+      } catch {
+        // Fall back gracefully to corridor polyline if road router fails
+      }
+    }
+
+    let geometryStatus: RouteGeometryStatus = 'APPROXIMATE_GEOMETRY';
+    if (!finalPolyline || finalPolyline.length < 2) {
+      geometryStatus = 'GEOMETRY_UNAVAILABLE';
+    } else if (optGeometrySource === 'tomtom') {
+      geometryStatus = 'PROVIDER_ROAD_GEOMETRY';
+    } else if (optGeometrySource === 'osrm') {
+      geometryStatus = 'OSRM_ROAD_GEOMETRY';
+    } else {
+      geometryStatus = 'APPROXIMATE_GEOMETRY';
+    }
+
+    // Infeasibility diagnosis
+    let infeasibilityDetails: InfeasibilityDetails | undefined = undefined;
+    if (!isTripFeasible) {
+      let lastFeasibleIdx = -1;
+      for (let i = 0; i < stops.length; i++) {
+        if (stops[i].isFeasible && stops[i].arrivalSoc >= minChargerReserve) {
+          lastFeasibleIdx = i;
+        } else {
+          break;
+        }
+      }
+
+      const lastStop = lastFeasibleIdx >= 0 ? stops[lastFeasibleIdx] : undefined;
+      const lastCoord = lastStop ? lastStop.coordinates : origin.coordinates;
+      const remainingMiles = Math.max(1, Math.round(haversineDistanceMi(lastCoord, destination.coordinates)));
+      const remainingEnergyKwh = Math.round(((remainingMiles * vehicle.referenceConsumptionWhPerMi) / 1000) * 10) / 10;
+      const requiredSocPercent = Math.min(100, Math.round((remainingEnergyKwh / vehicle.usableBatteryKwh) * 100));
+
+      const reason = lastStop
+        ? `Battery depleted after charging at "${lastStop.name}". Next leg requires ~${remainingEnergyKwh} kWh (${requiredSocPercent}% SoC), exceeding available battery reserve.`
+        : `Battery depleted before reaching first charging station or destination. Required range is ${remainingMiles} mi (${remainingEnergyKwh} kWh).`;
+
+      const suggestedAction = initialSoc < 90
+        ? `Charge vehicle to 100% SoC before departure (currently ${initialSoc}%).`
+        : `Add an intermediate verified fast charging hub along this corridor or reduce cruising speed to conserve energy.`;
+
+      infeasibilityDetails = {
+        lastReachableStation: lastStop ? {
+          id: lastStop.stationId,
+          name: lastStop.name,
+          coordinates: lastStop.coordinates,
+          arrivalSoc: lastStop.arrivalSoc
+        } : undefined,
+        remainingDistanceMi: remainingMiles,
+        remainingEnergyKwh,
+        requiredSocPercent,
+        reason,
+        suggestedAction
+      };
+
+      if (!feasibilityNote || !feasibilityNote.includes('complete EV journey not currently feasible')) {
+        feasibilityNote = `Road route available — complete EV journey not currently feasible.${feasibilityNote ? ` ${feasibilityNote}` : ''}`;
       }
     }
 
@@ -642,10 +979,10 @@ export async function calculateTripRoutes(
     const totalDurationStr = formatHoursMinutes(totalDurationMinutes);
 
     generatedOptions.push({
-      id: strat.id,
+      id: plan.id,
       label: totalDurationStr,
-      badge: strat.badge,
-      description: `${strat.name} strategy (${stops.length} stops)`,
+      badge: plan.badge,
+      description: `${plan.name} (${stops.length} stops)`,
       totalDuration: totalDurationStr,
       totalDurationMinutes,
       drivingDuration: formatHoursMinutes(finalDriveMinutes),
@@ -661,19 +998,295 @@ export async function calculateTripRoutes(
       stops,
       polylineCoordinates: finalPolyline,
       isFeasible: isTripFeasible,
-      calculationMethod: initialRoadData
+      isCompleteEvJourney: isTripFeasible && stops.length > 0,
+      chargerDataStatus,
+      feasibilityNote,
+      infeasibilityDetails,
+      calculationMethod: optGeometrySource === 'tomtom'
+        ? 'TomTom Orbis Road Router'
+        : optGeometrySource === 'osrm'
         ? 'OSRM Road Router + Calibrated Model'
-        : 'Energy-Constrained Path Simulation'
+        : 'Energy-Constrained Path Simulation',
+      geometrySource: optGeometrySource,
+      geometryStatus,
+      roadValidated: Boolean(optGeometrySource !== 'estimated'),
+      trafficSummary: roadPath.trafficSummary,
+      alternativeIndex: plan.alternativeIndex,
+      routeName: plan.name,
+      hasTolls: roadPath.hasTolls
     });
   }
 
-  let activeRouteId = 'route-optimal';
+  // Identify recommended EV route (fastest among feasible options, or primary option if none)
+  const feasibleOpts = generatedOptions.filter((o) => o.isFeasible);
+  const recommendedOpt = feasibleOpts.length > 0
+    ? feasibleOpts.reduce((best, curr) => curr.totalDurationMinutes < best.totalDurationMinutes ? curr : best, feasibleOpts[0])
+    : generatedOptions[0];
+
+  if (recommendedOpt) {
+    recommendedOpt.isRecommended = true;
+  }
+
+  let activeRouteId = generatedOptions[0]?.id || 'route-optimal';
   if (planOptions.avoidTolls || routingSettings.avoidTolls) {
-    activeRouteId = 'route-fewest';
+    const tollFree = generatedOptions.find((o) => !o.hasTolls);
+    if (tollFree) activeRouteId = tollFree.id;
   } else if (planOptions.chargeStops === 'Fewest' || routingSettings.chargeStops === 'Fewest') {
-    activeRouteId = 'route-fewest';
+    const fewest = generatedOptions.find((o) => o.id === 'route-fewest');
+    if (fewest) activeRouteId = fewest.id;
   } else if (planOptions.chargeStops === 'Fewer' || routingSettings.chargeStops === 'Fewer') {
-    activeRouteId = 'route-fewer';
+    const fewer = generatedOptions.find((o) => o.id === 'route-fewer');
+    if (fewer) activeRouteId = fewer.id;
+  }
+
+  // 7. If RCSP optimizer is requested, solve with RCSP and perform road validation
+  if (planOptions.useRcspOptimizer) {
+    const primaryPolyline = roadAlternatives[0]?.coordinates || initialEndpoints;
+    const rcspCandidate = solveRcsp(req);
+    if (rcspCandidate) {
+      let finalPolyline = rcspCandidate.polylineCoordinates;
+      let finalDistanceMi = rcspCandidate.totalDistanceMi;
+      let finalDriveMinutes = rcspCandidate.drivingDurationMinutes;
+      let isRcspFeasible = rcspCandidate.isFeasible;
+      let geometrySource: 'osrm' | 'tomtom' | 'estimated' = 'estimated';
+      let roadValidated = false;
+      let updatedStops = rcspCandidate.stops;
+      let totalExpenseInr = rcspCandidate.estimatedExpenseInr;
+
+      // Query OSRM or TomTom geometry through all selected stops and waypoints
+      const allIntermediatePoints: { coordinates: [number, number]; distFromOriginMi: number }[] = [
+        ...rcspCandidate.stops.map((s) => ({ coordinates: s.coordinates, distFromOriginMi: projectStationOnPolyline(s.coordinates, primaryPolyline).distFromOriginMi })),
+        ...waypoints.map((w) => ({ coordinates: w.coordinates, distFromOriginMi: projectStationOnPolyline(w.coordinates, primaryPolyline).distFromOriginMi }))
+      ];
+      allIntermediatePoints.sort((a, b) => a.distFromOriginMi - b.distFromOriginMi);
+
+      const uniquePoints: [number, number][] = [origin.coordinates];
+      for (const p of allIntermediatePoints) {
+        const last = uniquePoints[uniquePoints.length - 1];
+        if (haversineDistanceMi(last, p.coordinates) > 0.1) {
+          uniquePoints.push(p.coordinates);
+        }
+      }
+      uniquePoints.push(destination.coordinates);
+
+      let rcspTrafficSummary = roadAlternatives[0]?.trafficSummary || {
+        status: 'unavailable',
+        provider: 'TomTom Orbis Traffic',
+        trafficTravelTimeMinutes: finalDriveMinutes,
+        freeFlowTravelTimeMinutes: finalDriveMinutes,
+        trafficDelayMinutes: 0,
+        lastUpdated: new Date().toISOString(),
+        segments: [],
+        incidents: []
+      };
+      const tomtomRoad = await calculateTomTomTrafficRoute(uniquePoints);
+      const roadData = tomtomRoad
+        ? {
+            coordinates: tomtomRoad.coordinates,
+            distanceMi: tomtomRoad.distanceMi,
+            durationMinutes: tomtomRoad.durationMinutes,
+            legs: tomtomRoad.legs
+          }
+        : await fetchRoadGeometry(uniquePoints);
+
+      if (tomtomRoad) {
+        rcspTrafficSummary = tomtomRoad.trafficSummary;
+        geometrySource = 'tomtom';
+      } else if (roadData) {
+        geometrySource = 'osrm';
+      }
+
+      if (roadData) {
+        finalPolyline = roadData.coordinates;
+        finalDistanceMi = roadData.distanceMi;
+        finalDriveMinutes = roadData.durationMinutes;
+
+        // Revalidate battery energy and arrival SoCs against real road leg distances
+        if (roadData.legs && roadData.legs.length === rcspCandidate.stops.length + 1) {
+          let currSoc = initialSoc;
+          let accTime = origin.departureTime || '08:00 AM';
+          let allLegsOk = true;
+          let recalculatedExpense = 0;
+
+          const revalidatedStops: ChargingStop[] = [];
+          for (let i = 0; i < rcspCandidate.stops.length; i++) {
+            const origStop = rcspCandidate.stops[i];
+            const legDist = roadData.legs[i].distanceMi;
+            const legDriveMins = roadData.legs[i].durationMinutes;
+            const legEnergy = calculateLegEnergy({ distanceMi: legDist, vehicle });
+            const arrSoc = Number((currSoc - legEnergy.socPercent).toFixed(1));
+
+            if (arrSoc < minChargerReserve) {
+              allLegsOk = false;
+            }
+
+            const targetSoc = Math.min(
+              maxChargeLimit,
+              Math.max(arrSoc + 20, origStop.departureSoc)
+            );
+            const actualKw = Math.min(vehicle.maxDcChargingKw, origStop.powerKw);
+            const chargeEst = calculateChargingDuration({
+              usableCapacityKwh: vehicle.usableBatteryKwh,
+              degradationPercent: vehicle.batteryDegradationPercent,
+              maxDcChargingKw: actualKw,
+              stationPowerKw: origStop.powerKw,
+              currentSocPercent: Math.max(0, arrSoc),
+              targetSocPercent: targetSoc
+            });
+
+            const chargeMins = Math.max(5, chargeEst.durationMinutes);
+            const arrivalTime = addMinutesToTimeString(accTime, legDriveMins);
+            const departureTime = addMinutesToTimeString(arrivalTime, chargeMins);
+            accTime = departureTime;
+
+            const tariff = parsePricePerKwh(origStop.priceEstimate);
+            recalculatedExpense += Math.round(chargeEst.energyAddedKwh * tariff);
+
+            revalidatedStops.push({
+              ...origStop,
+              legDistanceMi: legDist,
+              legDriveDuration: formatHoursMinutes(legDriveMins),
+              arrivalSoc: arrSoc,
+              departureSoc: targetSoc,
+              chargeDurationMinutes: chargeMins,
+              energyAddedKwh: chargeEst.energyAddedKwh,
+              arrivalTime,
+              departureTime,
+              isFeasible: arrSoc >= minChargerReserve
+            });
+
+            currSoc = targetSoc;
+          }
+
+          // Check final destination leg
+          const lastLegDist = roadData.legs[roadData.legs.length - 1].distanceMi;
+          const finalEnergy = calculateLegEnergy({ distanceMi: lastLegDist, vehicle });
+          const finalArrSoc = Number((currSoc - finalEnergy.socPercent).toFixed(1));
+          if (finalArrSoc < minDestReserve) {
+            allLegsOk = false;
+          }
+
+          updatedStops = revalidatedStops;
+          totalExpenseInr = recalculatedExpense;
+          isRcspFeasible = allLegsOk;
+          roadValidated = allLegsOk;
+        } else {
+          // If legs not available, check destination reserve based on total road distance
+          const remainingDist = Math.max(1, finalDistanceMi - updatedStops.reduce((sum, s) => sum + s.legDistanceMi, 0));
+          const finalEnergy = calculateLegEnergy({ distanceMi: remainingDist, vehicle });
+          const lastDepartureSoc = updatedStops.length > 0 ? updatedStops[updatedStops.length - 1].departureSoc : initialSoc;
+          const finalArrSoc = Number((lastDepartureSoc - finalEnergy.socPercent).toFixed(1));
+          if (finalArrSoc < minDestReserve) {
+            isRcspFeasible = false;
+          }
+          roadValidated = isRcspFeasible;
+        }
+      }
+
+      const totalChargingMinutes = updatedStops.reduce((sum, s) => sum + s.chargeDurationMinutes, 0);
+      const stopBufferMinutes = updatedStops.length * 5;
+      const totalDurationMinutes = finalDriveMinutes + totalChargingMinutes + stopBufferMinutes;
+      const totalDurationStr = formatHoursMinutes(totalDurationMinutes);
+
+      let rcspInfeasibilityDetails: InfeasibilityDetails | undefined = undefined;
+      if (!isRcspFeasible) {
+        let lastFeasibleIdx = -1;
+        for (let i = 0; i < updatedStops.length; i++) {
+          if (updatedStops[i].isFeasible && updatedStops[i].arrivalSoc >= minChargerReserve) {
+            lastFeasibleIdx = i;
+          } else {
+            break;
+          }
+        }
+        const lastStop = lastFeasibleIdx >= 0 ? updatedStops[lastFeasibleIdx] : undefined;
+        const lastCoord = lastStop ? lastStop.coordinates : origin.coordinates;
+        const remainingMiles = Math.max(1, Math.round(haversineDistanceMi(lastCoord, destination.coordinates)));
+        const remainingEnergyKwh = Math.round(((remainingMiles * vehicle.referenceConsumptionWhPerMi) / 1000) * 10) / 10;
+        const requiredSocPercent = Math.min(100, Math.round((remainingEnergyKwh / vehicle.usableBatteryKwh) * 100));
+
+        rcspInfeasibilityDetails = {
+          lastReachableStation: lastStop ? {
+            id: lastStop.stationId,
+            name: lastStop.name,
+            coordinates: lastStop.coordinates,
+            arrivalSoc: lastStop.arrivalSoc
+          } : undefined,
+          remainingDistanceMi: remainingMiles,
+          remainingEnergyKwh,
+          requiredSocPercent,
+          reason: lastStop
+            ? `Battery depleted after "${lastStop.name}". Remaining ${remainingMiles} mi requires ${remainingEnergyKwh} kWh (${requiredSocPercent}% SoC).`
+            : `Battery depleted before reaching first charging station or destination.`,
+          suggestedAction: initialSoc < 90
+            ? `Charge vehicle to 100% SoC before departure (currently ${initialSoc}%).`
+            : `Add an intermediate charging hub along the corridor.`
+        };
+      }
+
+      const rcspOption: RouteOption = {
+        id: 'route-rcsp',
+        label: totalDurationStr,
+        badge: isRcspFeasible ? 'RCSP Optimal' : 'Infeasible on Road',
+        description: `RCSP Optimizer (${updatedStops.length} stops)`,
+        totalDuration: totalDurationStr,
+        totalDurationMinutes,
+        drivingDuration: formatHoursMinutes(finalDriveMinutes),
+        drivingDurationMinutes: finalDriveMinutes,
+        chargingDuration: formatHoursMinutes(totalChargingMinutes),
+        chargingDurationMinutes: totalChargingMinutes,
+        stopBufferDuration: formatHoursMinutes(stopBufferMinutes),
+        stopBufferMinutes,
+        totalDistanceMi: finalDistanceMi,
+        stopCount: updatedStops.length,
+        totalEnergyKwh: Math.round((finalDistanceMi * vehicle.referenceConsumptionWhPerMi) / 1000),
+        estimatedExpenseInr: totalExpenseInr,
+        stops: updatedStops,
+        polylineCoordinates: finalPolyline,
+        isFeasible: isRcspFeasible,
+        isCompleteEvJourney: isRcspFeasible && updatedStops.length > 0,
+        chargerDataStatus: updatedStops.length > 0 || (generatedOptions[0] && generatedOptions[0].chargerDataStatus === 'catalogue_verified')
+          ? 'catalogue_verified'
+          : 'unavailable_outside_catalogue',
+        feasibilityNote: isRcspFeasible ? undefined : 'Road route available — complete EV journey not currently feasible.',
+        infeasibilityDetails: rcspInfeasibilityDetails,
+        calculationMethod: 'RCSP Optimizer',
+        geometrySource,
+        geometryStatus: geometrySource === 'tomtom'
+          ? 'PROVIDER_ROAD_GEOMETRY'
+          : geometrySource === 'osrm'
+          ? 'OSRM_ROAD_GEOMETRY'
+          : 'APPROXIMATE_GEOMETRY',
+        roadValidated,
+        trafficSummary: rcspTrafficSummary
+      };
+
+      if (isRcspFeasible) {
+        generatedOptions.unshift(rcspOption);
+        activeRouteId = 'route-rcsp';
+      } else {
+        // If RCSP is infeasible on real road distance, still provide it for user inspection,
+        // but mark greedy fallback as active with clear identification
+        generatedOptions.push(rcspOption);
+        const fallback = generatedOptions.find((o) => o.id === 'route-optimal') || generatedOptions[0];
+        if (fallback) {
+          fallback.calculationMethod = 'Greedy Fallback';
+          fallback.badge = 'Greedy Fallback';
+          activeRouteId = fallback.id;
+        }
+      }
+    } else {
+      // RCSP found no candidate sequence at all; fallback to greedy
+      const fallback = generatedOptions.find((o) => o.id === 'route-optimal') || generatedOptions[0];
+      if (fallback) {
+        fallback.calculationMethod = 'Greedy Fallback';
+        fallback.badge = 'Greedy Fallback';
+        activeRouteId = fallback.id;
+      }
+    }
+  }
+
+  if (generatedOptions.length > 0 && !generatedOptions.some((o) => o.id === activeRouteId)) {
+    activeRouteId = generatedOptions[0].id;
   }
 
   return {

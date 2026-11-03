@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useMemo, useEffect, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useMemo, useEffect, useRef, useCallback, ReactNode } from 'react';
 import { ChargingStop, DemonstrationTrip, RouteOption } from '../types/route';
 import { VehicleProfile } from '../types/vehicle';
 import {
@@ -20,6 +20,7 @@ import {
   initialRoutingSettings
 } from '../data/demoSettings';
 import { calculateTripRoutes } from '../services/routingService';
+import { simulatedQueueService } from '../services/queue/simulatedQueueService';
 
 export type SettingsTab =
   | 'vehicle'
@@ -68,6 +69,14 @@ interface PlannerContextType {
   setIsChargerFinderOpen: (open: boolean) => void;
   isSavedPlansOpen: boolean;
   setIsSavedPlansOpen: (open: boolean) => void;
+  isOperatorPortalOpen: boolean;
+  setIsOperatorPortalOpen: (open: boolean) => void;
+  isDriverCheckInOpen: boolean;
+  setIsDriverCheckInOpen: (open: boolean) => void;
+  driverCheckInStation: { id: string; name: string } | null;
+  setDriverCheckInStation: (st: { id: string; name: string } | null) => void;
+  operatorStationId: string;
+  setOperatorStationId: (id: string) => void;
 
   // Configurations
   planOptions: PlanOptions;
@@ -87,7 +96,7 @@ interface PlannerContextType {
   setDriveHistory: React.Dispatch<React.SetStateAction<DriveHistoryItem[]>>;
 
   // Actions
-  replanRoute: () => void;
+  replanRoute: (overrideTrip?: Partial<DemonstrationTrip>) => void;
   replaceVehicleWith: (profile: VehicleProfile) => void;
   clearAllHistory: () => void;
   resetAllSettings: () => void;
@@ -125,12 +134,24 @@ export const PlannerProvider: React.FC<{ children: ReactNode }> = ({ children })
   const [isReplaceVehicleModalOpen, setIsReplaceVehicleModalOpen] = useState<boolean>(false);
   const [isChargerFinderOpen, setIsChargerFinderOpen] = useState<boolean>(false);
   const [isSavedPlansOpen, setIsSavedPlansOpen] = useState<boolean>(false);
+  const [isOperatorPortalOpen, setIsOperatorPortalOpen] = useState<boolean>(false);
+  const [isDriverCheckInOpen, setIsDriverCheckInOpen] = useState<boolean>(false);
+  const [driverCheckInStation, setDriverCheckInStation] = useState<{ id: string; name: string } | null>(null);
+  const [operatorStationId, setOperatorStationId] = useState<string>('sta-test-evsure-hub');
 
   // Hydrate configurations with LocalStorage persistence
   const [planOptions, setPlanOptions] = useState<PlanOptions>(() => {
     try {
       const saved = localStorage.getItem(STORAGE_KEYS.OPTIONS);
-      return saved ? JSON.parse(saved) : initialPlanOptions;
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        return {
+          ...initialPlanOptions,
+          ...parsed,
+          useRcspOptimizer: parsed.useRcspOptimizer === true
+        };
+      }
+      return initialPlanOptions;
     } catch {
       return initialPlanOptions;
     }
@@ -222,10 +243,14 @@ export const PlannerProvider: React.FC<{ children: ReactNode }> = ({ children })
     }
   }, [displaySettings.theme]);
 
-  // Save to LocalStorage on state changes
+  // Save to LocalStorage on state changes & sync simulated queue settings
   useEffect(() => {
     try {
       localStorage.setItem(STORAGE_KEYS.OPTIONS, JSON.stringify(planOptions));
+      simulatedQueueService.setSimulationEnabled(planOptions.enableSimulatedQueues ?? true);
+      if (planOptions.simulatedQueueSeed) {
+        simulatedQueueService.setRouteSession(simulatedQueueService.getSessionKey(), planOptions.simulatedQueueSeed);
+      }
     } catch {}
   }, [planOptions]);
 
@@ -267,12 +292,12 @@ export const PlannerProvider: React.FC<{ children: ReactNode }> = ({ children })
 
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
-  const showToast = (msg: string) => {
+  const showToast = useCallback((msg: string) => {
     setToastMessage(msg);
     setTimeout(() => {
       setToastMessage((current) => (current === msg ? null : current));
     }, 3200);
-  };
+  }, []);
 
   const activeRoute = useMemo(() => {
     return (
@@ -290,21 +315,78 @@ export const PlannerProvider: React.FC<{ children: ReactNode }> = ({ children })
     setIsPanelCollapsed((prev) => !prev);
   };
 
-  const replanRoute = async () => {
+  const tripRef = useRef(trip);
+  tripRef.current = trip;
+  const vehicleRef = useRef(vehicle);
+  vehicleRef.current = vehicle;
+  const planOptionsRef = useRef(planOptions);
+  planOptionsRef.current = planOptions;
+  const chargingSettingsRef = useRef(chargingSettings);
+  chargingSettingsRef.current = chargingSettings;
+  const routingSettingsRef = useRef(routingSettings);
+  routingSettingsRef.current = routingSettings;
+
+  const replanRoute = useCallback(async (overrideTrip?: Partial<DemonstrationTrip>) => {
     showToast('Calculating optimized demonstration route...');
+    const hasValidOverride =
+      overrideTrip &&
+      typeof overrideTrip === 'object' &&
+      !('nativeEvent' in (overrideTrip as unknown as Record<string, unknown>)) &&
+      ('origin' in overrideTrip || 'destination' in overrideTrip || 'waypoints' in overrideTrip);
+
+    const safeOverride = hasValidOverride ? overrideTrip : undefined;
+    const currentTrip = safeOverride ? { ...tripRef.current, ...safeOverride } : tripRef.current;
     try {
+      // Derive route session key for deterministic simulation along this specific journey
+      const sessionKey = `${currentTrip.origin.name || 'origin'}_${currentTrip.destination.name || 'dest'}`;
+      simulatedQueueService.setRouteSession(sessionKey, planOptionsRef.current.simulatedQueueSeed || 1);
+
       const result = await calculateTripRoutes({
-        origin: trip.origin,
-        destination: trip.destination,
-        waypoints: trip.waypoints,
-        vehicle,
-        planOptions,
-        chargingSettings,
-        routingSettings
+        origin: currentTrip.origin,
+        destination: currentTrip.destination,
+        waypoints: currentTrip.waypoints,
+        vehicle: vehicleRef.current,
+        planOptions: planOptionsRef.current,
+        chargingSettings: chargingSettingsRef.current,
+        routingSettings: routingSettingsRef.current
       });
+
+      // Register route stop stations with simulation service
+      for (const opt of result.routeOptions) {
+        for (const stop of opt.stops) {
+          if (stop.stationId) {
+            simulatedQueueService.registerStation({
+              id: stop.stationId,
+              name: stop.name,
+              network: stop.network,
+              address: stop.address,
+              coordinates: stop.coordinates,
+              ratedPowerKw: stop.powerKw,
+              totalStalls: stop.stallsTotal,
+              availableStalls: stop.stallsTotal,
+              connectors: [
+                {
+                  type: 'CCS2',
+                  maxPowerKw: stop.powerKw,
+                  count: stop.stallsTotal,
+                  canonicalType: 'CCS2'
+                }
+              ],
+              amenities: stop.amenities || [],
+              pricePerKwh: '₹21.00 / kWh',
+              operationalStatus: 'operational',
+              statusTimestamp: 'Verified',
+              openingHours: '24/7',
+              paymentMethods: ['App', 'RFID'],
+              dataSource: 'Reference Simulation'
+            });
+          }
+        }
+      }
 
       setTrip((prev) => ({
         ...prev,
+        ...safeOverride,
         routeOptions: result.routeOptions,
         activeRouteId: result.activeRouteId
       }));
@@ -321,7 +403,7 @@ export const PlannerProvider: React.FC<{ children: ReactNode }> = ({ children })
     } catch {
       showToast('Standard highway corridor applied.');
     }
-  };
+  }, [showToast]);
 
   const replaceVehicleWith = (profile: VehicleProfile) => {
     setVehicle(profile);
@@ -386,6 +468,14 @@ export const PlannerProvider: React.FC<{ children: ReactNode }> = ({ children })
         setIsChargerFinderOpen,
         isSavedPlansOpen,
         setIsSavedPlansOpen,
+        isOperatorPortalOpen,
+        setIsOperatorPortalOpen,
+        isDriverCheckInOpen,
+        setIsDriverCheckInOpen,
+        driverCheckInStation,
+        setDriverCheckInStation,
+        operatorStationId,
+        setOperatorStationId,
         planOptions,
         setPlanOptions,
         vehicle,

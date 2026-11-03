@@ -25,6 +25,7 @@ export const TopNav: React.FC = () => {
     setIsOptionsModalOpen,
     setIsChargerFinderOpen,
     setIsSavedPlansOpen,
+    setIsOperatorPortalOpen,
     displaySettings,
     setDisplaySettings,
     resolvedTheme,
@@ -61,7 +62,7 @@ export const TopNav: React.FC = () => {
           type="button"
           onClick={() => setIsChargerFinderOpen(true)}
           title="Charger Finder & Hub Explorer"
-          className="hidden sm:flex items-center gap-1.5 px-3 py-2 rounded-xl bg-surface-panel/95 hover:bg-surface-hover border border-edge-default text-content-primary text-xs font-semibold shadow-card backdrop-blur-md transition-colors"
+          className="hidden sm:flex items-center gap-1.5 px-3 py-2 rounded-xl bg-surface-panel hover:bg-surface-hover border border-edge-default text-content-primary text-xs font-semibold shadow-card transition-colors"
         >
           <Search className="w-3.5 h-3.5 text-amber-500" />
           <span>Chargers</span>
@@ -72,10 +73,21 @@ export const TopNav: React.FC = () => {
           type="button"
           onClick={() => setIsSavedPlansOpen(true)}
           title="Saved Route Plans"
-          className="hidden sm:flex items-center gap-1.5 px-3 py-2 rounded-xl bg-surface-panel/95 hover:bg-surface-hover border border-edge-default text-content-primary text-xs font-semibold shadow-card backdrop-blur-md transition-colors"
+          className="hidden sm:flex items-center gap-1.5 px-3 py-2 rounded-xl bg-surface-panel hover:bg-surface-hover border border-edge-default text-content-primary text-xs font-semibold shadow-card transition-colors"
         >
           <Bookmark className="w-3.5 h-3.5 text-status-success" />
           <span>Saved Plans</span>
+        </button>
+
+        {/* Operator Portal Button (Solid Modern Styling) */}
+        <button
+          type="button"
+          onClick={() => setIsOperatorPortalOpen(true)}
+          title="EVSure Operator Portal - Live Queue & Hub Management"
+          className="hidden sm:flex items-center gap-1.5 px-3 py-2 rounded-xl bg-violet-700 hover:bg-violet-600 border border-violet-500 text-white text-xs font-semibold shadow-card transition-colors"
+        >
+          <ShieldCheck className="w-3.5 h-3.5 text-violet-200" />
+          <span>Operator</span>
         </button>
 
         {/* Quick Options Button */}
@@ -83,7 +95,7 @@ export const TopNav: React.FC = () => {
           type="button"
           onClick={() => setIsOptionsModalOpen(true)}
           title="Quick Plan Options"
-          className="hidden sm:flex items-center gap-1.5 px-3 py-2 rounded-xl bg-surface-panel/95 hover:bg-surface-hover border border-edge-default text-content-primary text-xs font-semibold shadow-card backdrop-blur-md transition-colors"
+          className="hidden sm:flex items-center gap-1.5 px-3 py-2 rounded-xl bg-surface-panel hover:bg-surface-hover border border-edge-default text-content-primary text-xs font-semibold shadow-card transition-colors"
         >
           <Sliders className="w-3.5 h-3.5 text-brand-primary" />
           <span>Plan Options</span>
@@ -95,7 +107,7 @@ export const TopNav: React.FC = () => {
           onClick={handleCycleTheme}
           title={`Appearance: ${displaySettings.theme} (click to cycle)`}
           aria-label="Toggle theme appearance"
-          className="p-2 rounded-xl bg-surface-panel/95 hover:bg-surface-hover border border-edge-default text-content-primary shadow-card backdrop-blur-md transition-colors flex items-center justify-center"
+          className="p-2 rounded-xl bg-surface-panel hover:bg-surface-hover border border-edge-default text-content-primary shadow-card transition-colors flex items-center justify-center"
         >
           {displaySettings.theme === 'system' ? (
             <Monitor className="w-4 h-4 text-brand-primary" />
@@ -110,7 +122,7 @@ export const TopNav: React.FC = () => {
         <button
           type="button"
           onClick={() => setIsLoginModalOpen(true)}
-          className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-surface-panel/95 hover:bg-surface-hover border border-edge-default text-content-primary text-xs font-semibold shadow-card backdrop-blur-md transition-colors"
+          className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-surface-panel hover:bg-surface-hover border border-edge-default text-content-primary text-xs font-semibold shadow-card transition-colors"
         >
           <User className="w-3.5 h-3.5 text-content-tertiary" />
           <span>Login</span>
@@ -123,7 +135,7 @@ export const TopNav: React.FC = () => {
             onClick={() => setIsMenuOpen(!isMenuOpen)}
             title="Open Menu"
             aria-label="Navigation menu"
-            className="p-2 rounded-xl bg-surface-panel/95 hover:bg-surface-hover border border-edge-default text-content-primary shadow-card backdrop-blur-md transition-colors"
+            className="p-2 rounded-xl bg-surface-panel hover:bg-surface-hover border border-edge-default text-content-primary shadow-card transition-colors"
           >
             {isMenuOpen ? <X className="w-4 h-4" /> : <Menu className="w-4 h-4" />}
           </button>
@@ -159,6 +171,18 @@ export const TopNav: React.FC = () => {
               >
                 <Bookmark className="w-4 h-4 text-status-success" />
                 <span>Saved Route Plans</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  setIsMenuOpen(false);
+                  setIsOperatorPortalOpen(true);
+                }}
+                className="w-full px-3.5 py-2 text-left text-xs font-semibold text-violet-400 hover:bg-violet-950/30 flex items-center gap-2.5 transition-colors"
+              >
+                <ShieldCheck className="w-4 h-4 text-violet-400" />
+                <span>Operator Portal</span>
               </button>
 
               <div className="px-3.5 py-2 border-b border-t border-edge-subtle my-1">

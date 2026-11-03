@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { ChargingStop, Amenity } from '../../types/route';
 import {
   Zap,
@@ -6,10 +6,17 @@ import {
   Coffee,
   ShoppingBag,
   Wifi,
-  Info
+  Info,
+  ShieldCheck,
+  AlertTriangle,
+  CornerDownRight,
+  MessageSquarePlus,
+  Users
 } from 'lucide-react';
 import { usePlanner } from '../../context/PlannerContext';
 import { formatDistance } from '../../utils/units';
+import { DriverReportModal } from '../dialogs/DriverReportModal';
+import { QueueReportModal } from '../dialogs/QueueReportModal';
 
 interface ChargingStopCardProps {
   stop: ChargingStop;
@@ -45,6 +52,9 @@ export const ChargingStopCard: React.FC<ChargingStopCardProps> = ({ stop, index 
     setHoveredStopId,
     displaySettings
   } = usePlanner();
+
+  const [isReportModalOpen, setIsReportModalOpen] = useState(false);
+  const [isQueueReportModalOpen, setIsQueueReportModalOpen] = useState(false);
 
   const isSelected = selectedStop?.id === stop.id;
   const isHovered = hoveredStopId === stop.id;
@@ -114,13 +124,144 @@ export const ChargingStopCard: React.FC<ChargingStopCardProps> = ({ stop, index 
               <Zap className="w-3 h-3 fill-current" />
               {stop.powerKw} kW
             </span>
-            <span className="text-[11px] text-content-tertiary">
+            <span
+              className="text-[11px] text-content-tertiary"
+              title={
+                stop.stallsAvailable !== undefined
+                  ? `${stop.stallsAvailable} of ${stop.stallsTotal} stalls available (static catalogue snapshot)`
+                  : 'Live occupancy unverified; displays total physical stalls'
+              }
+            >
               {stop.stallsAvailable !== undefined
-                ? `${stop.stallsAvailable}/${stop.stallsTotal} stalls`
-                : `${stop.stallsTotal} stalls`}
+                ? stop.stallsAvailable === 0
+                  ? `0/${stop.stallsTotal} stalls (Full)`
+                  : `${stop.stallsAvailable}/${stop.stallsTotal} stalls`
+                : `${stop.stallsTotal} stalls (Unverified)`}
             </span>
           </div>
         </div>
+
+        {/* Road Accessibility, Detour, Community Reliability & Backup Badges */}
+        <div className="mt-2 flex flex-wrap items-center gap-1.5 text-[10px]">
+          {/* User Pinned Stop Badge */}
+          {stop.isPinned && (
+            <span
+              className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded border font-semibold bg-amber-500/15 text-amber-600 dark:text-amber-400 border-amber-500/30"
+              title="Station added as mandatory charging stop by user"
+            >
+              📌 User Pinned
+            </span>
+          )}
+
+          {/* Community Reliability Badge */}
+          {stop.communityReliabilityScore !== null && stop.communityReliabilityScore !== undefined ? (
+            <span
+              className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded border font-medium ${
+                stop.communityReliabilityScore >= 80
+                  ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20'
+                  : stop.communityReliabilityScore >= 60
+                  ? 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20'
+                  : 'bg-red-500/10 text-red-600 dark:text-red-400 border-red-500/20'
+              }`}
+              title={`Community Reliability Score: ${stop.communityReliabilityScore}% (${stop.communityConfidenceTier || 'moderate'} confidence)`}
+            >
+              <ShieldCheck className="w-2.5 h-2.5" />
+              {stop.communityReliabilityScore}% Reliable
+            </span>
+          ) : (
+            <span
+              className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-surface-subtle text-content-tertiary border border-edge-subtle"
+              title="Insufficient community reports recorded yet"
+            >
+              Insufficient evidence
+            </span>
+          )}
+
+          {/* Queue Wait Time Estimate */}
+          {stop.communityQueueMinutes !== undefined && stop.communityQueueMinutes > 0 && (
+            <span
+              className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20 font-medium"
+              title="Community-estimated queue waiting time based on recent driver observations"
+            >
+              ⏱️ ~{stop.communityQueueMinutes}m wait
+            </span>
+          )}
+
+          {stop.roadAccessStatus === 'verified' && (
+            <span
+              className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 font-medium"
+              title={stop.accessNotes || 'Road access and carriageway verified'}
+            >
+              <ShieldCheck className="w-2.5 h-2.5" />
+              Verified Access
+            </span>
+          )}
+          {stop.roadAccessStatus === 'uncertain' && (
+            <span
+              className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20 font-medium"
+              title="Road access is uncertain or restricted"
+            >
+              <AlertTriangle className="w-2.5 h-2.5" />
+              Access Uncertain
+            </span>
+          )}
+          {stop.carriagewayAccess === 'bidirectional_service_road' && (
+            <span className="px-1.5 py-0.5 rounded bg-surface-subtle text-content-tertiary border border-edge-subtle">
+              Service Road
+            </span>
+          )}
+          {stop.actualDetourMi !== undefined && stop.actualDetourMi > 0 && (
+            <span
+              className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded bg-surface-subtle text-content-tertiary border border-edge-subtle"
+              title="Off-highway spur detour distance"
+            >
+              <CornerDownRight className="w-2.5 h-2.5" />
+              {formatDistance(stop.actualDetourMi, displaySettings.units)} detour
+            </span>
+          )}
+          {stop.backupStationName && (
+            <span
+              className={`px-1.5 py-0.5 rounded border ${
+                stop.backupReachable
+                  ? 'bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/20'
+                  : 'bg-red-500/10 text-red-600 dark:text-red-400 border-red-500/20'
+              }`}
+              title={
+                stop.backupReachable
+                  ? `Backup station reachable: ${stop.backupStationName} (${stop.reachabilityClassification?.replace(/_/g, ' ') || 'feasible'})`
+                  : `Warning: low reserve risk reaching backup station ${stop.backupStationName}`
+              }
+            >
+              Backup: {stop.backupStationName.split('-')[0].trim()} ({stop.backupReachable ? 'Reachable' : 'Risk'})
+            </span>
+          )}
+          {stop.tariffClassification === 'estimated_default' && (
+            <span
+              className="px-1.5 py-0.5 rounded bg-surface-subtle text-amber-600 dark:text-amber-400 border border-amber-500/20 font-medium"
+              title="Tariff not confirmed by operator; calculated using ₹21.00/kWh estimated default"
+            >
+              Est. Tariff
+            </span>
+          )}
+        </div>
+
+        {/* CPO vs Community Conflict Dual Signal Warning */}
+        {stop.cpoConflict?.hasConflict && (
+          <div className="mt-2 py-1 px-2 rounded-md bg-amber-500/10 border border-amber-500/30 text-[11px] text-amber-700 dark:text-amber-300 font-medium flex items-center gap-1.5">
+            <AlertTriangle className="w-3.5 h-3.5 shrink-0 text-amber-500" />
+            <span>
+              Dual Signal: {stop.cpoConflict.cpoStatus} · {stop.cpoConflict.communityWarning}
+            </span>
+          </div>
+        )}
+
+        {/* Community Warning if present */}
+        {!stop.cpoConflict?.hasConflict && stop.communityWarning && (
+          <div className="mt-2 py-1 px-2 rounded-md bg-amber-500/10 border border-amber-500/30 text-[11px] text-amber-700 dark:text-amber-300 font-medium flex items-center gap-1.5">
+            <AlertTriangle className="w-3.5 h-3.5 shrink-0 text-amber-500" />
+            <span>Community Warning: {stop.communityWarning}</span>
+          </div>
+        )}
 
         {/* If Infeasible Leg Alert */}
         {!stop.isFeasible && (
@@ -159,6 +300,34 @@ export const ChargingStopCard: React.FC<ChargingStopCardProps> = ({ stop, index 
               </span>
             ))}
 
+            {/* Report Live Station Queue Button */}
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                setIsQueueReportModalOpen(true);
+              }}
+              title="Report live station queue & waiting vehicles"
+              aria-label="Report live queue"
+              className="p-1 rounded hover:bg-surface-hover text-content-tertiary hover:text-brand-primary transition-colors"
+            >
+              <Users className="w-3.5 h-3.5" />
+            </button>
+
+            {/* Report Charger Status Button */}
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                setIsReportModalOpen(true);
+              }}
+              title="Report charger status"
+              aria-label="Report charger status"
+              className="p-1 rounded hover:bg-surface-hover text-content-tertiary hover:text-brand-primary transition-colors"
+            >
+              <MessageSquarePlus className="w-3.5 h-3.5" />
+            </button>
+
             <button
               type="button"
               onClick={(e) => {
@@ -168,7 +337,7 @@ export const ChargingStopCard: React.FC<ChargingStopCardProps> = ({ stop, index 
               }}
               title="Station Details & Settings"
               aria-label="View station details"
-              className="ml-1 p-1 rounded hover:bg-surface-hover text-content-tertiary hover:text-content-primary"
+              className="p-1 rounded hover:bg-surface-hover text-content-tertiary hover:text-content-primary"
             >
               <Info className="w-3.5 h-3.5" />
             </button>
@@ -191,6 +360,25 @@ export const ChargingStopCard: React.FC<ChargingStopCardProps> = ({ stop, index 
           />
         </div>
       </div>
+
+      {/* Driver Reporting Modal */}
+      <DriverReportModal
+        isOpen={isReportModalOpen}
+        onClose={() => setIsReportModalOpen(false)}
+        stationId={stop.stationId}
+        stationName={stop.name}
+      />
+
+      {/* Live Queue Reporting Modal */}
+      <QueueReportModal
+        isOpen={isQueueReportModalOpen}
+        onClose={() => setIsQueueReportModalOpen(false)}
+        station={{
+          id: stop.stationId,
+          name: stop.name,
+          coordinates: stop.coordinates
+        }}
+      />
     </div>
   );
 };

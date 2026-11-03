@@ -139,7 +139,7 @@ export function calculateChargingDuration(params: ChargingCalculationParams): Ch
       powerFactor = Math.max(0.2, 0.45 - ((soc - 85) / 15) * 0.25);
     }
 
-    const currentPowerKw = Math.max(10, peakPower * powerFactor);
+    const currentPowerKw = peakPower * powerFactor;
     const minutesForStep = (kwhInThisStep / currentPowerKw) * 60;
     totalMinutes += minutesForStep;
   }

@@ -14,7 +14,11 @@ export const initialPlanOptions: PlanOptions = {
   avoidHighways: false,
   avoidFerriesAndTrains: true,
   avoidBorders: false,
-  preferredNetworks: [] // Observed reference: No preferred charging networks configured by default
+  preferredNetworks: [], // Observed reference: No preferred charging networks configured by default
+  useRcspOptimizer: false,
+  routePreference: 'fastest',
+  enableSimulatedQueues: true,
+  simulatedQueueSeed: 1
 };
 
 export const initialChargingSettings: ChargingSettings = {
@@ -41,7 +45,8 @@ export const initialRoutingSettings: RoutingSettings = {
   realTimeTraffic: true,
   adjustSpeed: true,
   weatherChoice: 'Seasonal',
-  seasonalWeatherDescription: 'Seasonal temperature and wind conditions based on historical data'
+  seasonalWeatherDescription: 'Seasonal temperature and wind conditions based on historical data',
+  routePreference: 'fastest'
 };
 
 export const initialDisplaySettings: DisplaySettings = {

@@ -1,5 +1,6 @@
 import React from 'react';
 import { PlannerProvider, usePlanner } from './context/PlannerContext';
+import { GpsProvider } from './context/GpsContext';
 import { MapView } from './components/map/MapView';
 import { RoutePanel } from './components/route/RoutePanel';
 import { TopNav } from './components/topbar/TopNav';
@@ -12,6 +13,8 @@ import { PlugTypesModal } from './components/dialogs/PlugTypesModal';
 import { ReplaceVehicleModal } from './components/dialogs/ReplaceVehicleModal';
 import { ChargerFinderModal } from './components/charger/ChargerFinderModal';
 import { SavedPlansModal } from './components/dialogs/SavedPlansModal';
+import { OperatorPortalModal } from './components/operator/OperatorPortalModal';
+import { DriverCheckInModal } from './components/operator/DriverCheckInModal';
 import { CheckCircle2 } from 'lucide-react';
 
 const PlannerApp: React.FC = () => {
@@ -20,7 +23,14 @@ const PlannerApp: React.FC = () => {
     isChargerFinderOpen,
     setIsChargerFinderOpen,
     isSavedPlansOpen,
-    setIsSavedPlansOpen
+    setIsSavedPlansOpen,
+    isOperatorPortalOpen,
+    setIsOperatorPortalOpen,
+    isDriverCheckInOpen,
+    setIsDriverCheckInOpen,
+    driverCheckInStation,
+    setDriverCheckInStation,
+    operatorStationId
   } = usePlanner();
 
   return (
@@ -50,6 +60,19 @@ const PlannerApp: React.FC = () => {
         isOpen={isSavedPlansOpen}
         onClose={() => setIsSavedPlansOpen(false)}
       />
+      <OperatorPortalModal
+        isOpen={isOperatorPortalOpen}
+        onClose={() => setIsOperatorPortalOpen(false)}
+        initialStationId={operatorStationId}
+      />
+      <DriverCheckInModal
+        isOpen={isDriverCheckInOpen}
+        onClose={() => {
+          setIsDriverCheckInOpen(false);
+          setDriverCheckInStation(null);
+        }}
+        station={driverCheckInStation}
+      />
 
       {/* Toast Feedback Notification */}
       {toastMessage && (
@@ -65,7 +88,9 @@ const PlannerApp: React.FC = () => {
 export const App: React.FC = () => {
   return (
     <PlannerProvider>
-      <PlannerApp />
+      <GpsProvider>
+        <PlannerApp />
+      </GpsProvider>
     </PlannerProvider>
   );
 };

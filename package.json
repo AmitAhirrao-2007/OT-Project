@@ -5,6 +5,8 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "server": "vite-node server/ocpiProxyServer.ts",
+    "import:pcs": "python scripts/extractEvPcsData.py",
     "build": "tsc && vite build",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",

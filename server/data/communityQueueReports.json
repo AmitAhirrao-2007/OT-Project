@@ -1,0 +1,57 @@
+[
+  {
+    "id": "seed-queue-azamgarh",
+    "stationId": "sta-azamgarh-adani",
+    "stationName": "Adani TotalEnergies - Purvanchal Expressway",
+    "connectorType": "CCS2",
+    "action": "4_plus_waiting",
+    "vehiclesWaiting": 4,
+    "reporterPseudonym": "driver-7a49f120c1",
+    "timestamp": 1793418569518,
+    "isGeofenceVerified": true
+  },
+  {
+    "id": "seed-queue-haidergarh",
+    "stationId": "sta-haidergarh-renovatio",
+    "stationName": "Renovatio e-charge - Haidergarh",
+    "connectorType": "CCS2",
+    "action": "1_waiting",
+    "vehiclesWaiting": 1,
+    "reporterPseudonym": "driver-9b12e34a78",
+    "timestamp": 1793418329518,
+    "isGeofenceVerified": true
+  },
+  {
+    "id": "seed-queue-sitapur",
+    "stationId": "sta-sitapur-adani",
+    "stationName": "Adani TGas - Navabad Grant (Sitapur)",
+    "connectorType": "CCS2",
+    "action": "no_waiting",
+    "vehiclesWaiting": 0,
+    "reporterPseudonym": "driver-33fc82110a",
+    "timestamp": 1793418749518,
+    "isGeofenceVerified": true
+  },
+  {
+    "id": "seed-queue-kisan-path",
+    "stationId": "tata-kisan-path",
+    "stationName": "Tata Power EZ Charge - Kisan Path Bypass",
+    "connectorType": "CCS2",
+    "action": "2_waiting",
+    "vehiclesWaiting": 2,
+    "reporterPseudonym": "driver-21de894451",
+    "timestamp": 1793418149518,
+    "isGeofenceVerified": false
+  },
+  {
+    "id": "queue-1793419049525-fcop5",
+    "stationId": "test-cpo-station-1",
+    "stationName": "Tata Power Fast Charger - Expressway Hub",
+    "connectorType": "CCS2",
+    "action": "1_waiting",
+    "vehiclesWaiting": 1,
+    "reporterPseudonym": "driver-55ba6f9746",
+    "timestamp": 1793419049525,
+    "isGeofenceVerified": false
+  }
+]

@@ -272,7 +272,10 @@ export const demoRouteOptions: RouteOption[] = [
     stops: demoStopsRoute1,
     polylineCoordinates: route1Coordinates,
     isFeasible: true,
-    calculationMethod: 'Energy-Constrained Path Simulation'
+    calculationMethod: 'Energy-Constrained Path Simulation',
+    geometrySource: 'osrm',
+    geometryStatus: 'OSRM_ROAD_GEOMETRY',
+    roadValidated: true
   },
   {
     id: 'route-fewer',
@@ -293,7 +296,10 @@ export const demoRouteOptions: RouteOption[] = [
     stops: demoStopsRoute2,
     polylineCoordinates: route2Coordinates,
     isFeasible: true,
-    calculationMethod: 'Energy-Constrained Path Simulation'
+    calculationMethod: 'Energy-Constrained Path Simulation',
+    geometrySource: 'osrm',
+    geometryStatus: 'OSRM_ROAD_GEOMETRY',
+    roadValidated: true
   },
   {
     id: 'route-fewest',
@@ -315,7 +321,10 @@ export const demoRouteOptions: RouteOption[] = [
     stops: demoStopsRoute3,
     polylineCoordinates: route3Coordinates,
     isFeasible: true,
-    calculationMethod: 'Energy-Constrained Path Simulation'
+    calculationMethod: 'Energy-Constrained Path Simulation',
+    geometrySource: 'osrm',
+    geometryStatus: 'OSRM_ROAD_GEOMETRY',
+    roadValidated: true
   }
 ];
 

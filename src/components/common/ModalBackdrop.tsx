@@ -62,7 +62,7 @@ export const Modal: React.FC<ModalProps> = ({
           onClose();
         }
       }}
-      className="fixed inset-0 z-50 p-0 m-auto bg-transparent backdrop:bg-black/50 dark:backdrop:bg-black/75 backdrop:backdrop-blur-sm border-none overflow-visible max-h-[90vh] focus:outline-none"
+      className="fixed inset-0 z-50 p-0 m-auto bg-transparent backdrop:bg-black/60 dark:backdrop:bg-black/80 border-none overflow-visible max-h-[90vh] focus:outline-none"
     >
       <div
         className={`w-full ${maxWidth} bg-surface-panel border border-edge-default text-content-primary rounded-xl shadow-dropdown overflow-hidden flex flex-col max-h-[85vh] animate-in fade-in-50 zoom-in-95 duration-150`}

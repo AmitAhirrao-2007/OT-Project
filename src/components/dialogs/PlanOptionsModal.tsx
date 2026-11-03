@@ -6,7 +6,8 @@ import { Slider } from '../common/Slider';
 import { ToggleSwitch } from '../common/ToggleSwitch';
 import { ChargeStopsPreference } from '../../types/settings';
 import { availableNetworks, initialPlanOptions } from '../../data/demoSettings';
-import { Check, Plus, Edit3 } from 'lucide-react';
+import { Check, Plus, Edit3, RefreshCw } from 'lucide-react';
+import { simulatedQueueService } from '../../services/queue/simulatedQueueService';
 
 export const PlanOptionsModal: React.FC = () => {
   const {
@@ -103,6 +104,25 @@ export const PlanOptionsModal: React.FC = () => {
       }
     >
       <div className="space-y-4 text-xs">
+        {/* Road Routing Preference */}
+        <div className="p-3.5 bg-surface-subtle rounded-xl border border-edge-subtle">
+          <label className="block text-content-primary font-semibold uppercase tracking-wider text-[11px] mb-2">
+            Road Route Preference
+          </label>
+          <SegmentedControl<'fastest' | 'shortest'>
+            className="w-full"
+            value={planOptions.routePreference || 'fastest'}
+            onChange={(val) => {
+              setPlanOptions((prev) => ({ ...prev, routePreference: val }));
+              setRoutingSettings((prev) => ({ ...prev, routePreference: val }));
+            }}
+            options={[
+              { value: 'fastest', label: 'Fastest', subLabel: 'Min driving duration' },
+              { value: 'shortest', label: 'Shortest', subLabel: 'Min road distance' }
+            ]}
+          />
+        </div>
+
         {/* Charge Stops Strategy */}
         <div className="p-3.5 bg-surface-subtle rounded-xl border border-edge-subtle">
           <label className="block text-content-primary font-semibold uppercase tracking-wider text-[11px] mb-2">
@@ -164,6 +184,67 @@ export const PlanOptionsModal: React.FC = () => {
               onChange={() => toggleAvoid('avoidBorders')}
             />
           </div>
+        </div>
+
+        {/* Optimization Engine (RCSP) */}
+        <div className="p-3.5 bg-surface-subtle rounded-xl border border-edge-subtle">
+          <div className="text-content-primary font-semibold uppercase tracking-wider text-[11px] mb-2">
+            Optimization Engine
+          </div>
+          <ToggleSwitch
+            id="toggle-rcsp-optimizer"
+            label="Use RCSP Optimizer"
+            description="Use battery-constrained RCSP optimization to select charging-stop sequences for supported custom routes. (The Patna–Delhi corridor uses its dedicated demonstration route.)"
+            checked={Boolean(planOptions.useRcspOptimizer)}
+            onChange={(checked) => {
+              setPlanOptions((prev) => ({ ...prev, useRcspOptimizer: checked }));
+            }}
+          />
+        </div>
+
+        {/* Phase 6J: Simulated Queue Data Settings */}
+        <div className="p-3.5 bg-surface-subtle rounded-xl border border-edge-subtle space-y-2.5">
+          <div className="flex items-center justify-between">
+            <span className="text-content-primary font-semibold uppercase tracking-wider text-[11px]">
+              Simulated Queue Data
+            </span>
+            <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-violet-700 text-white shadow-sm border border-violet-500">
+              SIMULATED
+            </span>
+          </div>
+          <ToggleSwitch
+            id="toggle-simulated-queues"
+            label="Enable Simulated Queues"
+            description="Automatically generate realistic simulated queue counts and wait predictions for corridor charging stations displaying Queue unknown."
+            checked={planOptions.enableSimulatedQueues ?? true}
+            onChange={(checked) => {
+              setPlanOptions((prev) => ({ ...prev, enableSimulatedQueues: checked }));
+              simulatedQueueService.setSimulationEnabled(checked);
+              showToast(checked ? 'Simulated queue data enabled.' : 'Simulated queue data disabled.');
+              window.dispatchEvent(new CustomEvent('evsure:queue-updated', { detail: { simulationChanged: true } }));
+            }}
+          />
+          {(planOptions.enableSimulatedQueues ?? true) && (
+            <div className="pt-2 border-t border-edge-subtle flex items-center justify-between">
+              <span className="text-[11px] text-content-secondary">
+                Generate new queue distribution along corridor:
+              </span>
+              <button
+                type="button"
+                onClick={() => {
+                  const newSeed = simulatedQueueService.refreshSimulatedQueues();
+                  setPlanOptions((prev) => ({ ...prev, simulatedQueueSeed: newSeed }));
+                  showToast('Simulated queue distribution refreshed.');
+                  // Dispatch update event so map re-renders badges
+                  window.dispatchEvent(new CustomEvent('evsure:queue-updated', { detail: { refreshed: true } }));
+                }}
+                className="px-2.5 py-1 rounded-lg text-xs font-semibold bg-violet-700 hover:bg-violet-600 text-white border border-violet-500 shadow-sm transition-colors flex items-center gap-1.5"
+              >
+                <RefreshCw className="w-3.5 h-3.5" />
+                <span>Refresh Queues</span>
+              </button>
+            </div>
+          )}
         </div>
 
         {/* Charging Network Preferences */}

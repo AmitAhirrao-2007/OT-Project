@@ -21,7 +21,18 @@ export const chargingStations: ChargingStation[] = [
     openingHours: '24/7 Always Open',
     paymentMethods: ['RFID Card', 'Adani Gas App', 'UPI', 'Credit Card'],
     dataSource: 'Reference Simulation',
-    notes: 'High-speed DC fast charger inside expressway wayside amenities center with clean dining.'
+    notes: 'High-speed DC fast charger inside expressway wayside amenities center with clean dining.',
+    accessMetadata: {
+      roadAccessStatus: 'verified',
+      carriagewayAccess: 'both',
+      supportedDirections: ['both', 'eastbound', 'westbound', 'northbound', 'southbound'],
+      entranceCoordinates: [26.0682, 83.1855],
+      actualDetourMi: 0.4,
+      backupStationId: 'sta-haidergarh-renovatio',
+      accessRestrictions: ['Expressway toll ticket required'],
+      accessConfidence: 0.95,
+      accessNotes: 'Direct expressway rest area with bidirectional ramps'
+    }
   },
   {
     id: 'sta-haidergarh-renovatio',
@@ -42,7 +53,17 @@ export const chargingStations: ChargingStation[] = [
     openingHours: '24/7 Always Open',
     paymentMethods: ['Renovatio App', 'UPI', 'Debit/Credit Card'],
     dataSource: 'Reference Simulation',
-    notes: 'Highway diner EV station with sheltered canopy and shaded parking bays.'
+    notes: 'Highway diner EV station with sheltered canopy and shaded parking bays.',
+    accessMetadata: {
+      roadAccessStatus: 'verified',
+      carriagewayAccess: 'bidirectional_service_road',
+      supportedDirections: ['both', 'eastbound', 'westbound'],
+      entranceCoordinates: [26.5890, 81.4278],
+      actualDetourMi: 0.8,
+      backupStationId: 'sta-lucknow-tata',
+      accessConfidence: 0.9,
+      accessNotes: 'Access via two-way frontage service road'
+    }
   },
   {
     id: 'sta-lucknow-tata',
@@ -64,7 +85,17 @@ export const chargingStations: ChargingStation[] = [
     openingHours: '24/7 Always Open',
     paymentMethods: ['Tata Power EZ App', 'RFID Tag', 'UPI'],
     dataSource: 'Reference Simulation',
-    notes: 'Flagship Tata EV plaza with air-conditioned lounge and refreshments.'
+    notes: 'Flagship Tata EV plaza with air-conditioned lounge and refreshments.',
+    accessMetadata: {
+      roadAccessStatus: 'verified',
+      carriagewayAccess: 'both',
+      supportedDirections: ['both', 'westbound', 'northbound'],
+      entranceCoordinates: [26.8465, 80.9460],
+      actualDetourMi: 0.5,
+      backupStationId: 'sta-navabad-adani',
+      accessConfidence: 0.95,
+      accessNotes: 'Outer Ring Road cloverleaf interchange access'
+    }
   },
   {
     id: 'sta-navabad-adani',
@@ -85,7 +116,17 @@ export const chargingStations: ChargingStation[] = [
     openingHours: '24/7 Always Open',
     paymentMethods: ['RFID Card', 'Adani Gas App', 'UPI'],
     dataSource: 'Reference Simulation',
-    notes: '6-gun ultra-fast charge hub with dedicated high-voltage substation.'
+    notes: '6-gun ultra-fast charge hub with dedicated high-voltage substation.',
+    accessMetadata: {
+      roadAccessStatus: 'verified',
+      carriagewayAccess: 'both',
+      supportedDirections: ['both', 'northbound', 'westbound'],
+      entranceCoordinates: [27.4920, 80.3715],
+      actualDetourMi: 0.6,
+      backupStationId: 'sta-gularia-adani',
+      accessConfidence: 0.9,
+      accessNotes: 'Direct link road slip ramp with dedicated entry'
+    }
   },
   {
     id: 'sta-gularia-adani',
@@ -106,7 +147,17 @@ export const chargingStations: ChargingStation[] = [
     openingHours: '24/7 Always Open',
     paymentMethods: ['RFID Card', 'Adani Gas App', 'UPI'],
     dataSource: 'Reference Simulation',
-    notes: 'Wayside quick-stop fast charger with convenience store and coffee.'
+    notes: 'Wayside quick-stop fast charger with convenience store and coffee.',
+    accessMetadata: {
+      roadAccessStatus: 'verified',
+      carriagewayAccess: 'both',
+      supportedDirections: ['both', 'westbound'],
+      entranceCoordinates: [27.9150, 79.5280],
+      actualDetourMi: 0.5,
+      backupStationId: 'sta-kalliya-adani',
+      accessConfidence: 0.9,
+      accessNotes: 'Wayside approach with direct deceleration lane'
+    }
   },
   {
     id: 'sta-kalliya-adani',
@@ -127,7 +178,16 @@ export const chargingStations: ChargingStation[] = [
     openingHours: '6:00 AM - 11:00 PM',
     paymentMethods: ['Adani Gas App', 'UPI'],
     dataSource: 'Reference Simulation',
-    notes: '60 kW dual-gun charger adjacent to highway supermarket and bakery.'
+    notes: '60 kW dual-gun charger adjacent to highway supermarket and bakery.',
+    accessMetadata: {
+      roadAccessStatus: 'estimated',
+      carriagewayAccess: 'bidirectional_service_road',
+      supportedDirections: ['both'],
+      actualDetourMi: 1.2,
+      backupStationId: 'sta-garhmukteshwar-chargein',
+      accessConfidence: 0.75,
+      accessNotes: 'Narrow access spur off Chandausi link'
+    }
   },
   {
     id: 'sta-garhmukteshwar-chargein',
@@ -149,7 +209,17 @@ export const chargingStations: ChargingStation[] = [
     openingHours: '24/7 Always Open',
     paymentMethods: ['Charge_IN App', 'RFID Tag', 'UPI', 'Credit Card'],
     dataSource: 'Reference Simulation',
-    notes: 'Major food court charging hub at Bikanerwala. High-throughput station.'
+    notes: 'Major food court charging hub at Bikanerwala. High-throughput station.',
+    accessMetadata: {
+      roadAccessStatus: 'verified',
+      carriagewayAccess: 'both',
+      supportedDirections: ['both', 'westbound', 'eastbound'],
+      entranceCoordinates: [28.7514, 78.0960],
+      actualDetourMi: 0.3,
+      backupStationId: 'sta-delhi-aerocity-statiq',
+      accessConfidence: 0.95,
+      accessNotes: 'Paved highway plaza entrance directly off NH-9'
+    }
   },
   {
     id: 'sta-delhi-aerocity-statiq',
@@ -170,7 +240,17 @@ export const chargingStations: ChargingStation[] = [
     openingHours: '24/7 Always Open',
     paymentMethods: ['Statiq App', 'RFID', 'UPI'],
     dataSource: 'Reference Simulation',
-    notes: 'Premium airport corridor charging hub with multiple food options.'
+    notes: 'Premium airport corridor charging hub with multiple food options.',
+    accessMetadata: {
+      roadAccessStatus: 'verified',
+      carriagewayAccess: 'restricted_premises',
+      supportedDirections: ['both'],
+      actualDetourMi: 0.8,
+      accessRestrictions: ['Commercial basement parking tariff applicable'],
+      accessConfidence: 0.9,
+      accessNotes: 'Worldmark underground parking Level -1'
+    }
+
   },
   {
     id: 'sta-kanpur-jiobp',
@@ -382,6 +462,66 @@ export const chargingStations: ChargingStation[] = [
     paymentMethods: ['Tata Power EZ App', 'UPI'],
     dataSource: 'Reference Simulation',
     notes: 'Ring road plaza connecting NH-19 and Purvanchal link.'
+  },
+  {
+    id: 'sta-purvanchal-eastbound-only',
+    name: 'Statcon EV Hub - Purvanchal KM 140 (Eastbound Only)',
+    network: 'Statcon Energiaa',
+    address: 'Purvanchal Expressway KM 140 Eastbound Carriageway, Sultanpur',
+    coordinates: [26.2625, 82.0722],
+    ratedPowerKw: 120,
+    totalStalls: 2,
+    availableStalls: 2,
+    connectors: [
+      { type: 'CCS', maxPowerKw: 120, count: 2, availableCount: 2 }
+    ],
+    amenities: ['restroom', 'coffee'],
+    pricePerKwh: '₹21.50 / kWh',
+    operationalStatus: 'operational',
+    statusTimestamp: 'Verified 1h ago',
+    openingHours: '24/7 Always Open',
+    paymentMethods: ['UPI', 'Credit Card'],
+    dataSource: 'Reference Simulation',
+    notes: 'Accessible strictly from the Eastbound carriageway (towards Ghazipur). Median barrier prevents Westbound access.',
+    accessMetadata: {
+      roadAccessStatus: 'verified',
+      carriagewayAccess: 'divided_unidirectional',
+      supportedDirections: ['eastbound'],
+      entranceCoordinates: [26.2620, 82.0718],
+      actualDetourMi: 0.3,
+      accessRestrictions: ['Expressway Eastbound Carriageway only; no median U-turn for 18 km'],
+      accessConfidence: 0.95,
+      accessNotes: 'Divided highway median barrier enforced'
+    }
+  },
+  {
+    id: 'sta-closed-construction-demo',
+    name: 'ChargeZone - Lucknow Outer Slip (Inaccessible Demo)',
+    network: 'ChargeZone',
+    address: 'Lucknow Ring Road Junction 4 Underpass',
+    coordinates: [26.8500, 80.9500],
+    ratedPowerKw: 60,
+    totalStalls: 2,
+    availableStalls: 0,
+    connectors: [
+      { type: 'CCS', maxPowerKw: 60, count: 2, availableCount: 0 }
+    ],
+    amenities: ['restroom'],
+    pricePerKwh: '₹20.00 / kWh',
+    operationalStatus: 'limited',
+    statusTimestamp: 'Verified 2h ago',
+    openingHours: 'Closed for maintenance',
+    paymentMethods: ['UPI'],
+    dataSource: 'Reference Simulation',
+    notes: 'Approach ramp blocked due to flyover construction. Completely road inaccessible.',
+    accessMetadata: {
+      roadAccessStatus: 'inaccessible',
+      carriagewayAccess: 'unknown',
+      actualDetourMi: 999,
+      accessRestrictions: ['Flyover construction barrier', 'Road blocked by NHAI'],
+      accessConfidence: 1.0,
+      accessNotes: 'Approach road closed indefinitely'
+    }
   }
 ];
 
